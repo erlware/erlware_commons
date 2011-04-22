@@ -88,10 +88,10 @@ compare_toks2(_ToksA, _ToksB) ->
 
 -spec to_int(string()) -> integer().
 to_int(String) ->
-    case catch list_to_integer(String) of
-        Integer when is_integer(Integer) ->
-	    Integer;
-        _ ->
+    try
+	list_to_integer(String)
+    catch
+	error:badarg ->
 	    throw(invalid_semver_string)
     end.
 

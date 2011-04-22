@@ -97,12 +97,13 @@ remove(Path) ->
 %% @doc indicates witha boolean if the path supplied refers to symlink.
 -spec is_symlink(path()) -> boolean().
 is_symlink(Path) ->
-    case catch file:read_link_info(Path) of
+    case file:read_link_info(Path) of
 	{ok, #file_info{type = symlink}} ->
 	    true;
 	_ ->
 	    false
     end.
+
 
 %% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
