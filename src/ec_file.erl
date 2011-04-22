@@ -22,7 +22,10 @@
 	 consult/1
 	]).
 
--export_type([path/0]).
+-export_type([
+	      path/0,
+	      option/0
+	     ]).
 
 -include_lib("kernel/include/file.hrl").
 
@@ -34,19 +37,20 @@
 	       Exception,
 	       lists:flatten(io_lib:fwrite(UMSG, UVARS))}}).
 
--define(CHECK_PERMS_MSG, 
+-define(CHECK_PERMS_MSG,
 	"Try checking that you have the correct permissions and try again~n").
 
 %%============================================================================
 %% Types
 %%============================================================================
 -type path() :: string().
+-type option() :: [atom()].
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 %% @doc copy an entire directory to another location.
--spec copy(path(), path(), Options::list()) -> ok.
+-spec copy(path(), path(), Options::[option()]) -> ok.
 copy(From, To, []) ->
     copy(From, To);
 copy(From, To, [recursive] = Options) ->
@@ -77,7 +81,7 @@ md5sum(Value) ->
 %% <pre>
 %% Example: remove("./tmp_dir", [recursive]).
 %% </pre>
--spec remove(path(), Options::list()) -> ok | {error, Reason::term()}.
+-spec remove(path(), Options::[option()]) -> ok | {error, Reason::term()}.
 remove(Path, Options) ->
     try
 	ok = ec_file_remove(Path, Options)
@@ -85,7 +89,7 @@ remove(Path, Options) ->
 	_C:E -> throw(?UEX({remove_failed, E}, ?CHECK_PERMS_MSG, []))
     end.
 
-%% @doc delete a file. 
+%% @doc delete a file.
 -spec remove(path()) -> ok | {error, Reason::term()}.
 remove(Path) ->
     remove(Path, []).
@@ -100,7 +104,7 @@ is_symlink(Path) ->
 	    false
     end.
 
-%% @doc make a unique temorory directory. Similar function to BSD stdlib 
+%% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
 -spec mkdtemp() -> TmpDirPath::path().
 mkdtemp() ->
@@ -128,11 +132,11 @@ mkdir_path(Path) ->
     catch
 	_C:E -> throw(?UEX({mkdir_path_failed, E}, ?CHECK_PERMS_MSG, []))
     end.
-	
-	    
+
+
 %% @doc consult an erlang term file from the file system.
 %%      Provide user readible exeption on failure.
--spec consult(FilePath::string()) -> term().
+-spec consult(FilePath::path()) -> term().
 consult(FilePath) ->
     case file:consult(FilePath) of
 	{ok, [Term]} ->
@@ -181,7 +185,7 @@ write_term(FileName, Term) ->
 
 %% @doc Finds files and directories that match the regexp supplied in
 %%  the TargetPattern regexp.
--spec find(FromDir::path(), TargetPattern::string()) -> list().
+-spec find(FromDir::path(), TargetPattern::string()) -> [path()].
 find([], _) ->
     [];
 find(FromDir, TargetPattern) ->
@@ -202,6 +206,7 @@ find(FromDir, TargetPattern) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
+-spec find_in_subdirs(path(), string()) -> [path()].
 find_in_subdirs(FromDir, TargetPattern) ->
     lists:foldl(fun(CheckFromDir, Acc)
 		   when CheckFromDir == FromDir ->
@@ -214,7 +219,8 @@ find_in_subdirs(FromDir, TargetPattern) ->
 		end,
 		[],
 		filelib:wildcard(filename:join(FromDir, "*"))).
-    
+
+-spec ec_file_remove(path(), [{atom(), any()}]) -> ok.
 ec_file_remove(Path, Options) ->
     case lists:member(recursive, Options) of
 	false -> file:delete(Path);
@@ -233,6 +239,7 @@ remove_recursive(Path, Options) ->
 	    ok = file:del_dir(Path)
     end.
 
+-spec tmp() -> path().
 tmp() ->
     case erlang:system_info(system_architecture) of
 	"win32" ->
@@ -243,19 +250,22 @@ tmp() ->
     end.
 
 %% Copy the subfiles of the From directory to the to directory.
+-spec copy_subfiles(path(), path(), [option()]) -> ok.
 copy_subfiles(From, To, Options) ->
-    Fun = 
+    Fun =
 	fun(ChildFrom) ->
 		ChildTo = filename:join([To, filename:basename(ChildFrom)]),
 		copy(ChildFrom, ChildTo, Options)
 	end,
     lists:foreach(Fun, filelib:wildcard(filename:join(From, "*"))).
 
+-spec ec_file_copy(path(), path()) -> ok.
 ec_file_copy(From, To) ->
     {ok, _} = file:copy(From, To),
     {ok, FileInfo} = file:read_file_info(From),
     ok = file:write_file_info(To, FileInfo).
 
+-spec make_dir_if_dir(path()) -> ok.
 make_dir_if_dir(File) ->
     case filelib:is_dir(File) of
 	true  -> ok;
@@ -263,6 +273,7 @@ make_dir_if_dir(File) ->
     end.
 
 %% @doc convert a list of integers into hex.
+-spec hex(string() | non_neg_integer()) -> string().
 hex(L) when is_list (L) ->
     lists:flatten([hex(I) || I <- L]);
 hex(I) when I > 16#f ->
@@ -295,10 +306,10 @@ setup_test() ->
     mkdir_path("/tmp/ec_file/dir"),
     ?assertMatch(false, is_symlink("/tmp/ec_file/dir")),
     ?assertMatch(true, filelib:is_dir("/tmp/ec_file/dir")).
-    
-    
+
+
 md5sum_test() ->
-    ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")). 
+    ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
 
 file_test() ->
     TermFile = "/tmp/ec_file/dir/file.term",

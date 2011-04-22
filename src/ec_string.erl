@@ -17,7 +17,7 @@
 %% Valid version string elements are either separated by . or - or both.
 %% Final version string elements may have a numeric followed directly by an
 %% alpha numeric and will be compared separately as in 12alpha.
-%% 
+%%
 %% <pre>
 %% Example: compare_versions("3-2-5-alpha", "3.10.6") will return false
 %%          compare_versions("3-2-alpha", "3.2.1-alpha") will return false
@@ -34,14 +34,15 @@ compare_versions(VsnA, VsnB) ->
 %%% Internal Functions
 %%%===================================================================
 
+-spec compare(string(), string()) -> boolean().
 compare([Str|TA], [Str|TB]) ->
     compare(TA, TB);
 compare([StrA|TA], [StrB|TB]) ->
     fine_compare(split_numeric_alpha(StrA), TA,
 		 split_numeric_alpha(StrB), TB);
-compare([], [Str]) -> 
+compare([], [Str]) ->
     not compare_against_nothing(Str);
-compare([Str], []) -> 
+compare([Str], []) ->
     compare_against_nothing(Str);
 compare([], [_,_|_]) ->
     false;
@@ -50,6 +51,7 @@ compare([_,_|_], []) ->
 compare([], []) ->
     false.
 
+-spec compare_against_nothing(string()) -> boolean().
 compare_against_nothing(Str) ->
     case split_numeric_alpha(Str) of
 	{_StrDig, ""} -> true;
@@ -57,6 +59,9 @@ compare_against_nothing(Str) ->
 	{_StrDig, _StrAlpha} -> true
     end.
 
+-spec fine_compare({string(), string()}, string(),
+		   {string(), string()}, string()) ->
+    boolean().
 fine_compare({_StrDigA, StrA}, TA, {_StrDigB, _StrB}, _TB) when StrA /= "", TA /= [] ->
     throw(invalid_version_string);
 fine_compare({_StrDigA, _StrA}, _TA, {_StrDigB, StrB}, TB) when StrB /= "", TB /= [] ->
@@ -74,12 +79,17 @@ fine_compare({StrDig, StrA}, _TA, {StrDig, StrB}, _TB) ->
 fine_compare({StrDigA, _StrA}, _TA, {StrDigB, _StrB}, _TB) ->
     list_to_integer(StrDigA) > list_to_integer(StrDigB).
 
-%% In the case of a version sub part with a numeric then an alpha, 
+%% In the case of a version sub part with a numeric then an alpha,
 %% split out the numeric and alpha "24alpha" becomes {"24", "alpha"}
+-spec split_numeric_alpha(string()) ->
+    {PatchVsn::string(), PatchStr::string()}.
 split_numeric_alpha(RawVsn) ->
     {Num, Str} = split_numeric_alpha(RawVsn, {"", ""}),
     {lists:reverse(Num), Str}.
 
+-spec split_numeric_alpha(string(), {PatchVsnAcc::string(),
+				     PatchStrAcc::string()}) ->
+    {PatchVsn::string(), PatchStr::string()}.
 split_numeric_alpha([], Acc) ->
     Acc;
 split_numeric_alpha([Dig|T], {PatchVsn, PatchStr})
