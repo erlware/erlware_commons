@@ -62,9 +62,11 @@ compare_against_nothing(Str) ->
 -spec fine_compare({string(), string()}, string(),
 		   {string(), string()}, string()) ->
     boolean().
-fine_compare({_StrDigA, StrA}, TA, {_StrDigB, _StrB}, _TB) when StrA /= "", TA /= [] ->
+fine_compare({_StrDigA, StrA}, TA, {_StrDigB, _StrB}, _TB)
+  when StrA /= "", TA /= [] ->
     throw(invalid_version_string);
-fine_compare({_StrDigA, _StrA}, _TA, {_StrDigB, StrB}, TB) when StrB /= "", TB /= [] ->
+fine_compare({_StrDigA, _StrA}, _TA, {_StrDigB, StrB}, TB)
+  when StrB /= "", TB /= [] ->
     throw(invalid_version_string);
 fine_compare({"", _StrA}, _TA, {StrDigB, _StrB}, _TB) when StrDigB /= "" ->
     false;
@@ -97,7 +99,6 @@ split_numeric_alpha([Dig|T], {PatchVsn, PatchStr})
     split_numeric_alpha(T, {[Dig|PatchVsn], PatchStr});
 split_numeric_alpha(PatchStr, {PatchVsn, ""}) ->
     {PatchVsn, PatchStr}.
-
 
 %%%===================================================================
 %%% Test Functions

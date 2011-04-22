@@ -40,6 +40,7 @@ compare(VsnA, VsnB) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
+
 -spec tokens(semvar()) -> parsed_semvar().
 tokens(Vsn) ->
     [MajorVsn, MinorVsn, RawPatch] = string:tokens(Vsn, "."),
@@ -67,11 +68,14 @@ compare_toks({MajA, MinA, PVA, PSA}, {MajB, MinB, PVB, PSB}) ->
 		 {to_int(MajB), to_int(MinB), to_int(PVB), PSB}).
 
 -spec compare_toks2(parsed_semvar(), parsed_semvar()) -> boolean().
-compare_toks2({MajA, _MinA, _PVA, _PSA}, {MajB, _MinB, _PVB, _PSB}) when MajA > MajB ->
+compare_toks2({MajA, _MinA, _PVA, _PSA}, {MajB, _MinB, _PVB, _PSB})
+  when MajA > MajB ->
     true;
-compare_toks2({_Maj, MinA, _PVA, _PSA}, {_Maj, MinB, _PVB, _PSB}) when MinA > MinB ->
+compare_toks2({_Maj, MinA, _PVA, _PSA}, {_Maj, MinB, _PVB, _PSB})
+  when MinA > MinB ->
     true;
-compare_toks2({_Maj, _Min, PVA, _PSA}, {_Maj, _Min, PVB, _PSB}) when PVA > PVB ->
+compare_toks2({_Maj, _Min, PVA, _PSA}, {_Maj, _Min, PVB, _PSB})
+  when PVA > PVB ->
     true;
 compare_toks2({_Maj, _Min, _PV, ""}, {_Maj, _Min, _PV, PSB}) when PSB /= ""->
     true;
@@ -90,7 +94,6 @@ to_int(String) ->
         _ ->
 	    throw(invalid_semver_string)
     end.
-
 
 %%%===================================================================
 %%% Test Functions

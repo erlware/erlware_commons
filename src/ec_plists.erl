@@ -38,7 +38,7 @@ map(Fun, List, Timeout) ->
 %%      All application level results are wrapped in a tuple with the tag
 %%      'value'. Exceptions will come through as they are and timeouts will
 %%      return as the atom timeout.
-%%      This is useful when the ftmap is being used for side effects. 
+%%      This is useful when the ftmap is being used for side effects.
 %% <pre>
 %% 2> ftmap(fun(N) -> factorial(N) end, [1, 2, 1000000, "not num"], 100)
 %% [{value, 1}, {value, 2}, timeout, {badmatch, ...}]
@@ -68,12 +68,15 @@ filter(Fun, List, Timeout) ->
 -spec run_list_fun_in_parallel(atom(), fun(), [any()], integer()) -> [any()].
 run_list_fun_in_parallel(ListFun, Fun, List, Timeout) ->
     LocalPid = self(),
-    Pids = lists:map(fun(E) ->
-			     Pid = proc_lib:spawn(fun() ->
-							  wait(LocalPid, Fun, E, Timeout)
-						  end),
-			     {Pid, E}
-                   end, List),
+    Pids =
+	lists:map(fun(E) ->
+			  Pid =
+			      proc_lib:spawn(fun() ->
+						     wait(LocalPid, Fun,
+							  E, Timeout)
+					     end),
+			  {Pid, E}
+		  end, List),
     gather(ListFun, Pids).
 
 -spec wait(pid(), fun(), any(), integer()) -> any().
@@ -113,7 +116,7 @@ map_gather([{Pid, _E} | Rest]) ->
 	% is easier with the exception. Thoughts?
         {Pid, Exception} ->
 	    killall(Rest),
-	    throw(Exception) 
+	    throw(Exception)
     end;
 map_gather([]) ->
     [].
@@ -196,7 +199,7 @@ filter_good_test() ->
 
 map_timeout_test() ->
     Results =
-	try 
+	try
 	    map(fun(T) ->
 			timer:sleep(T),
 			T
@@ -217,7 +220,7 @@ ftmap_timeout_test() ->
 
 filter_timeout_test() ->
     Results =
-	try 
+	try
 	    filter(fun(T) ->
 			   timer:sleep(T),
 			   T == 1
@@ -230,7 +233,7 @@ filter_timeout_test() ->
 
 map_bad_test() ->
     Results =
-	try 
+	try
 	    map(fun(_) ->
 			throw(test_exception)
 		end,
@@ -244,10 +247,11 @@ ftmap_bad_test() ->
     Results =
 	ftmap(fun(2) ->
 		      throw(test_exception);
-		 (N) -> 
-		      N 
+		 (N) ->
+		      N
 	      end,
 	      lists:seq(1, 5), infinity),
-    ?assertMatch([{value, 1}, test_exception, {value, 3}, {value, 4}, {value, 5}] , Results).
+    ?assertMatch([{value, 1}, test_exception, {value, 3},
+		  {value, 4}, {value, 5}] , Results).
 
 -endif.

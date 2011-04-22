@@ -243,7 +243,6 @@ remove_recursive(Path, Options) ->
 tmp() ->
     case erlang:system_info(system_architecture) of
 	"win32" ->
-	    % XXX TODO better tmp dir for windows perhaps :)
 	    "./tmp";
 	_SysArch ->
 	    "/tmp"
