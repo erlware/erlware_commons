@@ -8,12 +8,12 @@
 -module(ec_semver).
 
 -exports([
-	  compare/2
-	 ]).
+          compare/2
+         ]).
 
 -export_type([
-	      semvar/0
-	      ]).
+              semvar/0
+             ]).
 
 %%%===================================================================
 %%% Public Types
@@ -21,9 +21,9 @@
 
 -type semvar() :: string().
 -type parsed_semvar() :: {MajorVsn::string(),
-			  MinorVsn::string(),
-			  PatchVsn::string(),
-			  PathString::string()}.
+                          MinorVsn::string(),
+                          PatchVsn::string(),
+                          PathString::string()}.
 
 %%%===================================================================
 %%% API
@@ -48,13 +48,13 @@ tokens(Vsn) ->
     {MajorVsn, MinorVsn, PatchVsn, PatchString}.
 
 -spec split_patch(string()) ->
-    {PatchVsn::string(), PatchStr::string()}.
+                         {PatchVsn::string(), PatchStr::string()}.
 split_patch(RawPatch) ->
     {PatchVsn, PatchStr} = split_patch(RawPatch, {"", ""}),
     {lists:reverse(PatchVsn), PatchStr}.
 
 -spec split_patch(string(), {AccPatchVsn::string(), AccPatchStr::string()}) ->
-    {PatchVsn::string(), PatchStr::string()}.
+                         {PatchVsn::string(), PatchStr::string()}.
 split_patch([], Acc) ->
     Acc;
 split_patch([Dig|T], {PatchVsn, PatchStr}) when Dig >= $0 andalso Dig =< $9 ->
@@ -65,7 +65,7 @@ split_patch(PatchStr, {PatchVsn, ""}) ->
 -spec compare_toks(parsed_semvar(), parsed_semvar()) -> boolean().
 compare_toks({MajA, MinA, PVA, PSA}, {MajB, MinB, PVB, PSB}) ->
     compare_toks2({to_int(MajA), to_int(MinA), to_int(PVA), PSA},
-		 {to_int(MajB), to_int(MinB), to_int(PVB), PSB}).
+                  {to_int(MajB), to_int(MinB), to_int(PVB), PSB}).
 
 -spec compare_toks2(parsed_semvar(), parsed_semvar()) -> boolean().
 compare_toks2({MajA, _MinA, _PVA, _PSA}, {MajB, _MinB, _PVB, _PSB})
@@ -89,10 +89,10 @@ compare_toks2(_ToksA, _ToksB) ->
 -spec to_int(string()) -> integer().
 to_int(String) ->
     try
-	list_to_integer(String)
+        list_to_integer(String)
     catch
-	error:badarg ->
-	    throw(invalid_semver_string)
+        error:badarg ->
+            throw(invalid_semver_string)
     end.
 
 %%%===================================================================

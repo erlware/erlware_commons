@@ -42,10 +42,10 @@ search(_, []) ->
 -spec find(fun(), list()) -> {ok, term()} | error.
 find(Fun, [Head|Tail]) when is_function(Fun) ->
     case Fun(Head) of
-	true ->
-	    {ok, Head};
-	false ->
-	    find(Fun, Tail)
+        true ->
+            {ok, Head};
+        false ->
+            find(Fun, Tail)
     end;
 find(_Fun, []) ->
     error.
@@ -57,10 +57,10 @@ find(_Fun, []) ->
 -spec fetch(fun(), list()) -> term().
 fetch(Fun, List) when is_list(List), is_function(Fun) ->
     case find(Fun, List) of
-	{ok, Head} ->
-	    Head;
-	error ->
-	    throw(not_found)
+        {ok, Head} ->
+            Head;
+        error ->
+            throw(not_found)
     end.
 
 %%%===================================================================
@@ -73,60 +73,60 @@ fetch(Fun, List) when is_list(List), is_function(Fun) ->
 find1_test() ->
     TestData = [1, 2, 3, 4, 5, 6],
     Result = find(fun(5) ->
-			  true;
-		     (_) ->
-			  false
-		  end,
-		  TestData),
+                          true;
+                     (_) ->
+                          false
+                  end,
+                  TestData),
     ?assertMatch({ok, 5}, Result),
 
     Result2 = find(fun(37) ->
-			   true;
-		      (_) ->
-			   false
-		   end,
-		   TestData),
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch(error, Result2).
 
 find2_test() ->
     TestData = ["one", "two", "three", "four", "five", "six"],
     Result = find(fun("five") ->
-			  true;
-		     (_) ->
-			  false
-		  end,
-		 TestData),
+                          true;
+                     (_) ->
+                          false
+                  end,
+                  TestData),
     ?assertMatch({ok, "five"}, Result),
 
     Result2 = find(fun(super_duper) ->
-			   true;
-		      (_) ->
-			   false
-		   end,
-		  TestData),
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch(error, Result2).
 
 
 
 find3_test() ->
     TestData = [{"one", 1}, {"two", 2}, {"three", 3}, {"four", 5}, {"five", 5},
-		{"six", 6}],
+                {"six", 6}],
     Result = find(fun({"one", 1}) ->
-			  true;
-		     (_) ->
-			  false
-		  end,
-		 TestData),
+                          true;
+                     (_) ->
+                          false
+                  end,
+                  TestData),
     ?assertMatch({ok, {"one", 1}}, Result),
 
     Result2 = find(fun([fo, bar, baz]) ->
-			   true;
-		      ({"onehundred", 100}) ->
-			   true;
-		      (_) ->
-			   false
-		   end,
-	       TestData),
+                           true;
+                      ({"onehundred", 100}) ->
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch(error, Result2).
 
 
@@ -134,48 +134,48 @@ find3_test() ->
 fetch1_test() ->
     TestData = [1, 2, 3, 4, 5, 6],
     Result = fetch(fun(5) ->
-			  true;
-		     (_) ->
-			  false
-		  end,
-		  TestData),
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch(5, Result),
 
     ?assertThrow(not_found,
-		 fetch(fun(37) ->
-			       true;
-			  (_) ->
-			       false
-		       end,
-		      TestData)).
+                 fetch(fun(37) ->
+                               true;
+                          (_) ->
+                               false
+                       end,
+                       TestData)).
 
 fetch2_test() ->
     TestData = ["one", "two", "three", "four", "five", "six"],
     Result = fetch(fun("five") ->
-			  true;
-		      (_) ->
-			   false
-		   end,
-		  TestData),
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch("five", Result),
 
     ?assertThrow(not_found,
-		 fetch(fun(super_duper) ->
-			       true;
-			  (_) ->
-			       false
-		       end,
-		      TestData)).
+                 fetch(fun(super_duper) ->
+                               true;
+                          (_) ->
+                               false
+                       end,
+                       TestData)).
 
 fetch3_test() ->
     TestData = [{"one", 1}, {"two", 2}, {"three", 3}, {"four", 5}, {"five", 5},
-		{"six", 6}],
+                {"six", 6}],
     Result = fetch(fun({"one", 1}) ->
-			  true;
-		     (_) ->
-			  false
-		  end,
-		  TestData),
+                           true;
+                      (_) ->
+                           false
+                   end,
+                   TestData),
     ?assertMatch({"one", 1}, Result),
 
     ?assertThrow(not_found,

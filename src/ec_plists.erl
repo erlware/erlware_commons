@@ -69,14 +69,14 @@ filter(Fun, List, Timeout) ->
 run_list_fun_in_parallel(ListFun, Fun, List, Timeout) ->
     LocalPid = self(),
     Pids =
-	lists:map(fun(E) ->
-			  Pid =
-			      proc_lib:spawn(fun() ->
-						     wait(LocalPid, Fun,
-							  E, Timeout)
-					     end),
-			  {Pid, E}
-		  end, List),
+        lists:map(fun(E) ->
+                          Pid =
+                              proc_lib:spawn(fun() ->
+                                                     wait(LocalPid, Fun,
+                                                          E, Timeout)
+                                             end),
+                          {Pid, E}
+                  end, List),
     gather(ListFun, Pids).
 
 -spec wait(pid(), fun(), any(), integer()) -> any().
@@ -110,13 +110,13 @@ gather(filter, PidElementList) ->
 map_gather([{Pid, _E} | Rest]) ->
     receive
         {Pid, {value, Ret}} ->
-	    [Ret|map_gather(Rest)];
-	% timeouts fall here too. Should timeouts be a return value
-	% or an exception? I lean toward return value, but the code
-	% is easier with the exception. Thoughts?
+            [Ret|map_gather(Rest)];
+                                                % timeouts fall here too. Should timeouts be a return value
+                                                % or an exception? I lean toward return value, but the code
+                                                % is easier with the exception. Thoughts?
         {Pid, Exception} ->
-	    killall(Rest),
-	    throw(Exception)
+            killall(Rest),
+            throw(Exception)
     end;
 map_gather([]) ->
     [].
@@ -133,15 +133,15 @@ ftmap_gather([]) ->
 filter_gather([{Pid, E} | Rest]) ->
     receive
         {Pid, {value, false}} ->
-	    filter_gather(Rest);
+            filter_gather(Rest);
         {Pid, {value, true}} ->
-	    [E|filter_gather(Rest)];
+            [E|filter_gather(Rest)];
         {Pid, {value, NotBool}} ->
-	    killall(Rest),
-	    throw({bad_return_value, NotBool});
+            killall(Rest),
+            throw({bad_return_value, NotBool});
         {Pid, Exception} ->
-	    killall(Rest),
-	    throw(Exception)
+            killall(Rest),
+            throw(Exception)
     end;
 filter_gather([]) ->
     [].
@@ -153,9 +153,9 @@ do_f(Parent, F, E) ->
         Parent ! {self(), {value, Result}}
     catch
         _Class:Exception ->
-	    % Losing class info here, but since throw does not accept
-	    % that arg anyhow and forces a class of throw it does not
-	    % matter.
+                                                % Losing class info here, but since throw does not accept
+                                                % that arg anyhow and forces a class of throw it does not
+                                                % matter.
             Parent ! {self(), Exception}
     end.
 
@@ -183,9 +183,9 @@ map_good_test() ->
 
 ftmap_good_test() ->
     Results = ftmap(fun(_) ->
-                          ok
-                  end,
-                 lists:seq(1, 3), infinity),
+                            ok
+                    end,
+                    lists:seq(1, 3), infinity),
     ?assertMatch([{value, ok}, {value, ok}, {value, ok}],
                  Results).
 
@@ -199,59 +199,59 @@ filter_good_test() ->
 
 map_timeout_test() ->
     Results =
-	try
-	    map(fun(T) ->
-			timer:sleep(T),
-			T
-		end,
-		[1, 100], 10)
-	catch
-	    C:E -> {C, E}
-	end,
+        try
+            map(fun(T) ->
+                        timer:sleep(T),
+                        T
+                end,
+                [1, 100], 10)
+        catch
+            C:E -> {C, E}
+        end,
     ?assertMatch({throw, timeout}, Results).
 
 ftmap_timeout_test() ->
     Results = ftmap(fun(X) ->
-                          timer:sleep(X),
-                          true
-                  end,
-                  [100, 1], 10),
+                            timer:sleep(X),
+                            true
+                    end,
+                    [100, 1], 10),
     ?assertMatch([timeout, {value, true}], Results).
 
 filter_timeout_test() ->
     Results =
-	try
-	    filter(fun(T) ->
-			   timer:sleep(T),
-			   T == 1
-		   end,
-		   [1, 100], 10)
-	catch
-	    C:E -> {C, E}
-	end,
+        try
+            filter(fun(T) ->
+                           timer:sleep(T),
+                           T == 1
+                   end,
+                   [1, 100], 10)
+        catch
+            C:E -> {C, E}
+        end,
     ?assertMatch({throw, timeout}, Results).
 
 map_bad_test() ->
     Results =
-	try
-	    map(fun(_) ->
-			throw(test_exception)
-		end,
-		lists:seq(1, 5), infinity)
-	catch
-	    C:E -> {C, E}
-	end,
+        try
+            map(fun(_) ->
+                        throw(test_exception)
+                end,
+                lists:seq(1, 5), infinity)
+        catch
+            C:E -> {C, E}
+        end,
     ?assertMatch({throw, test_exception}, Results).
 
 ftmap_bad_test() ->
     Results =
-	ftmap(fun(2) ->
-		      throw(test_exception);
-		 (N) ->
-		      N
-	      end,
-	      lists:seq(1, 5), infinity),
+        ftmap(fun(2) ->
+                      throw(test_exception);
+                 (N) ->
+                      N
+              end,
+              lists:seq(1, 5), infinity),
     ?assertMatch([{value, 1}, test_exception, {value, 3},
-		  {value, 4}, {value, 5}] , Results).
+                  {value, 4}, {value, 5}] , Results).
 
 -endif.

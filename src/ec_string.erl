@@ -7,8 +7,8 @@
 -module(ec_string).
 
 -export([
-	 compare_versions/2
-	]).
+         compare_versions/2
+        ]).
 %%%===================================================================
 %%% API
 %%%===================================================================
@@ -39,7 +39,7 @@ compare([Str|TA], [Str|TB]) ->
     compare(TA, TB);
 compare([StrA|TA], [StrB|TB]) ->
     fine_compare(split_numeric_alpha(StrA), TA,
-		 split_numeric_alpha(StrB), TB);
+                 split_numeric_alpha(StrB), TB);
 compare([], [Str]) ->
     not compare_against_nothing(Str);
 compare([Str], []) ->
@@ -54,14 +54,14 @@ compare([], []) ->
 -spec compare_against_nothing(string()) -> boolean().
 compare_against_nothing(Str) ->
     case split_numeric_alpha(Str) of
-	{_StrDig, ""} -> true;
-	{"", _StrAlpha} -> false;
-	{_StrDig, _StrAlpha} -> true
+        {_StrDig, ""} -> true;
+        {"", _StrAlpha} -> false;
+        {_StrDig, _StrAlpha} -> true
     end.
 
 -spec fine_compare({string(), string()}, string(),
-		   {string(), string()}, string()) ->
-    boolean().
+                   {string(), string()}, string()) ->
+                          boolean().
 fine_compare({_StrDigA, StrA}, TA, {_StrDigB, _StrB}, _TB)
   when StrA /= "", TA /= [] ->
     throw(invalid_version_string);
@@ -84,14 +84,14 @@ fine_compare({StrDigA, _StrA}, _TA, {StrDigB, _StrB}, _TB) ->
 %% In the case of a version sub part with a numeric then an alpha,
 %% split out the numeric and alpha "24alpha" becomes {"24", "alpha"}
 -spec split_numeric_alpha(string()) ->
-    {PatchVsn::string(), PatchStr::string()}.
+                                 {PatchVsn::string(), PatchStr::string()}.
 split_numeric_alpha(RawVsn) ->
     {Num, Str} = split_numeric_alpha(RawVsn, {"", ""}),
     {lists:reverse(Num), Str}.
 
 -spec split_numeric_alpha(string(), {PatchVsnAcc::string(),
-				     PatchStrAcc::string()}) ->
-    {PatchVsn::string(), PatchStr::string()}.
+                                     PatchStrAcc::string()}) ->
+                                 {PatchVsn::string(), PatchStr::string()}.
 split_numeric_alpha([], Acc) ->
     Acc;
 split_numeric_alpha([Dig|T], {PatchVsn, PatchStr})
