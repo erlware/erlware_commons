@@ -9,11 +9,30 @@
 
 %% API
 -export([find/2,
-	 fetch/2]).
+         fetch/2,
+         search/2]).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
+
+%% @doc Search each value in the list with the specified
+%% function. When the function returns a value of {ok, term()} the
+%% search function stops and returns a tuple of {ok, term(), term()},
+%% where the second value is the term returned from the function and
+%% the third value is the element passed to the function. The purpose
+%% of this is to allow a list to be searched where some internal state
+%% is important while the input element is not.
+-spec search(fun(), list()) -> {ok, Result::term(), Element::term()}.
+search(Fun, [H|T]) ->
+    case Fun(H) of
+        {ok, Value} ->
+            {ok, Value, H};
+        not_found ->
+            search(Fun, T)
+    end;
+search(_, []) ->
+    not_found.
 
 %% @doc Find a value in the list with the specified function. If the
 %% function returns the atom true, the value is returned as {ok,
@@ -160,13 +179,67 @@ fetch3_test() ->
     ?assertMatch({"one", 1}, Result),
 
     ?assertThrow(not_found,
-		 fetch(fun([fo, bar, baz]) ->
-			       true;
-			  ({"onehundred", 100}) ->
-			       true;
-			  (_) ->
-			       false
-		       end,
-		      TestData)).
+                 fetch(fun([fo, bar, baz]) ->
+                               true;
+                          ({"onehundred", 100}) ->
+                               true;
+                          (_) ->
+                               false
+                       end,
+                       TestData)).
+
+search1_test() ->
+    TestData = [1, 2, 3, 4, 5, 6],
+    Result = search(fun(5) ->
+                            {ok, 5};
+                       (_) ->
+                            not_found
+                    end,
+                    TestData),
+    ?assertMatch({ok, 5, 5}, Result),
+
+    Result2 = search(fun(37) ->
+                             {ok, 37};
+                        (_) ->
+                             not_found
+                     end,
+                     TestData),
+    ?assertMatch(not_found, Result2).
+
+search2_test() ->
+    TestData = [1, 2, 3, 4, 5, 6],
+    Result = search(fun(1) ->
+                            {ok, 10};
+                       (_) ->
+                            not_found
+                    end,
+                    TestData),
+    ?assertMatch({ok, 10, 1}, Result),
+
+    Result2 = search(fun(6) ->
+                             {ok, 37};
+                        (_) ->
+                             not_found
+                     end,
+                     TestData),
+    ?assertMatch({ok, 37, 6}, Result2).
+
+search3_test() ->
+    TestData = [1, 2, 3, 4, 5, 6],
+    Result = search(fun(10) ->
+                            {ok, 10};
+                       (_) ->
+                            not_found
+                    end,
+                    TestData),
+    ?assertMatch(not_found, Result),
+
+    Result2 = search(fun(-1) ->
+                             {ok, 37};
+                        (_) ->
+                             not_found
+                     end,
+                     TestData),
+    ?assertMatch(not_found, Result2).
 
 -endif.
