@@ -8,6 +8,7 @@
              ec_file,
              ec_string,
              ec_semver,
+             ec_date,
              ec_dictionary,
              ec_assoc_list,
              ec_dict,
