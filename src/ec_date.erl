@@ -56,12 +56,12 @@ format(Format, {_,_,_}=Now) ->
 format(Format, Date) ->
     format(Format, Date, []).
 
--spec parse(string()) -> datetime() | {error, bad_date}.
+-spec parse(string()) -> datetime().
 %% @doc parses the datetime from a string
 parse(Date) ->
     do_parse(Date, calendar:universal_time(),[]).
 
--spec parse(string(),datetime() | now()) -> datetime() | {error, bad_date}.
+-spec parse(string(),datetime() | now()) -> datetime().
 %% @doc parses the datetime from a string
 parse(Date, {_,_,_}=Now) ->
     do_parse(Date, calendar:now_to_datetime(Now), []);
@@ -71,16 +71,16 @@ parse(Date, Now) ->
 do_parse(Date, Now, Opts) ->
     case parse(tokenise(string:to_upper(Date), []), Now, Opts) of
         {error, bad_date} ->
-            {error, bad_date};
+            erlang:throw({?MODULE, {bad_date, Date}});
         {D1, T1} = {{Y, M, D}, {H, M1, S}}
         when is_number(Y), is_number(M),
              is_number(D), is_number(H),
              is_number(M1), is_number(S) ->
             case calendar:valid_date(D1) of
                 true -> {D1, T1};
-                false -> {error, bad_date}
+                false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
-        _ -> {error, bad_date}
+        _ -> erlang:throw({?MODULE, {bad_date, Date}})
     end.
 
 -spec nparse(string()) -> now().
@@ -519,7 +519,7 @@ basic_parse_test_() ->
                    parse("23/april/1963", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
                    parse("23/apr/1963", ?DATE)),
-     ?_assertEqual({error, bad_date},
+     ?_assertThrow({?MODULE, {bad_date, "23/ap/195"}},
                    parse("23/ap/195", ?DATE)),
      ?_assertEqual({{2001,3,10}, {6,45,0}},
                    parse("6:45 am", ?DATE)),
