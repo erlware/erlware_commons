@@ -3,10 +3,17 @@
 %%
 %% Licensed under the MIT license
 %%
-%% This module formats erlang dates in the form
-%% {{Year, Month, Day}, {Hour, Minute, Second}}
-%% to printable strings, using (almost) equivalent
-%% formatting rules as http://uk.php.net/date
+%% This module formats erlang dates in the form {{Year, Month, Day},
+%% {Hour, Minute, Second}} to printable strings, using (almost)
+%% equivalent formatting rules as http://uk.php.net/date, US vs
+%% European dates are disambiguated in the same way as
+%% http://uk.php.net/manual/en/function.strtotime.php That is, Dates
+%% in the m/d/y or d-m-y formats are disambiguated by looking at the
+%% separator between the various components: if the separator is a
+%% slash (/), then the American m/d/y is assumed; whereas if the
+%% separator is a dash (-) or a dot (.), then the European d-m-y
+%% format is assumed. To avoid potential ambiguity, it's best to use
+%% ISO 8601 (YYYY-MM-DD) dates.
 %%
 %% erlang has no concept of timezone so the following
 %% formats are not implemented: B e I O P T Z
@@ -24,7 +31,8 @@
 %% defines make sense
 -define( is_num(X), (X >= $0 andalso X =< $9) ).
 -define( is_meridian(X), (X==[] orelse X==[am] orelse X==[pm]) ).
--define( is_sep(X), (X==$- orelse X==$/) ).
+-define( is_us_sep(X), ( X==$/) ).
+-define( is_world_sep(X), ( X==$-) ).
 
 -define(GREGORIAN_SECONDS_1970, 62167219200).
 
@@ -105,16 +113,40 @@ parse([Hour,$:,Min | PAM], {Date, _Time}, _Opts) when ?is_meridian(PAM) ->
 %% Dates 23/april/1963
 parse([Day,Month,Year], {_Date, Time}, _Opts) ->
     {{Year, Month, Day}, Time};
-parse([Day,X,Month,X,Year], {_Date, Time}, _Opts) when ?is_sep(X) ->
+parse([Year,X,Month,X,Day], {_Date, Time}, _Opts)
+  when (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, Time};
+parse([Month,X,Day,X,Year], {_Date, Time}, _Opts) when ?is_us_sep(X) ->
+    {{Year, Month, Day}, Time};
+parse([Day,X,Month,X,Year], {_Date, Time}, _Opts) when ?is_world_sep(X) ->
     {{Year, Month, Day}, Time};
 
 %% Date/Times 22 Aug 2008 6:35 PM
-parse([Day,X,Month,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
-  when ?is_meridian(PAM) andalso ?is_sep(X) ->
+parse([Year,X,Month,X,Day,Hour,$:,Min | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso
+       (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
-parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
-  when ?is_meridian(PAM) andalso ?is_sep(X) ->
+parse([Day,X,Month,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
+parse([Month,X,Day,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
+
+parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso
+       (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
+parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
+parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
+
 
 parse([Day,Month,Year,Hour,$:,Min | PAM], _Now, _Opts)
   when ?is_meridian(PAM) ->
@@ -492,9 +524,7 @@ basic_parse_test_() ->
      ?_assertEqual({{2008,8,22}, {6,35,12}},
                    parse("22-Aug-2008 6:35:12 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
-                   parse("22/Aug/2008 6:35 AM", ?DATE)),
-     ?_assertEqual({{2008,8,22}, {6,35,0}},
-                   parse("22/August/2008 6:35 AM", ?DATE)),
+                   parse("August/22/2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22 August 2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
@@ -514,11 +544,29 @@ basic_parse_test_() ->
      ?_assertEqual({{2001,3,10}, {3,45,39}},
                    parse("3:45:39", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
-                   parse("23/4/1963", ?DATE)),
+                   parse("23-4-1963", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
-                   parse("23/april/1963", ?DATE)),
+                   parse("23-april-1963", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
-                   parse("23/apr/1963", ?DATE)),
+                   parse("23-apr-1963", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("4/23/1963", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("april/23/1963", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("apr/23/1963", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963/4/23", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963/april/23", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963/apr/23", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963-4-23", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963-4-23", ?DATE)),
+     ?_assertEqual({{1963,4,23}, {17,16,17}},
+                   parse("1963-apr-23", ?DATE)),
      ?_assertThrow({?MODULE, {bad_date, "23/ap/195"}},
                    parse("23/ap/195", ?DATE)),
      ?_assertEqual({{2001,3,10}, {6,45,0}},
@@ -538,9 +586,9 @@ parse_with_days_test_() ->
      ?_assertEqual({{2008,8,22}, {6,35,12}},
                    parse("Sunday 22-Aug-2008 6:35:12 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
-                   parse("Sun 22/Aug/2008 6:35 AM", ?DATE)),
+                   parse("Sun 22-Aug-2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
-                   parse("THURSDAY, 22/August/2008 6:35 AM", ?DATE)),
+                   parse("THURSDAY, 22-August-2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("THU 22 August 2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
