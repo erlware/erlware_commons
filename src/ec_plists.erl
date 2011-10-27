@@ -111,9 +111,9 @@ map_gather([{Pid, _E} | Rest]) ->
     receive
         {Pid, {value, Ret}} ->
             [Ret|map_gather(Rest)];
-                                                % timeouts fall here too. Should timeouts be a return value
-                                                % or an exception? I lean toward return value, but the code
-                                                % is easier with the exception. Thoughts?
+        %% timeouts fall here too. Should timeouts be a return value
+        %% or an exception? I lean toward return value, but the code
+        %% is easier with the exception. Thoughts?
         {Pid, Exception} ->
             killall(Rest),
             throw(Exception)
@@ -153,9 +153,9 @@ do_f(Parent, F, E) ->
         Parent ! {self(), {value, Result}}
     catch
         _Class:Exception ->
-                                                % Losing class info here, but since throw does not accept
-                                                % that arg anyhow and forces a class of throw it does not
-                                                % matter.
+            %% Losing class info here, but since throw does not accept
+            %% that arg anyhow and forces a class of throw it does not
+            %% matter.
             Parent ! {self(), Exception}
     end.
 

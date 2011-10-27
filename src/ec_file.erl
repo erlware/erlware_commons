@@ -123,10 +123,10 @@ mkdtemp() ->
 %% @doc Makes a directory including parent dirs if they are missing.
 -spec mkdir_path(path()) -> ok.
 mkdir_path(Path) ->
-                                                % We are exploiting a feature of ensuredir that that creates all
-                                                % directories up to the last element in the filename, then ignores
-                                                % that last element. This way we ensure that the dir is created
-                                                % and not have any worries about path names
+    %% We are exploiting a feature of ensuredir that that creates all
+    %% directories up to the last element in the filename, then ignores
+    %% that last element. This way we ensure that the dir is created
+    %% and not have any worries about path names
     DirName = filename:join([filename:absname(Path), "tmp"]),
     try
         ok = filelib:ensure_dir(DirName)
@@ -343,7 +343,7 @@ setup_base_and_target() ->
     {BaseDir, SourceDir, {Name1, Name2, Name3, NoName}}.
 
 find_test() ->
-                                                % Create a directory in /tmp for the test. Clean everything afterwards
+    %% Create a directory in /tmp for the test. Clean everything afterwards
 
     {setup,
      fun setup_base_and_target/0,
