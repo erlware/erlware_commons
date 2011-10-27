@@ -15,16 +15,16 @@
 
 %% API
 -export([new/0,
-	 has_key/2,
-	 get/2,
-	 get/3,
-	 add/3,
-	 remove/2,
-	 has_value/2,
-	 size/1,
-	 to_list/1,
-	 from_list/1,
-	 keys/1]).
+         has_key/2,
+         get/2,
+         get/3,
+         add/3,
+         remove/2,
+         has_value/2,
+         size/1,
+         to_list/1,
+         from_list/1,
+         keys/1]).
 
 -export_type([dictionary/2]).
 
@@ -49,26 +49,26 @@ has_key(Key, Data) ->
     ec_dictionary:value(V).
 get(Key, Data) ->
     case orddict:find(Key, Data) of
-	{ok, Value} ->
-	    Value;
-	 error ->
-	    throw(not_found)
+        {ok, Value} ->
+            Value;
+         error ->
+            throw(not_found)
     end.
 
 -spec get(ec_dictionary:key(K),
-	  Default::ec_dictionary:value(V),
-	  Object::dictionary(K, V)) ->
+          Default::ec_dictionary:value(V),
+          Object::dictionary(K, V)) ->
     ec_dictionary:value(V).
 get(Key, Default, Data) ->
     case orddict:find(Key, Data) of
-	{ok, Value} ->
-	    Value;
-	 error ->
-	    Default
+        {ok, Value} ->
+            Value;
+         error ->
+            Default
     end.
 
 -spec add(ec_dictionary:key(K), ec_dictionary:value(V),
-	  Object::dictionary(K, V)) ->
+          Object::dictionary(K, V)) ->
     dictionary(K, V).
 add(Key, Value, Data) ->
     orddict:store(Key, Value, Data).
@@ -81,12 +81,12 @@ remove(Key, Data) ->
 -spec has_value(ec_dictionary:value(V), Object::dictionary(_K, V)) -> boolean().
 has_value(Value, Data) ->
     orddict:fold(fun(_, NValue, _) when NValue == Value ->
-		      true;
-		 (_, _, Acc) ->
-		      Acc
-	      end,
-	      false,
-	      Data).
+                      true;
+                 (_, _, Acc) ->
+                      Acc
+              end,
+              false,
+              Data).
 
 -spec size(Object::dictionary(_K, _V)) -> integer().
 size(Data) ->
