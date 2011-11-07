@@ -69,11 +69,13 @@
 %%% Types
 %%%===================================================================
 
--opaque dictionary(K, V) :: empty | {color(),
-                                     dictionary(K, V),
-                                     ec_dictionary:key(K),
-                                     ec_dictionary:value(V),
-                                     dictionary(K, V)}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(K, V) :: empty | {color(),
+                                   dictionary(K, V),
+                                   ec_dictionary:key(K),
+                                   ec_dictionary:value(V),
+                                   dictionary(K, V)}.
 
 -type color() :: r | b.
 

@@ -30,7 +30,9 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: {non_neg_integer(), ec_gb_tree_node(K, V)}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(K, V) :: {non_neg_integer(), ec_gb_tree_node(K, V)}.
 
 -type ec_gb_tree_node(K, V) :: 'nil' | {K, V,
                                         ec_gb_tree_node(K, V),

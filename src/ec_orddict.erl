@@ -31,7 +31,9 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: [{K, V}].
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(K, V) :: [{K, V}].
 
 %%%===================================================================
 %%% API

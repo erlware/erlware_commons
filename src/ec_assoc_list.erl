@@ -29,8 +29,14 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: {ec_assoc_list,
-                             [{ec_dictionary:key(K), ec_dictionary:value(V)}]}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(K, V) :: {ec_assoc_list,
+                           internal_assoc_list(K, V)}.
+
+-type internal_assoc_list(K, V) :: [] |
+                                   [{ec_dictionary:key(K),
+                                     ec_dictionary:value(V)}].
 
 %%%===================================================================
 %%% API

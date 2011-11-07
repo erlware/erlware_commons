@@ -38,7 +38,9 @@
         {callback,
           data}).
 
--opaque dictionary(_K, _V) :: #dict_t{}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(_K, _V) :: #dict_t{}.
 -type key(T) :: T.
 -type value(T) :: T.
 
