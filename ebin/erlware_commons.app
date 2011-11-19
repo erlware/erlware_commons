@@ -3,6 +3,7 @@
  [{description, "Additional standard library for Erlang"},
   {vsn, "0.6.0"},
   {modules, [
+             ec_talk,
              ec_lists,
              ec_plists,
              ec_file,
