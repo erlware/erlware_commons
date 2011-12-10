@@ -60,8 +60,8 @@
 
 %% Standard interface.
 -export([add/3, from_list/1, get/2, get/3, has_key/2,
-	 has_value/2, new/0, remove/2, size/1, to_list/1,
-	 keys/1]).
+         has_value/2, new/0, remove/2, size/1, to_list/1,
+         keys/1]).
 
 -export_type([dictionary/2]).
 
@@ -69,11 +69,13 @@
 %%% Types
 %%%===================================================================
 
--opaque dictionary(K, V) :: empty | {color(),
-				     dictionary(K, V),
-				     ec_dictionary:key(K),
-				     ec_dictionary:value(V),
-				     dictionary(K, V)}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(K, V) :: empty | {color(),
+                                   dictionary(K, V),
+                                   ec_dictionary:key(K),
+                                   ec_dictionary:value(V),
+                                   dictionary(K, V)}.
 
 -type color() :: r | b.
 
@@ -105,8 +107,8 @@ get(_, {_, _, _, Val, _}) ->
     Val.
 
 -spec get(ec_dictionary:key(K),
-	  ec_dictionary:value(V),
-	  dictionary(K, V)) -> ec_dictionary:value(V).
+          ec_dictionary:value(V),
+          dictionary(K, V)) -> ec_dictionary:value(V).
 get(_, Default, empty) ->
     Default;
 get(K, Default, {_, Left, K1, _, _}) when K < K1 ->
@@ -117,7 +119,7 @@ get(_, _, {_, _, _, Val, _}) ->
     Val.
 
 -spec add(ec_dicitonary:key(K), ec_dictionary:value(V),
-	  dictionary(K, V)) -> dictionary(K, V).
+          dictionary(K, V)) -> dictionary(K, V).
 add(Key, Value, Dict) ->
     {_, L, K1, V1, R} = add1(Key, Value, Dict),
     {b, L, K1, V1, R}.
@@ -129,9 +131,9 @@ remove(Key, Dictionary) ->
 -spec has_value(ec_dictionary:value(V), dictionary(_K, V)) -> boolean().
 has_value(Value, Dict) ->
     fold(fun (_, NValue, _) when NValue == Value -> true;
-	     (_, _, Acc) -> Acc
-	 end,
-	 false, Dict).
+             (_, _, Acc) -> Acc
+         end,
+         false, Dict).
 
 -spec size(dictionary(_K, _V)) -> integer().
 size(T) ->
@@ -146,9 +148,9 @@ to_list(T) ->
     dictionary(K, V).
 from_list(L) ->
     lists:foldl(fun ({K, V}, D) ->
-			add(K, V, D)
-		end, new(),
-		L).
+                        add(K, V, D)
+                end, new(),
+                L).
 
 -spec keys(dictionary(K, _V)) -> [ec_dictionary:key(K)].
 keys(Dict) ->
@@ -171,59 +173,59 @@ erase_aux(_, empty) ->
     {empty, false};
 erase_aux(K, {b, A, Xk, Xv, B}) ->
     if K < Xk ->
-	    {A1, Dec} = erase_aux(K, A),
-	    if Dec ->
-		    unbalright(b, A1, Xk, Xv, B);
-	       true ->
-		    {{b, A1, Xk, Xv, B}, false}
-	    end;
+            {A1, Dec} = erase_aux(K, A),
+            if Dec ->
+                    unbalright(b, A1, Xk, Xv, B);
+               true ->
+                    {{b, A1, Xk, Xv, B}, false}
+            end;
        K > Xk ->
-	    {B1, Dec} = erase_aux(K, B),
-	    if Dec ->
-		    unballeft(b, A, Xk, Xv, B1);
-	       true ->
-		    {{b, A, Xk, Xv, B1}, false}
-	    end;
+            {B1, Dec} = erase_aux(K, B),
+            if Dec ->
+                    unballeft(b, A, Xk, Xv, B1);
+               true ->
+                    {{b, A, Xk, Xv, B1}, false}
+            end;
        true ->
-	    case B of
-		empty ->
-		    blackify(A);
-		_ ->
-		    {B1, {Mk, Mv}, Dec} = erase_min(B),
-		    if Dec ->
-			    unballeft(b, A, Mk, Mv, B1);
-		       true ->
-			    {{b, A, Mk, Mv, B1}, false}
-		    end
-	    end
+            case B of
+                empty ->
+                    blackify(A);
+                _ ->
+                    {B1, {Mk, Mv}, Dec} = erase_min(B),
+                    if Dec ->
+                            unballeft(b, A, Mk, Mv, B1);
+                       true ->
+                            {{b, A, Mk, Mv, B1}, false}
+                    end
+            end
     end;
 erase_aux(K, {r, A, Xk, Xv, B}) ->
     if K < Xk ->
-	    {A1, Dec} = erase_aux(K, A),
-	    if Dec ->
-		    unbalright(r, A1, Xk, Xv, B);
-	       true ->
-		    {{r, A1, Xk, Xv, B}, false}
-	    end;
+            {A1, Dec} = erase_aux(K, A),
+            if Dec ->
+                    unbalright(r, A1, Xk, Xv, B);
+               true ->
+                    {{r, A1, Xk, Xv, B}, false}
+            end;
        K > Xk ->
-	    {B1, Dec} = erase_aux(K, B),
-	    if Dec ->
-		    unballeft(r, A, Xk, Xv, B1);
-	       true ->
-		    {{r, A, Xk, Xv, B1}, false}
-	    end;
+            {B1, Dec} = erase_aux(K, B),
+            if Dec ->
+                    unballeft(r, A, Xk, Xv, B1);
+               true ->
+                    {{r, A, Xk, Xv, B1}, false}
+            end;
        true ->
-	    case B of
-		empty ->
-		    {A, false};
-		_ ->
-		    {B1, {Mk, Mv}, Dec} = erase_min(B),
-		    if Dec ->
-			    unballeft(r, A, Mk, Mv, B1);
-		       true ->
-			    {{r, A, Mk, Mv, B1}, false}
-		    end
-	    end
+            case B of
+                empty ->
+                    {A, false};
+                _ ->
+                    {B1, {Mk, Mv}, Dec} = erase_min(B),
+                    if Dec ->
+                            unballeft(r, A, Mk, Mv, B1);
+                       true ->
+                            {{r, A, Mk, Mv, B1}, false}
+                    end
+            end
     end.
 
 -spec erase_min(dictionary(K, V)) ->
@@ -239,15 +241,15 @@ erase_min({r, empty, Xk, Xv, A}) ->
 erase_min({b, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-	   {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
-	   {T, Min, Dec1};
+           {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
+           {T, Min, Dec1};
        true -> {{b, A1, Xk, Xv, B}, Min, false}
     end;
 erase_min({r, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-	   {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
-	   {T, Min, Dec1};
+           {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
+           {T, Min, Dec1};
        true -> {{r, A1, Xk, Xv, B}, Min, false}
     end.
 
@@ -259,7 +261,7 @@ unballeft(r, {b, A, Xk, Xv, B}, Yk, Yv, C) ->
 unballeft(b, {b, A, Xk, Xv, B}, Yk, Yv, C) ->
     {lbalance(b, {r, A, Xk, Xv, B}, Yk, Yv, C), true};
 unballeft(b, {r, A, Xk, Xv, {b, B, Yk, Yv, C}}, Zk, Zv,
-	  D) ->
+          D) ->
     {{b, A, Xk, Xv,
       lbalance(b, {r, B, Yk, Yv, C}, Zk, Zv, D)},
      false}.
@@ -269,7 +271,7 @@ unbalright(r, A, Xk, Xv, {b, B, Yk, Yv, C}) ->
 unbalright(b, A, Xk, Xv, {b, B, Yk, Yv, C}) ->
     {rbalance(b, A, Xk, Xv, {r, B, Yk, Yv, C}), true};
 unbalright(b, A, Xk, Xv,
-	   {r, {b, B, Yk, Yv, C}, Zk, Zv, D}) ->
+           {r, {b, B, Yk, Yv, C}, Zk, Zv, D}) ->
     {{b, rbalance(b, A, Xk, Xv, {r, B, Yk, Yv, C}), Zk, Zv,
       D},
      false}.
@@ -295,25 +297,25 @@ to_list({_, A, Xk, Xv, B}, List) ->
 
 %% Balance a tree afer (possibly) adding a node to the left/right.
 -spec lbalance(color(), dictionary(K, V),
-	       ec_dictinary:key(K), ec_dictionary:value(V),
-	       dictionary(K, V)) ->
+               ec_dictinary:key(K), ec_dictionary:value(V),
+               dictionary(K, V)) ->
    dictionary(K, V).
 lbalance(b, {r, {r, A, Xk, Xv, B}, Yk, Yv, C}, Zk, Zv,
-	 D) ->
+         D) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
 lbalance(b, {r, A, Xk, Xv, {r, B, Yk, Yv, C}}, Zk, Zv,
-	 D) ->
+         D) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
 lbalance(C, A, Xk, Xv, B) -> {C, A, Xk, Xv, B}.
 
 -spec rbalance(color(), dictionary(K, V),
-	       ec_dictinary:key(K), ec_dictionary:value(V),
-	       dictionary(K, V)) ->
+               ec_dictinary:key(K), ec_dictionary:value(V),
+               dictionary(K, V)) ->
     dictionary(K, V).
 rbalance(b, A, Xk, Xv,
-	 {r, {r, B, Yk, Yv, C}, Zk, Zv, D}) ->
+         {r, {r, B, Yk, Yv, C}, Zk, Zv, D}) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
 rbalance(b, A, Xk, Xv,
-	 {r, B, Yk, Yv, {r, C, Zk, Zv, D}}) ->
+         {r, B, Yk, Yv, {r, C, Zk, Zv, D}}) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
 rbalance(C, A, Xk, Xv, B) -> {C, A, Xk, Xv, B}.

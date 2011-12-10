@@ -15,30 +15,32 @@
 
 %% API
 -export([new/1,
-	 has_key/2,
-	 get/2,
-	 get/3,
-	 add/3,
-	 remove/2,
-	 has_value/2,
-	 size/1,
-	 to_list/1,
-	 from_list/2,
-	 keys/1]).
+         has_key/2,
+         get/2,
+         get/3,
+         add/3,
+         remove/2,
+         has_value/2,
+         size/1,
+         to_list/1,
+         from_list/2,
+         keys/1]).
 
 -export_type([dictionary/2,
-	      key/1,
-	      value/1]).
+              key/1,
+              value/1]).
 
 %%%===================================================================
 %%% Types
 %%%===================================================================
 
 -record(dict_t,
-	{callback,
-	  data}).
+        {callback,
+          data}).
 
--opaque dictionary(_K, _V) :: #dict_t{}.
+%% This type should be opaque, but dialyzer does not support complex
+%% opaque types as yet.
+-type dictionary(_K, _V) :: #dict_t{}.
 -type key(T) :: T.
 -type value(T) :: T.
 
