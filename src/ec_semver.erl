@@ -23,7 +23,7 @@
 -type parsed_semvar() :: {MajorVsn::string(),
                           MinorVsn::string(),
                           PatchVsn::string(),
-                          PathString::string()}.
+                          PatchString::string()}.
 
 %%%===================================================================
 %%% API
