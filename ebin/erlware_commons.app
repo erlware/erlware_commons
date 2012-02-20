@@ -1,7 +1,7 @@
 %% -*- mode: Erlang; fill-column: 75; comment-column: 50; -*-
 {application, erlware_commons,
  [{description, "Additional standard library for Erlang"},
-  {vsn, "0.6.0"},
+  {vsn, "0.6.1"},
   {modules, [
              ec_talk,
              ec_lists,
