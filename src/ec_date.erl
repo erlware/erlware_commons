@@ -247,7 +247,9 @@ tokenise([Else | Rest], Acc) ->
     tokenise(Rest, [{bad_token, Else} | Acc]).
 
 hour(Hour, []) -> Hour;
+hour(12, [am]) -> 0;
 hour(Hour, [am]) -> Hour;
+hour(12, [pm]) -> 12;
 hour(Hour, [pm]) -> Hour+12.
 
 -spec format(string(),datetime(),list()) -> string().
@@ -541,6 +543,10 @@ basic_parse_test_() ->
                    parse("1:15", ?DATE)),
      ?_assertEqual({{2001,3,10}, {1,15,0}},
                    parse("1:15 am", ?DATE)),
+     ?_assertEqual({{2001,3,10}, {0,15,0}},
+                   parse("12:15 am", ?DATE)),
+     ?_assertEqual({{2001,3,10}, {12,15,0}},
+                   parse("12:15 pm", ?DATE)),
      ?_assertEqual({{2001,3,10}, {3,45,39}},
                    parse("3:45:39", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
