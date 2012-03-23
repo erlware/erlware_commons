@@ -109,6 +109,8 @@ parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
     {Date, {hour(Hour, PAM), Min, Sec}};
 parse([Hour,$:,Min | PAM], {Date, _Time}, _Opts) when ?is_meridian(PAM) ->
     {Date, {hour(Hour, PAM), Min, 0}};
+parse([Hour | PAM],{Date,_Time}, _Opts) when ?is_meridian(PAM) ->
+	{Date, {hour(Hour,PAM), 0, 0}};
 
 %% Dates 23/april/1963
 parse([Day,Month,Year], {_Date, Time}, _Opts) ->
@@ -123,6 +125,20 @@ parse([Day,X,Month,X,Year], {_Date, Time}, _Opts) when ?is_world_sep(X) ->
     {{Year, Month, Day}, Time};
 
 %% Date/Times 22 Aug 2008 6:35 PM
+%% Time is "7 PM"
+parse([Year,X,Month,X,Day,Hour | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso
+       (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+parse([Day,X,Month,X,Year,Hour | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+parse([Month,X,Day,X,Year,Hour | PAM], _Date, _Opts)
+  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+	{{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+
+%% Time is "6:35 PM"
 parse([Year,X,Month,X,Day,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -135,6 +151,7 @@ parse([Month,X,Day,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
 
+%% Time is "6:35:15 PM"
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -148,6 +165,9 @@ parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
 
 
+parse([Day,Month,Year,Hour | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 parse([Day,Month,Year,Hour,$:,Min | PAM], _Now, _Opts)
   when ?is_meridian(PAM) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
@@ -203,6 +223,8 @@ tokenise([$/ | Rest], Acc) -> tokenise(Rest, [ $/ | Acc]);
 tokenise([$- | Rest], Acc) -> tokenise(Rest, [ $- | Acc]);
 tokenise("AM"++Rest, Acc) -> tokenise(Rest, [am | Acc]);
 tokenise("PM"++Rest, Acc) -> tokenise(Rest, [pm | Acc]);
+tokenise("A"++Rest, Acc) -> tokenise(Rest, [am | Acc]);
+tokenise("P"++Rest, Acc) -> tokenise(Rest, [pm | Acc]);
 
 %% Postel's Law
 %%
@@ -519,28 +541,40 @@ basic_parse_test_() ->
     [
      ?_assertEqual({{2008,8,22}, {17,16,17}},
                    parse("22nd of August 2008", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("22-Aug-2008 6 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22-Aug-2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,12}},
                    parse("22-Aug-2008 6:35:12 AM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("August/22/2008 6 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("August/22/2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22 August 2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("22 Aug 2008 6AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22 Aug 2008 6:35AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22 Aug 2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("22 Aug 2008 6", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("22 Aug 2008 6:35", ?DATE)),
      ?_assertEqual({{2008,8,22}, {18,35,0}},
                    parse("22 Aug 2008 6:35 PM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,0,0}},
+                   parse("22 Aug 2008 6 PM", ?DATE)),
      ?_assertEqual({{2001,3,10}, {11,15,0}},
                    parse("11:15", ?DATE)),
      ?_assertEqual({{2001,3,10}, {1,15,0}},
                    parse("1:15", ?DATE)),
      ?_assertEqual({{2001,3,10}, {1,15,0}},
                    parse("1:15 am", ?DATE)),
+     ?_assertEqual({{2001,3,10}, {1,0,0}},
+                   parse("1 AM", ?DATE)),
      ?_assertEqual({{2001,3,10}, {3,45,39}},
                    parse("3:45:39", ?DATE)),
      ?_assertEqual({{1963,4,23}, {17,16,17}},
@@ -589,14 +623,24 @@ parse_with_days_test_() ->
                    parse("Sun 22-Aug-2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("THURSDAY, 22-August-2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,0,0}},
+                   parse("THURSDAY, 22-August-2008 6 pM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("THU 22 August 2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("FRi 22 Aug 2008 6:35AM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("FRi 22 Aug 2008 6AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("Wednesday 22 Aug 2008 6:35 AM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {6,35,0}},
                    parse("Monday 22 Aug 2008 6:35", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("Monday 22 Aug 2008 6", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,0,0}},
+                   parse("Monday 22 Aug 2008 6p", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {6,0,0}},
+                   parse("Monday 22 Aug 2008 6a", ?DATE)),
      ?_assertEqual({{2008,8,22}, {18,35,0}},
                    parse("Mon, 22 Aug 2008 6:35 PM", ?DATE))
     ].
