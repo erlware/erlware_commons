@@ -109,14 +109,21 @@ is_symlink(Path) ->
 %% function of the same name.
 -spec mkdtemp() -> TmpDirPath::path().
 mkdtemp() ->
-    UniqueNumber = integer_to_list(element(3, now())),
+    random:seed(now()),
+    UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
     TmpDirPath =
         filename:join([tmp(), lists:flatten([".tmp_dir", UniqueNumber])]),
-    try
-        ok = mkdir_path(TmpDirPath),
-        TmpDirPath
-    catch
-        _C:E -> throw(?UEX({mkdtemp_failed, E}, ?CHECK_PERMS_MSG, []))
+
+    case filelib:is_dir(TmpDirPath) of
+        true ->
+            throw(?UEX({mkdtemp_failed, file_exists}, "tmp directory exists", []));
+        false ->
+            try
+                ok = mkdir_path(TmpDirPath),
+                TmpDirPath
+            catch
+                _C:E -> throw(?UEX({mkdtemp_failed, E}, ?CHECK_PERMS_MSG, []))
+            end
     end.
 
 
