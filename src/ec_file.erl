@@ -9,7 +9,7 @@
 -export([
          copy/2,
          copy/3,
-         mkdtemp/0,
+         insecure_mkdtemp/0,
          mkdir_path/1,
          find/2,
          is_symlink/1,
@@ -107,8 +107,8 @@ is_symlink(Path) ->
 
 %% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
--spec mkdtemp() -> TmpDirPath::path().
-mkdtemp() ->
+-spec insecure_mkdtemp() -> TmpDirPath::path().
+insecure_mkdtemp() ->
     random:seed(now()),
     UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
     TmpDirPath =
@@ -304,7 +304,7 @@ hex0(I)  -> $0 + I.
 -include_lib("eunit/include/eunit.hrl").
 
 setup_test() ->
-    Dir = mkdtemp(),
+    Dir = insecure_mkdtemp(),
     mkdir_path(Dir),
     ?assertMatch(false, is_symlink(Dir)),
     ?assertMatch(true, filelib:is_dir(Dir)).
@@ -313,7 +313,7 @@ md5sum_test() ->
     ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
 
 file_test() ->
-    Dir = mkdtemp(),
+    Dir = insecure_mkdtemp(),
     TermFile = filename:join(Dir, "ec_file/dir/file.term"),
     TermFileCopy = filename:join(Dir, "ec_file/dircopy/file.term"),
     filelib:ensure_dir(TermFile),
@@ -327,12 +327,12 @@ file_test() ->
     ?assertMatch("term", consult(TermFileCopy)).
 
 teardown_test() ->
-    Dir = mkdtemp(),
+    Dir = insecure_mkdtemp(),
     remove(Dir, [recursive]),
     ?assertMatch(false, filelib:is_dir(Dir)).
 
 setup_base_and_target() ->
-    BaseDir = mkdtemp(),
+    BaseDir = insecure_mkdtemp(),
     DummyContents = <<"This should be deleted">>,
     SourceDir = filename:join([BaseDir, "source"]),
     ok = file:make_dir(SourceDir),
