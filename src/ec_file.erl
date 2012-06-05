@@ -9,7 +9,7 @@
 -export([
          copy/2,
          copy/3,
-         mkdtemp/0,
+         insecure_mkdtemp/0,
          mkdir_path/1,
          find/2,
          is_symlink/1,
@@ -107,16 +107,23 @@ is_symlink(Path) ->
 
 %% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
--spec mkdtemp() -> TmpDirPath::path().
-mkdtemp() ->
-    UniqueNumber = integer_to_list(element(3, now())),
+-spec insecure_mkdtemp() -> TmpDirPath::path().
+insecure_mkdtemp() ->
+    random:seed(now()),
+    UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
     TmpDirPath =
         filename:join([tmp(), lists:flatten([".tmp_dir", UniqueNumber])]),
-    try
-        ok = mkdir_path(TmpDirPath),
-        TmpDirPath
-    catch
-        _C:E -> throw(?UEX({mkdtemp_failed, E}, ?CHECK_PERMS_MSG, []))
+
+    case filelib:is_dir(TmpDirPath) of
+        true ->
+            throw(?UEX({mkdtemp_failed, file_exists}, "tmp directory exists", []));
+        false ->
+            try
+                ok = mkdir_path(TmpDirPath),
+                TmpDirPath
+            catch
+                _C:E -> throw(?UEX({mkdtemp_failed, E}, ?CHECK_PERMS_MSG, []))
+            end
     end.
 
 
@@ -297,23 +304,20 @@ hex0(I)  -> $0 + I.
 -include_lib("eunit/include/eunit.hrl").
 
 setup_test() ->
-    case filelib:is_dir("/tmp/ec_file") of
-        true ->
-            remove("/tmp/ec_file", [recursive]);
-        false ->
-            ok
-    end,
-    mkdir_path("/tmp/ec_file/dir"),
-    ?assertMatch(false, is_symlink("/tmp/ec_file/dir")),
-    ?assertMatch(true, filelib:is_dir("/tmp/ec_file/dir")).
-
+    Dir = insecure_mkdtemp(),
+    mkdir_path(Dir),
+    ?assertMatch(false, is_symlink(Dir)),
+    ?assertMatch(true, filelib:is_dir(Dir)).
 
 md5sum_test() ->
     ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
 
 file_test() ->
-    TermFile = "/tmp/ec_file/dir/file.term",
-    TermFileCopy = "/tmp/ec_file/dircopy/file.term",
+    Dir = insecure_mkdtemp(),
+    TermFile = filename:join(Dir, "ec_file/dir/file.term"),
+    TermFileCopy = filename:join(Dir, "ec_file/dircopy/file.term"),
+    filelib:ensure_dir(TermFile),
+    filelib:ensure_dir(TermFileCopy),
     write_term(TermFile, "term"),
     ?assertMatch("term", consult(TermFile)),
     ?assertMatch(<<"\"term\". ">>, read(TermFile)),
@@ -323,11 +327,12 @@ file_test() ->
     ?assertMatch("term", consult(TermFileCopy)).
 
 teardown_test() ->
-    remove("/tmp/ec_file", [recursive]),
-    ?assertMatch(false, filelib:is_dir("/tmp/ec_file")).
+    Dir = insecure_mkdtemp(),
+    remove(Dir, [recursive]),
+    ?assertMatch(false, filelib:is_dir(Dir)).
 
 setup_base_and_target() ->
-    {ok, BaseDir} = ewl_file:create_tmp_dir("/tmp"),
+    BaseDir = insecure_mkdtemp(),
     DummyContents = <<"This should be deleted">>,
     SourceDir = filename:join([BaseDir, "source"]),
     ok = file:make_dir(SourceDir),
@@ -344,17 +349,12 @@ setup_base_and_target() ->
 
 find_test() ->
     %% Create a directory in /tmp for the test. Clean everything afterwards
+    {BaseDir, _SourceDir, {Name1, Name2, Name3, _NoName}} = setup_base_and_target(),
+    ?assertMatch([Name2,
+                  Name3,
+                  Name1],
+                 find(BaseDir, "file[a-z]+\$")),
+    remove(BaseDir, [recursive]).
 
-    {setup,
-     fun setup_base_and_target/0,
-     fun ({BaseDir, _, _}) ->
-             ewl_file:delete_dir(BaseDir)
-     end,
-     fun ({BaseDir, _, {Name1, Name2, Name3, _}}) ->
-             ?assertMatch([Name2,
-                           Name3,
-                           Name1],
-                          ewl_file:find(BaseDir, "file[a-z]+\$"))
-     end}.
 
 -endif.
