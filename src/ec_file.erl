@@ -304,23 +304,20 @@ hex0(I)  -> $0 + I.
 -include_lib("eunit/include/eunit.hrl").
 
 setup_test() ->
-    case filelib:is_dir("/tmp/ec_file") of
-        true ->
-            remove("/tmp/ec_file", [recursive]);
-        false ->
-            ok
-    end,
-    mkdir_path("/tmp/ec_file/dir"),
-    ?assertMatch(false, is_symlink("/tmp/ec_file/dir")),
-    ?assertMatch(true, filelib:is_dir("/tmp/ec_file/dir")).
-
+    Dir = mkdtemp(),
+    mkdir_path(Dir),
+    ?assertMatch(false, is_symlink(Dir)),
+    ?assertMatch(true, filelib:is_dir(Dir)).
 
 md5sum_test() ->
     ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
 
 file_test() ->
-    TermFile = "/tmp/ec_file/dir/file.term",
-    TermFileCopy = "/tmp/ec_file/dircopy/file.term",
+    Dir = mkdtemp(),
+    TermFile = filename:join(Dir, "ec_file/dir/file.term"),
+    TermFileCopy = filename:join(Dir, "ec_file/dircopy/file.term"),
+    filelib:ensure_dir(TermFile),
+    filelib:ensure_dir(TermFileCopy),
     write_term(TermFile, "term"),
     ?assertMatch("term", consult(TermFile)),
     ?assertMatch(<<"\"term\". ">>, read(TermFile)),
@@ -330,11 +327,12 @@ file_test() ->
     ?assertMatch("term", consult(TermFileCopy)).
 
 teardown_test() ->
-    remove("/tmp/ec_file", [recursive]),
-    ?assertMatch(false, filelib:is_dir("/tmp/ec_file")).
+    Dir = mkdtemp(),
+    remove(Dir, [recursive]),
+    ?assertMatch(false, filelib:is_dir(Dir)).
 
 setup_base_and_target() ->
-    {ok, BaseDir} = ewl_file:create_tmp_dir("/tmp"),
+    BaseDir = mkdtemp(),
     DummyContents = <<"This should be deleted">>,
     SourceDir = filename:join([BaseDir, "source"]),
     ok = file:make_dir(SourceDir),
@@ -351,17 +349,12 @@ setup_base_and_target() ->
 
 find_test() ->
     %% Create a directory in /tmp for the test. Clean everything afterwards
+    {BaseDir, _SourceDir, {Name1, Name2, Name3, _NoName}} = setup_base_and_target(),
+    ?assertMatch([Name2,
+                  Name3,
+                  Name1],
+                 find(BaseDir, "file[a-z]+\$")),
+    remove(BaseDir, [recursive]).
 
-    {setup,
-     fun setup_base_and_target/0,
-     fun ({BaseDir, _, _}) ->
-             ewl_file:delete_dir(BaseDir)
-     end,
-     fun ({BaseDir, _, {Name1, Name2, Name3, _}}) ->
-             ?assertMatch([Name2,
-                           Name3,
-                           Name1],
-                          ewl_file:find(BaseDir, "file[a-z]+\$"))
-     end}.
 
 -endif.
