@@ -1,3 +1,9 @@
+ebin/*.app
+deps/*
+doc/*.css
+doc/*.html
+doc/edoc-info
+doc/erlang.png
 *.beam
 .*
 _build
