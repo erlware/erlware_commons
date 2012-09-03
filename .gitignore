@@ -6,6 +6,7 @@ doc/*.css
 doc/edoc-info
 doc/erlang.png
 ebin/*
+.*
 _build
 erl_crash.dump
 *.pyc
