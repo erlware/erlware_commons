@@ -83,7 +83,7 @@ has_key(Key, #dict_t{callback = Mod, data = Data}) ->
 %%
 %% @param Dict The dictionary object to return the value from
 %% @param Key The key requested
-%% @throws not_found when the key does not exist
+%%  when the key does not exist @throws not_found
 -spec get(key(K), dictionary(K, V)) -> value(V).
 get(Key, #dict_t{callback = Mod, data = Data}) ->
     Mod:get(Key, Data).
