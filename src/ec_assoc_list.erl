@@ -4,8 +4,8 @@
 %%% @doc
 %%%  provides an implementation of ec_dictionary using an association
 %%%  list as a basy
+%%% see ec_dictionary
 %%% @end
-%%% @see ec_dictionary
 %%%-------------------------------------------------------------------
 -module(ec_assoc_list).
 
