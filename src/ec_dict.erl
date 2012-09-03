@@ -5,9 +5,9 @@
 %%%  This provides an implementation of the ec_dictionary type using
 %%%  erlang dicts as a base. The function documentation for
 %%%  ec_dictionary applies here as well.
+%%% see ec_dictionary
+%%% see dict
 %%% @end
-%%% @see ec_dictionary
-%%% @see dict
 %%%-------------------------------------------------------------------
 -module(ec_dict).
 
