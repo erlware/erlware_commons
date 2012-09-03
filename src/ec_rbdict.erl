@@ -51,8 +51,8 @@
 %%% l/rbalance, the colour, in store etc. is actually slower than not
 %%% doing it. Measured.
 %%%
+%%% see ec_dictionary
 %%% @end
-%%% @see ec_dictionary
 %%%-------------------------------------------------------------------
 -module(ec_rbdict).
 
