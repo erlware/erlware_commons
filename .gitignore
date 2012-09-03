@@ -1,3 +1,11 @@
+.erlware_commons_Plt
+.eunit/*
+deps/*
+doc/*.html
+doc/*.css
+doc/edoc-info
+doc/erlang.png
+ebin/*
 _build
 erl_crash.dump
 *.pyc
