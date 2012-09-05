@@ -28,14 +28,6 @@
 
 -include_lib("kernel/include/file.hrl").
 
-%% User friendly exception message (remove line and module info once we
-%% get them in stack traces)
--define(UEX(Exception, UMSG, UVARS),
-        {uex, {?MODULE,
-               ?LINE,
-               Exception,
-               lists:flatten(io_lib:fwrite(UMSG, UVARS))}}).
-
 -define(CHECK_PERMS_MSG,
         "Try checking that you have the correct permissions and try again~n").
 
@@ -61,12 +53,23 @@ copy(From, To, [recursive] = Options) ->
     end.
 
 %% @doc copy a file including timestamps,ownership and mode etc.
--spec copy(From::file:filename(), To::file:filename()) -> ok.
+-spec copy(From::file:filename(), To::file:filename()) -> ok | {error, Reason::term()}.
 copy(From, To) ->
-    try
-        ec_file_copy(From, To)
-    catch
-        _C:E -> throw(?UEX({copy_failed, E}, ?CHECK_PERMS_MSG, []))
+    case file:copy(From, To) of
+        {ok, _} ->
+            case file:read_file_info(From) of
+                {ok, FileInfo} ->
+                    case file:write_file_info(To, FileInfo) of
+                        ok ->
+                            ok;
+                        {error, WFError} ->
+                            {error, {write_file_info_failed, WFError}}
+                    end;
+                {error, RFError} ->
+                    {error, {read_file_info_failed, RFError}}
+            end;
+        {error, Error} ->
+            {error, {copy_failed, Error}}
     end.
 
 %% @doc return an md5 checksum string or a binary. Same as unix utility of
@@ -81,11 +84,11 @@ md5sum(Value) ->
 %% </pre>
 -spec remove(file:name(), Options::[option()]) -> ok | {error, Reason::term()}.
 remove(Path, Options) ->
-    try
-        ok = ec_file_remove(Path, Options)
-    catch
-        _C:E -> throw(?UEX({remove_failed, E}, ?CHECK_PERMS_MSG, []))
+    case lists:member(recursive, Options) of
+        false -> file:delete(Path);
+        true  -> remove_recursive(Path, Options)
     end.
+
 
 %% @doc delete a file.
 -spec remove(file:name()) -> ok | {error, Reason::term()}.
@@ -112,32 +115,26 @@ insecure_mkdtemp() ->
     TmpDirPath =
         filename:join([tmp(), lists:flatten([".tmp_dir", UniqueNumber])]),
 
-    case filelib:is_dir(TmpDirPath) of
-        true ->
-            throw(?UEX({mkdtemp_failed, file_exists}, "tmp directory exists", []));
-        false ->
-            try
-                ok = mkdir_path(TmpDirPath),
-                TmpDirPath
-            catch
-                _C:E -> throw(?UEX({mkdtemp_failed, E}, ?CHECK_PERMS_MSG, []))
-            end
+    case mkdir_path(TmpDirPath) of
+        ok -> TmpDirPath;
+        Error -> Error
     end.
 
-
 %% @doc Makes a directory including parent dirs if they are missing.
--spec mkdir_path(file:name()) -> ok.
-mkdir_path(Path) ->
+-spec mkdir_p(file:name()) -> ok | {error, Reason::term()}.
+mkdir_p(Path) ->
     %% We are exploiting a feature of ensuredir that that creates all
     %% directories up to the last element in the filename, then ignores
     %% that last element. This way we ensure that the dir is created
     %% and not have any worries about path names
     DirName = filename:join([filename:absname(Path), "tmp"]),
-    try
-        ok = filelib:ensure_dir(DirName)
-    catch
-        _C:E -> throw(?UEX({mkdir_path_failed, E}, ?CHECK_PERMS_MSG, []))
-    end.
+    filelib:ensure_dir(DirName).
+
+
+%% @doc Makes a directory including parent dirs if they are missing.
+-spec mkdir_path(file:name()) -> ok | {error, Reason::term()}.
+mkdir_path(Path) ->
+    mkdir_p(Path).
 
 
 %% @doc consult an erlang term file from the file system.
@@ -147,45 +144,28 @@ consult(FilePath) ->
     case file:consult(FilePath) of
         {ok, [Term]} ->
             Term;
-        {error, Error} ->
-            Msg = "The file at ~p~n" ++
-                "is either not a valid Erlang term, does not to exist~n" ++
-                "or you lack the permissions to read it. Please check~n" ++
-                "to see if the file exists and that it has the correct~n" ++
-                "permissions~n",
-            throw(?UEX({failed_to_consult_file, {FilePath, Error}},
-                       Msg, [FilePath]))
+        Error ->
+            Error
     end.
-
 %% @doc read a file from the file system. Provide UEX exeption on failure.
--spec read(FilePath::file:filename()) -> binary().
+-spec read(FilePath::file:filename()) -> binary() | {error, Reason::term()}.
 read(FilePath) ->
-    try
-        {ok, FileBin} = file:read_file(FilePath),
-        FileBin
-    catch
-        _C:E -> throw(?UEX({read_failed, {FilePath, E}},
-                           "Read failed for the file ~p with ~p~n" ++
-                               ?CHECK_PERMS_MSG,
-                           [FilePath, E]))
-    end.
+    %% Now that we are moving away from exceptions again this becomes
+    %% a bit redundant but we want to be backwards compatible as much
+    %% as possible in the api.
+    file:read_file(FilePath).
+
 
 %% @doc write a file to the file system. Provide UEX exeption on failure.
--spec write(FileName::file:filename(), Contents::string()) -> ok.
+-spec write(FileName::file:filename(), Contents::string()) -> ok | {error, Reason::term()}.
 write(FileName, Contents) ->
-    case file:write_file(FileName, Contents) of
-        ok ->
-            ok;
-        {error, Reason} ->
-            Msg = "Writing the file ~s to disk failed with reason ~p.~n" ++
-                ?CHECK_PERMS_MSG,
-            throw(?UEX({write_file_failure, {FileName, Reason}},
-                       Msg,
-                       [FileName, Reason]))
-    end.
+    %% Now that we are moving away from exceptions again this becomes
+    %% a bit redundant but we want to be backwards compatible as much
+    %% as possible in the api.
+    file:write_file(FileName, Contents).
 
 %% @doc write a term out to a file so that it can be consulted later.
--spec write_term(file:filename(), term()) -> ok.
+-spec write_term(file:filename(), term()) -> ok | {error, Reason::term()}.
 write_term(FileName, Term) ->
     write(FileName, lists:flatten(io_lib:fwrite("~p. ", [Term]))).
 
@@ -226,14 +206,8 @@ find_in_subdirs(FromDir, TargetPattern) ->
                 [],
                 filelib:wildcard(filename:join(FromDir, "*"))).
 
--spec ec_file_remove(file:name(), [option()]) ->  ok | {error, Reason::any()}.
-ec_file_remove(Path, Options) ->
-    case lists:member(recursive, Options) of
-        false -> file:delete(Path);
-        true  -> remove_recursive(Path, Options)
-    end.
 
--spec remove_recursive(file:name(), Options::list()) -> ok.
+-spec remove_recursive(file:name(), Options::list()) -> ok | {error, Reason::term()}.
 remove_recursive(Path, Options) ->
     case filelib:is_dir(Path) of
         false ->
@@ -242,7 +216,7 @@ remove_recursive(Path, Options) ->
             lists:foreach(fun(ChildPath) ->
                                   remove_recursive(ChildPath, Options)
                           end, filelib:wildcard(filename:join(Path, "*"))),
-            ok = file:del_dir(Path)
+            file:del_dir(Path)
     end.
 
 -spec tmp() -> file:name().
@@ -264,17 +238,11 @@ copy_subfiles(From, To, Options) ->
         end,
     lists:foreach(Fun, filelib:wildcard(filename:join(From, "*"))).
 
--spec ec_file_copy(file:name(), file:name()) -> ok.
-ec_file_copy(From, To) ->
-    {ok, _} = file:copy(From, To),
-    {ok, FileInfo} = file:read_file_info(From),
-    ok = file:write_file_info(To, FileInfo).
-
--spec make_dir_if_dir(file:name()) -> ok.
+-spec make_dir_if_dir(file:name()) -> ok | {error, Reason::term()}.
 make_dir_if_dir(File) ->
     case filelib:is_dir(File) of
         true  -> ok;
-        false -> ok = mkdir_path(File)
+        false -> mkdir_path(File)
     end.
 
 %% @doc convert a list of integers into hex.
@@ -318,7 +286,7 @@ file_test() ->
     filelib:ensure_dir(TermFileCopy),
     write_term(TermFile, "term"),
     ?assertMatch("term", consult(TermFile)),
-    ?assertMatch(<<"\"term\". ">>, read(TermFile)),
+    ?assertMatch({ok, <<"\"term\". ">>}, read(TermFile)),
     copy(filename:dirname(TermFile),
          filename:dirname(TermFileCopy),
          [recursive]),
