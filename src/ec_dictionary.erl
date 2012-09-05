@@ -10,9 +10,6 @@
 %%%-------------------------------------------------------------------
 -module(ec_dictionary).
 
-%%% Behaviour Callbacks
--export([behaviour_info/1]).
-
 %% API
 -export([new/1,
          has_key/2,
@@ -38,29 +35,26 @@
         {callback,
           data}).
 
--opaque dictionary(_K, _V) :: #dict_t{}.
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(_K, _V) :: #dict_t{}.
 -type key(T) :: T.
 -type value(T) :: T.
+
+-callback new() -> any().
+-callback has_key(key(any()), any()) -> boolean().
+-callback get(key(any()), any()) -> any().
+-callback add(key(any()), value(any()), T) -> T.
+-callback remove(key(any()), T) -> T.
+-callback has_value(value(any()), any()) -> boolean().
+-callback size(any()) -> non_neg_integer().
+-callback to_list(any()) -> [{key(any()), value(any())}].
+-callback from_list([{key(any()), value(any())}]) -> any().
+-callback keys(any()) -> [key(any())].
 
 %%%===================================================================
 %%% API
 %%%===================================================================
-
-%% @doc export the behaviour callbacks for this type
-%% @private
-behaviour_info(callbacks) ->
-    [{new, 0},
-     {has_key, 2},
-     {get, 2},
-     {add, 3},
-     {remove, 2},
-     {has_value, 2},
-     {size, 1},
-     {to_list, 1},
-     {from_list, 1},
-     {keys, 1}];
-behaviour_info(_) ->
-    undefined.
 
 %% @doc create a new dictionary object from the specified module. The
 %% module should implement the dictionary behaviour.

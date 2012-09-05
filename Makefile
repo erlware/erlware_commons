@@ -35,7 +35,7 @@ $(ERLWARE_COMMONS_PLT):
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT)
 	@echo
 	- dialyzer --output_plt $(ERLWARE_COMMONS_PLT) --build_plt \
-	   --apps erts kernel stdlib -r deps
+	   --apps erts kernel stdlib eunit -r deps
 
 dialyzer: $(ERLWARE_COMMONS_PLT)
 	dialyzer --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
@@ -49,7 +49,7 @@ shell: compile
 # rebuilt). However, eunit runs the tests, which probably
 # fails (thats probably why You want them in the shell). This
 # runs eunit but tells make to ignore the result.
-	- @$(REBAR) eunit
+	- @$(REBAR) skip_deps=true eunit
 	@$(ERL) $(ERLFLAGS)
 
 clean:

@@ -30,7 +30,9 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: {non_neg_integer(), ec_gb_tree_node(K, V)}.
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(K, V) :: {non_neg_integer(), ec_gb_tree_node(K, V)}.
 
 -type ec_gb_tree_node(K, V) :: 'nil' | {K, V,
                                         ec_gb_tree_node(K, V),
@@ -124,7 +126,7 @@ has_value(Value, Data) ->
 %% @doc return the current number of key value pairs in the dictionary
 %%
 %% @param Object the object return the size for.
--spec size(Object::dictionary(_K, _V)) -> integer().
+-spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
 size(Data) ->
     gb_trees:size(Data).
 
