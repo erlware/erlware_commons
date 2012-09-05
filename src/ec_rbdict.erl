@@ -139,12 +139,12 @@ size(T) ->
     size1(T).
 
 -spec to_list(dictionary(K, V)) ->
-    [{ec_dictionary:key(K), ec_dictionary:value(V)}].
+                     [{ec_dictionary:key(K), ec_dictionary:value(V)}].
 to_list(T) ->
     to_list(T, []).
 
 -spec from_list([{ec_dictionary:key(K), ec_dictionary:value(V)}]) ->
-    dictionary(K, V).
+                       dictionary(K, V).
 from_list(L) ->
     lists:foldl(fun ({K, V}, D) ->
                         add(K, V, D)
@@ -159,7 +159,7 @@ keys(Dict) ->
 %%% Enternal functions
 %%%===================================================================
 -spec keys(dictionary(K, _V), [ec_dictionary:key(K)]) ->
-    [ec_dictionary:key(K)].
+                  [ec_dictionary:key(K)].
 keys(empty, Tail) ->
     Tail;
 keys({_, L, K, _, R}, Tail) ->
@@ -167,7 +167,7 @@ keys({_, L, K, _, R}, Tail) ->
 
 
 -spec erase_aux(ec_dictionary:key(K), dictionary(K, V)) ->
-    {dictionary(K, V), boolean()}.
+                       {dictionary(K, V), boolean()}.
 erase_aux(_, empty) ->
     {empty, false};
 erase_aux(K, {b, A, Xk, Xv, B}) ->
@@ -228,7 +228,7 @@ erase_aux(K, {r, A, Xk, Xv, B}) ->
     end.
 
 -spec erase_min(dictionary(K, V)) ->
-    {dictionary(K, V), {ec_dictionary:key(K), ec_dictionary:value(V)}, boolean()}.
+                       {dictionary(K, V), {ec_dictionary:key(K), ec_dictionary:value(V)}, boolean()}.
 erase_min({b, empty, Xk, Xv, empty}) ->
     {empty, {Xk, Xv}, true};
 erase_min({b, empty, Xk, Xv, {r, A, Yk, Yv, B}}) ->
@@ -240,15 +240,15 @@ erase_min({r, empty, Xk, Xv, A}) ->
 erase_min({b, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-           {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
-           {T, Min, Dec1};
+            {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
+            {T, Min, Dec1};
        true -> {{b, A1, Xk, Xv, B}, Min, false}
     end;
 erase_min({r, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-           {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
-           {T, Min, Dec1};
+            {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
+            {T, Min, Dec1};
        true -> {{r, A1, Xk, Xv, B}, Min, false}
     end.
 
@@ -299,7 +299,7 @@ to_list({_, A, Xk, Xv, B}, List) ->
 -spec lbalance(color(), dictionary(K, V),
                ec_dictionary:key(K), ec_dictionary:value(V),
                dictionary(K, V)) ->
-   dictionary(K, V).
+                      dictionary(K, V).
 lbalance(b, {r, {r, A, Xk, Xv, B}, Yk, Yv, C}, Zk, Zv,
          D) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
@@ -311,7 +311,7 @@ lbalance(C, A, Xk, Xv, B) -> {C, A, Xk, Xv, B}.
 -spec rbalance(color(), dictionary(K, V),
                ec_dictionary:key(K), ec_dictionary:value(V),
                dictionary(K, V)) ->
-    dictionary(K, V).
+                      dictionary(K, V).
 rbalance(b, A, Xk, Xv,
          {r, {r, B, Yk, Yv, C}, Zk, Zv, D}) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
