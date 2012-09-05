@@ -29,8 +29,10 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: {ec_assoc_list,
-                             [{ec_dictionary:key(K), ec_dictionary:value(V)}]}.
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(K, V) :: {ec_assoc_list,
+                           [{ec_dictionary:key(K), ec_dictionary:value(V)}]}.
 
 %%%===================================================================
 %%% API
@@ -82,7 +84,7 @@ remove(Key, {ec_assoc_list, Data}) ->
 has_value(Value, {ec_assoc_list, Data}) ->
     lists:keymember(Value, 2, Data).
 
--spec size(Object::dictionary(_K, _V)) -> integer().
+-spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
 size({ec_assoc_list, Data}) ->
     length(Data).
 

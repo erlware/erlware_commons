@@ -49,7 +49,7 @@
 %%============================================================================
 -type prompt() :: string().
 -type type() :: boolean | number | string.
--type supported() :: string() | boolean() | number().
+-type supported() ::  boolean() | number() | string().
 
 %%============================================================================
 %% API
@@ -100,8 +100,11 @@ ask_default(Prompt, string, Default) ->
 %% between min and max.
 -spec ask(prompt(), number(), number()) -> number().
 ask(Prompt, Min, Max)
-  when is_list(Prompt), is_number(Min), is_number(Max) ->
-    Res = ask(Prompt, fun get_integer/1, none),
+  when erlang:is_list(Prompt),
+       erlang:is_number(Min),
+       erlang:is_number(Max),
+       Min =< Max ->
+    Res = ask_convert(Prompt, fun get_integer/1, number, none),
     case (Res >= Min andalso Res =< Max) of
         true ->
             Res;
@@ -115,14 +118,16 @@ ask(Prompt, Min, Max)
 %% ============================================================================
 %% @doc Actually does the work of asking, checking result and
 %% translating result into the requested format.
--spec ask_convert(prompt(), fun(), type(), supported()) -> supported().
+-spec ask_convert(prompt(), fun((any()) -> any()), type(), supported() | none) -> supported().
 ask_convert(Prompt, TransFun, Type,  Default) ->
-    NewPrompt = Prompt ++ case Default of
-                              none ->
-                                  [];
-                              Default ->
-                                  " (" ++ sin_utils:term_to_list(Default) ++ ")"
-                          end ++ "> ",
+    NewPrompt =
+        erlang:binary_to_list(erlang:iolist_to_binary([Prompt,
+                                                       case Default of
+                                                           none ->
+                                                               [];
+                                                           Default ->
+                                                               [" (", io_lib:format("~p", [Default]) , ")"]
+                                                       end, "> "])),
     Data = string:strip(string:strip(io:get_line(NewPrompt)), both, $\n),
     Ret = TransFun(Data),
     case Ret of

@@ -23,7 +23,7 @@
 %% the third value is the element passed to the function. The purpose
 %% of this is to allow a list to be searched where some internal state
 %% is important while the input element is not.
--spec search(fun(), list()) -> {ok, Result::term(), Element::term()}.
+-spec search(fun(), list()) -> {ok, Result::term(), Element::term()} | not_found.
 search(Fun, [H|T]) ->
     case Fun(H) of
         {ok, Value} ->
