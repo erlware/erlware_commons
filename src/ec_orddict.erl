@@ -48,59 +48,59 @@ has_key(Key, Data) ->
     orddict:is_key(Key, Data).
 
 -spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
-    ec_dictionary:value(V).
+                 ec_dictionary:value(V).
 get(Key, Data) ->
     case orddict:find(Key, Data) of
         {ok, Value} ->
             Value;
-         error ->
+        error ->
             throw(not_found)
     end.
 
 -spec get(ec_dictionary:key(K),
           Default::ec_dictionary:value(V),
           Object::dictionary(K, V)) ->
-    ec_dictionary:value(V).
+                 ec_dictionary:value(V).
 get(Key, Default, Data) ->
     case orddict:find(Key, Data) of
         {ok, Value} ->
             Value;
-         error ->
+        error ->
             Default
     end.
 
 -spec add(ec_dictionary:key(K), ec_dictionary:value(V),
           Object::dictionary(K, V)) ->
-    dictionary(K, V).
+                 dictionary(K, V).
 add(Key, Value, Data) ->
     orddict:store(Key, Value, Data).
 
 -spec remove(ec_dictionary:key(K), Object::dictionary(K, V)) ->
-    dictionary(K, V).
+                    dictionary(K, V).
 remove(Key, Data) ->
     orddict:erase(Key, Data).
 
 -spec has_value(ec_dictionary:value(V), Object::dictionary(_K, V)) -> boolean().
 has_value(Value, Data) ->
     orddict:fold(fun(_, NValue, _) when NValue == Value ->
-                      true;
-                 (_, _, Acc) ->
-                      Acc
-              end,
-              false,
-              Data).
+                         true;
+                    (_, _, Acc) ->
+                         Acc
+                 end,
+                 false,
+                 Data).
 
 -spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
 size(Data) ->
     orddict:size(Data).
 
 -spec to_list(dictionary(K, V)) ->
-    [{ec_dictionary:key(K), ec_dictionary:value(V)}].
+                     [{ec_dictionary:key(K), ec_dictionary:value(V)}].
 to_list(Data) ->
     orddict:to_list(Data).
 
 -spec from_list([{ec_dictionary:key(K), ec_dictionary:value(V)}]) ->
-    dictionary(K, V).
+                       dictionary(K, V).
 from_list(List) when is_list(List) ->
     orddict:from_list(List).
 
