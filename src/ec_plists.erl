@@ -13,6 +13,13 @@
          filter/2,
          filter/3]).
 
+-export_type([thunk/0]).
+
+%%=============================================================================
+%% Types
+%%=============================================================================
+-type thunk() :: fun((any()) -> any()).
+
 %%=============================================================================
 %% Public API
 %%=============================================================================
@@ -25,7 +32,7 @@
 map(Fun, List) ->
     map(Fun, List, infinity).
 
--spec map(fun(), [any()], non_neg_integer()) -> [any()].
+-spec map(thunk(), [any()], timeout() | infinity) -> [any()].
 map(Fun, List, Timeout) ->
     run_list_fun_in_parallel(map, Fun, List, Timeout).
 
@@ -43,29 +50,29 @@ map(Fun, List, Timeout) ->
 %% 2> ftmap(fun(N) -> factorial(N) end, [1, 2, 1000000, "not num"], 100)
 %% [{value, 1}, {value, 2}, timeout, {badmatch, ...}]
 %% </pre>
--spec ftmap(fun(), [any()]) -> [{value, any()} | any()].
+-spec ftmap(thunk(), [any()]) -> [{value, any()} | any()].
 ftmap(Fun, List) ->
     ftmap(Fun, List, infinity).
 
--spec ftmap(fun(), [any()], non_neg_integer()) -> [{value, any()} | any()].
+-spec ftmap(thunk(), [any()], timeout() | infinity) -> [{value, any()} | any()].
 ftmap(Fun, List, Timeout) ->
     run_list_fun_in_parallel(ftmap, Fun, List, Timeout).
 
 %% @doc Returns a list of the elements in the supplied list which
 %%      the function Fun returns true. A timeout is optional. In the
 %%      event of a timeout the filter operation fails.
--spec filter(fun(), [any()]) -> [any()].
+-spec filter(thunk(), [any()]) -> [any()].
 filter(Fun, List) ->
     filter(Fun, List, infinity).
 
--spec filter(fun(), [any()], integer()) -> [any()].
+-spec filter(thunk(), [any()], timeout() | infinity) -> [any()].
 filter(Fun, List, Timeout) ->
     run_list_fun_in_parallel(filter, Fun, List, Timeout).
 
 %%=============================================================================
 %% Internal API
 %%=============================================================================
--spec run_list_fun_in_parallel(atom(), fun(), [any()], integer()) -> [any()].
+-spec run_list_fun_in_parallel(atom(), thunk(), [any()], timeout() | infinity) -> [any()].
 run_list_fun_in_parallel(ListFun, Fun, List, Timeout) ->
     LocalPid = self(),
     Pids =
@@ -79,7 +86,7 @@ run_list_fun_in_parallel(ListFun, Fun, List, Timeout) ->
                   end, List),
     gather(ListFun, Pids).
 
--spec wait(pid(), fun(), any(), integer()) -> any().
+-spec wait(pid(), thunk(), any(), timeout() | infinity) -> any().
 wait(Parent, Fun, E, Timeout) ->
     WaitPid = self(),
     Child = spawn(fun() ->
@@ -88,7 +95,7 @@ wait(Parent, Fun, E, Timeout) ->
 
     wait(Parent, Child, Timeout).
 
--spec wait(pid(), pid(), integer()) -> any().
+-spec wait(pid(), pid(), timeout() | infinity) -> any().
 wait(Parent, Child, Timeout) ->
     receive
         {Child, Ret} ->
@@ -146,7 +153,7 @@ filter_gather([{Pid, E} | Rest]) ->
 filter_gather([]) ->
     [].
 
--spec do_f(pid(), fun(), any())  -> no_return().
+-spec do_f(pid(), thunk(), any())  -> no_return().
 do_f(Parent, F, E) ->
     try
         Result = F(E),

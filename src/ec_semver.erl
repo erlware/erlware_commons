@@ -20,10 +20,12 @@
 %%%===================================================================
 
 -type semvar() :: string().
--type parsed_semvar() :: {MajorVsn::string(),
-                          MinorVsn::string(),
-                          PatchVsn::string(),
+-type parsed_semvar() :: {MajorVsn::integer(),
+                          MinorVsn::integer(),
+                          PatchVsn::integer(),
                           PathString::string()}.
+
+-type semver_tokens() :: {string(), string(), string(), string()}.
 
 %%%===================================================================
 %%% API
@@ -41,7 +43,7 @@ compare(VsnA, VsnB) ->
 %%% Internal Functions
 %%%===================================================================
 
--spec tokens(semvar()) -> parsed_semvar().
+-spec tokens(semvar()) -> semver_tokens().
 tokens(Vsn) ->
     [MajorVsn, MinorVsn, RawPatch] = string:tokens(Vsn, "."),
     {PatchVsn, PatchString} = split_patch(RawPatch),
@@ -62,7 +64,7 @@ split_patch([Dig|T], {PatchVsn, PatchStr}) when Dig >= $0 andalso Dig =< $9 ->
 split_patch(PatchStr, {PatchVsn, ""}) ->
     {PatchVsn, PatchStr}.
 
--spec compare_toks(parsed_semvar(), parsed_semvar()) -> boolean().
+-spec compare_toks(semver_tokens(), semver_tokens()) -> boolean().
 compare_toks({MajA, MinA, PVA, PSA}, {MajB, MinB, PVB, PSB}) ->
     compare_toks2({to_int(MajA), to_int(MinA), to_int(PVA), PSA},
                   {to_int(MajB), to_int(MinB), to_int(PVB), PSB}).

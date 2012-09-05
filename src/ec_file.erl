@@ -23,7 +23,6 @@
         ]).
 
 -export_type([
-              path/0,
               option/0
              ]).
 
@@ -43,14 +42,13 @@
 %%============================================================================
 %% Types
 %%============================================================================
--type path() :: string().
--type option() :: [atom()].
-
+-type option() :: recursive.
+-type void() :: ok.
 %%%===================================================================
 %%% API
 %%%===================================================================
 %% @doc copy an entire directory to another location.
--spec copy(path(), path(), Options::[option()]) -> ok.
+-spec copy(file:name(), file:name(), Options::[option()]) -> void().
 copy(From, To, []) ->
     copy(From, To);
 copy(From, To, [recursive] = Options) ->
@@ -63,7 +61,7 @@ copy(From, To, [recursive] = Options) ->
     end.
 
 %% @doc copy a file including timestamps,ownership and mode etc.
--spec copy(From::string(), To::string()) -> ok.
+-spec copy(From::file:filename(), To::file:filename()) -> ok.
 copy(From, To) ->
     try
         ec_file_copy(From, To)
@@ -81,7 +79,7 @@ md5sum(Value) ->
 %% <pre>
 %% Example: remove("./tmp_dir", [recursive]).
 %% </pre>
--spec remove(path(), Options::[option()]) -> ok | {error, Reason::term()}.
+-spec remove(file:name(), Options::[option()]) -> ok | {error, Reason::term()}.
 remove(Path, Options) ->
     try
         ok = ec_file_remove(Path, Options)
@@ -90,12 +88,12 @@ remove(Path, Options) ->
     end.
 
 %% @doc delete a file.
--spec remove(path()) -> ok | {error, Reason::term()}.
+-spec remove(file:name()) -> ok | {error, Reason::term()}.
 remove(Path) ->
     remove(Path, []).
 
 %% @doc indicates witha boolean if the path supplied refers to symlink.
--spec is_symlink(path()) -> boolean().
+-spec is_symlink(file:name()) -> boolean().
 is_symlink(Path) ->
     case file:read_link_info(Path) of
         {ok, #file_info{type = symlink}} ->
@@ -107,7 +105,7 @@ is_symlink(Path) ->
 
 %% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
--spec insecure_mkdtemp() -> TmpDirPath::path().
+-spec insecure_mkdtemp() -> TmpDirPath::file:name().
 insecure_mkdtemp() ->
     random:seed(now()),
     UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
@@ -128,7 +126,7 @@ insecure_mkdtemp() ->
 
 
 %% @doc Makes a directory including parent dirs if they are missing.
--spec mkdir_path(path()) -> ok.
+-spec mkdir_path(file:name()) -> ok.
 mkdir_path(Path) ->
     %% We are exploiting a feature of ensuredir that that creates all
     %% directories up to the last element in the filename, then ignores
@@ -144,7 +142,7 @@ mkdir_path(Path) ->
 
 %% @doc consult an erlang term file from the file system.
 %%      Provide user readible exeption on failure.
--spec consult(FilePath::path()) -> term().
+-spec consult(FilePath::file:name()) -> term().
 consult(FilePath) ->
     case file:consult(FilePath) of
         {ok, [Term]} ->
@@ -160,7 +158,7 @@ consult(FilePath) ->
     end.
 
 %% @doc read a file from the file system. Provide UEX exeption on failure.
--spec read(FilePath::string()) -> binary().
+-spec read(FilePath::file:filename()) -> binary().
 read(FilePath) ->
     try
         {ok, FileBin} = file:read_file(FilePath),
@@ -173,7 +171,7 @@ read(FilePath) ->
     end.
 
 %% @doc write a file to the file system. Provide UEX exeption on failure.
--spec write(FileName::string(), Contents::string()) -> ok.
+-spec write(FileName::file:filename(), Contents::string()) -> ok.
 write(FileName, Contents) ->
     case file:write_file(FileName, Contents) of
         ok ->
@@ -187,13 +185,13 @@ write(FileName, Contents) ->
     end.
 
 %% @doc write a term out to a file so that it can be consulted later.
--spec write_term(string(), term()) -> ok.
+-spec write_term(file:filename(), term()) -> ok.
 write_term(FileName, Term) ->
     write(FileName, lists:flatten(io_lib:fwrite("~p. ", [Term]))).
 
 %% @doc Finds files and directories that match the regexp supplied in
 %%  the TargetPattern regexp.
--spec find(FromDir::path(), TargetPattern::string()) -> [path()].
+-spec find(FromDir::file:name(), TargetPattern::string()) -> [file:name()].
 find([], _) ->
     [];
 find(FromDir, TargetPattern) ->
@@ -214,7 +212,7 @@ find(FromDir, TargetPattern) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
--spec find_in_subdirs(path(), string()) -> [path()].
+-spec find_in_subdirs(file:name(), string()) -> [file:name()].
 find_in_subdirs(FromDir, TargetPattern) ->
     lists:foldl(fun(CheckFromDir, Acc)
                       when CheckFromDir == FromDir ->
@@ -228,14 +226,14 @@ find_in_subdirs(FromDir, TargetPattern) ->
                 [],
                 filelib:wildcard(filename:join(FromDir, "*"))).
 
--spec ec_file_remove(path(), [{atom(), any()}]) -> ok.
+-spec ec_file_remove(file:name(), [option()]) ->  ok | {error, Reason::any()}.
 ec_file_remove(Path, Options) ->
     case lists:member(recursive, Options) of
         false -> file:delete(Path);
         true  -> remove_recursive(Path, Options)
     end.
 
--spec remove_recursive(path(), Options::list()) -> ok.
+-spec remove_recursive(file:name(), Options::list()) -> ok.
 remove_recursive(Path, Options) ->
     case filelib:is_dir(Path) of
         false ->
@@ -247,7 +245,7 @@ remove_recursive(Path, Options) ->
             ok = file:del_dir(Path)
     end.
 
--spec tmp() -> path().
+-spec tmp() -> file:name().
 tmp() ->
     case erlang:system_info(system_architecture) of
         "win32" ->
@@ -257,7 +255,7 @@ tmp() ->
     end.
 
 %% Copy the subfiles of the From directory to the to directory.
--spec copy_subfiles(path(), path(), [option()]) -> ok.
+-spec copy_subfiles(file:name(), file:name(), [option()]) -> void().
 copy_subfiles(From, To, Options) ->
     Fun =
         fun(ChildFrom) ->
@@ -266,13 +264,13 @@ copy_subfiles(From, To, Options) ->
         end,
     lists:foreach(Fun, filelib:wildcard(filename:join(From, "*"))).
 
--spec ec_file_copy(path(), path()) -> ok.
+-spec ec_file_copy(file:name(), file:name()) -> ok.
 ec_file_copy(From, To) ->
     {ok, _} = file:copy(From, To),
     {ok, FileInfo} = file:read_file_info(From),
     ok = file:write_file_info(To, FileInfo).
 
--spec make_dir_if_dir(path()) -> ok.
+-spec make_dir_if_dir(file:name()) -> ok.
 make_dir_if_dir(File) ->
     case filelib:is_dir(File) of
         true  -> ok;
@@ -355,6 +353,5 @@ find_test() ->
                   Name1],
                  find(BaseDir, "file[a-z]+\$")),
     remove(BaseDir, [recursive]).
-
 
 -endif.
