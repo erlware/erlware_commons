@@ -14,9 +14,9 @@ endif
 
 ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
-.PHONY: all compile doc clean eunit dialyzer typer shell distclean pdf get-deps escript
+.PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps escript
 
-all: compile eunit dialyzer
+all: compile test dialyzer
 
 get-deps:
 	$(REBAR) get-deps
@@ -28,7 +28,7 @@ compile:
 doc: compile
 	$(REBAR) skip_deps=true doc
 
-eunit: compile
+test: compile
 	$(REBAR) skip_deps=true eunit
 
 $(ERLWARE_COMMONS_PLT):
@@ -53,11 +53,11 @@ shell: compile
 	@$(ERL) $(ERLFLAGS)
 
 clean:
-	$(REBAR) clean
-	rm $(CURDIR)/doc/*.html
-	rm $(CURDIR)/doc/*.css
-	rm $(CURDIR)/doc/*.png
-	rm $(CURDIR)/doc/edoc-info
+	$(REBAR) skip_deps=true clean
+	- rm $(CURDIR)/doc/*.html
+	- rm $(CURDIR)/doc/*.css
+	- rm $(CURDIR)/doc/*.png
+	- rm $(CURDIR)/doc/edoc-info
 
 distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT)
