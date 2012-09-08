@@ -5,9 +5,9 @@
 %%%  This provides an implementation of the ec_dictionary type using
 %%%  erlang dicts as a base. The function documentation for
 %%%  ec_dictionary applies here as well.
+%%% see ec_dictionary
+%%% see dict
 %%% @end
-%%% @see ec_dictionary
-%%% @see dict
 %%%-------------------------------------------------------------------
 -module(ec_dict).
 
@@ -31,7 +31,9 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(_K, _V) :: dict().
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(_K, _V) :: dict().
 
 %%%===================================================================
 %%% API
@@ -88,7 +90,7 @@ has_value(Value, Data) ->
               false,
               Data).
 
--spec size(Object::dictionary(_K, _V)) -> integer().
+-spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
 size(Data) ->
     dict:size(Data).
 

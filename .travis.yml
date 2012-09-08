@@ -1,0 +1,12 @@
+language: erlang
+otp_release:
+       - R15B02
+       - R15B01
+       - R15B
+
+before_script: "make get-deps"
+script: "make"
+branches:
+        only:
+                - master
+                - next

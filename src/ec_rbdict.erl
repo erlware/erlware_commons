@@ -51,8 +51,8 @@
 %%% l/rbalance, the colour, in store etc. is actually slower than not
 %%% doing it. Measured.
 %%%
+%%% see ec_dictionary
 %%% @end
-%%% @see ec_dictionary
 %%%-------------------------------------------------------------------
 -module(ec_rbdict).
 
@@ -68,12 +68,13 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
-
--opaque dictionary(K, V) :: empty | {color(),
-                                     dictionary(K, V),
-                                     ec_dictionary:key(K),
-                                     ec_dictionary:value(V),
-                                     dictionary(K, V)}.
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(K, V) :: empty | {color(),
+                                   dictionary(K, V),
+                                   ec_dictionary:key(K),
+                                   ec_dictionary:value(V),
+                                   dictionary(K, V)}.
 
 -type color() :: r | b.
 
@@ -116,7 +117,7 @@ get(K, Default, {_, _, K1, _, Right}) when K > K1 ->
 get(_, _, {_, _, _, Val, _}) ->
     Val.
 
--spec add(ec_dicitonary:key(K), ec_dictionary:value(V),
+-spec add(ec_dictionary:key(K), ec_dictionary:value(V),
           dictionary(K, V)) -> dictionary(K, V).
 add(Key, Value, Dict) ->
     {_, L, K1, V1, R} = add1(Key, Value, Dict),
@@ -133,17 +134,17 @@ has_value(Value, Dict) ->
          end,
          false, Dict).
 
--spec size(dictionary(_K, _V)) -> integer().
+-spec size(dictionary(_K, _V)) -> non_neg_integer().
 size(T) ->
     size1(T).
 
 -spec to_list(dictionary(K, V)) ->
-    [{ec_dictionary:key(K), ec_dictionary:value(V)}].
+                     [{ec_dictionary:key(K), ec_dictionary:value(V)}].
 to_list(T) ->
     to_list(T, []).
 
 -spec from_list([{ec_dictionary:key(K), ec_dictionary:value(V)}]) ->
-    dictionary(K, V).
+                       dictionary(K, V).
 from_list(L) ->
     lists:foldl(fun ({K, V}, D) ->
                         add(K, V, D)
@@ -158,7 +159,7 @@ keys(Dict) ->
 %%% Enternal functions
 %%%===================================================================
 -spec keys(dictionary(K, _V), [ec_dictionary:key(K)]) ->
-    [ec_dictionary:key(K)].
+                  [ec_dictionary:key(K)].
 keys(empty, Tail) ->
     Tail;
 keys({_, L, K, _, R}, Tail) ->
@@ -166,7 +167,7 @@ keys({_, L, K, _, R}, Tail) ->
 
 
 -spec erase_aux(ec_dictionary:key(K), dictionary(K, V)) ->
-    {dictionary(K, V), boolean()}.
+                       {dictionary(K, V), boolean()}.
 erase_aux(_, empty) ->
     {empty, false};
 erase_aux(K, {b, A, Xk, Xv, B}) ->
@@ -227,7 +228,7 @@ erase_aux(K, {r, A, Xk, Xv, B}) ->
     end.
 
 -spec erase_min(dictionary(K, V)) ->
-    {dictionary(K, V), {ec_dictionary:key(K), ec_dictionary:value(V)}, boolean}.
+                       {dictionary(K, V), {ec_dictionary:key(K), ec_dictionary:value(V)}, boolean()}.
 erase_min({b, empty, Xk, Xv, empty}) ->
     {empty, {Xk, Xv}, true};
 erase_min({b, empty, Xk, Xv, {r, A, Yk, Yv, B}}) ->
@@ -239,15 +240,15 @@ erase_min({r, empty, Xk, Xv, A}) ->
 erase_min({b, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-           {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
-           {T, Min, Dec1};
+            {T, Dec1} = unbalright(b, A1, Xk, Xv, B),
+            {T, Min, Dec1};
        true -> {{b, A1, Xk, Xv, B}, Min, false}
     end;
 erase_min({r, A, Xk, Xv, B}) ->
     {A1, Min, Dec} = erase_min(A),
     if Dec ->
-           {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
-           {T, Min, Dec1};
+            {T, Dec1} = unbalright(r, A1, Xk, Xv, B),
+            {T, Min, Dec1};
        true -> {{r, A1, Xk, Xv, B}, Min, false}
     end.
 
@@ -274,7 +275,8 @@ unbalright(b, A, Xk, Xv,
       D},
      false}.
 
--spec fold(fun(), dictionary(K, V), dictionary(K, V)) -> dictionary(K, V).
+-spec fold(fun((ec_dictionary:key(K), ec_dictionary:value(V), any()) -> any()),
+           any(), dictionary(K, V)) -> any().
 fold(_, Acc, empty) -> Acc;
 fold(F, Acc, {_, A, Xk, Xv, B}) ->
     fold(F, F(Xk, Xv, fold(F, Acc, B)), A).
@@ -295,9 +297,9 @@ to_list({_, A, Xk, Xv, B}, List) ->
 
 %% Balance a tree afer (possibly) adding a node to the left/right.
 -spec lbalance(color(), dictionary(K, V),
-               ec_dictinary:key(K), ec_dictionary:value(V),
+               ec_dictionary:key(K), ec_dictionary:value(V),
                dictionary(K, V)) ->
-   dictionary(K, V).
+                      dictionary(K, V).
 lbalance(b, {r, {r, A, Xk, Xv, B}, Yk, Yv, C}, Zk, Zv,
          D) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};
@@ -307,9 +309,9 @@ lbalance(b, {r, A, Xk, Xv, {r, B, Yk, Yv, C}}, Zk, Zv,
 lbalance(C, A, Xk, Xv, B) -> {C, A, Xk, Xv, B}.
 
 -spec rbalance(color(), dictionary(K, V),
-               ec_dictinary:key(K), ec_dictionary:value(V),
+               ec_dictionary:key(K), ec_dictionary:value(V),
                dictionary(K, V)) ->
-    dictionary(K, V).
+                      dictionary(K, V).
 rbalance(b, A, Xk, Xv,
          {r, {r, B, Yk, Yv, C}, Zk, Zv, D}) ->
     {r, {b, A, Xk, Xv, B}, Yk, Yv, {b, C, Zk, Zv, D}};

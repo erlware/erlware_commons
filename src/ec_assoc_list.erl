@@ -4,8 +4,8 @@
 %%% @doc
 %%%  provides an implementation of ec_dictionary using an association
 %%%  list as a basy
+%%% see ec_dictionary
 %%% @end
-%%% @see ec_dictionary
 %%%-------------------------------------------------------------------
 -module(ec_assoc_list).
 
@@ -29,8 +29,10 @@
 %%%===================================================================
 %%% Types
 %%%===================================================================
--opaque dictionary(K, V) :: {ec_assoc_list,
-                             [{ec_dictionary:key(K), ec_dictionary:value(V)}]}.
+%% This should be opaque, but that kills dialyzer so for now we export it
+%% however you should not rely on the internal representation here
+-type dictionary(K, V) :: {ec_assoc_list,
+                           [{ec_dictionary:key(K), ec_dictionary:value(V)}]}.
 
 %%%===================================================================
 %%% API
@@ -45,12 +47,12 @@ has_key(Key, {ec_assoc_list, Data}) ->
     lists:keymember(Key, 1, Data).
 
 -spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
-    ec_dictionary:value(V).
+                 ec_dictionary:value(V).
 get(Key, {ec_assoc_list, Data}) ->
     case lists:keyfind(Key, 1, Data) of
         {Key, Value} ->
             Value;
-         false ->
+        false ->
             throw(not_found)
     end.
 
@@ -62,19 +64,19 @@ get(Key, Default, {ec_assoc_list, Data}) ->
     case lists:keyfind(Key, 1, Data) of
         {Key, Value} ->
             Value;
-         false ->
+        false ->
             Default
     end.
 
 -spec add(ec_dictionary:key(K), ec_dictionary:value(V),
           Object::dictionary(K, V)) ->
-    dictionary(K, V).
+                 dictionary(K, V).
 add(Key, Value, {ec_assoc_list, _Data}=Dict) ->
     {ec_assoc_list, Rest} = remove(Key,Dict),
     {ec_assoc_list, [{Key, Value} | Rest ]}.
 
 -spec remove(ec_dictionary:key(K), Object::dictionary(K, _V)) ->
-    dictionary(K, _V).
+                    dictionary(K, _V).
 remove(Key, {ec_assoc_list, Data}) ->
     {ec_assoc_list, lists:keydelete(Key, 1, Data)}.
 
@@ -82,22 +84,22 @@ remove(Key, {ec_assoc_list, Data}) ->
 has_value(Value, {ec_assoc_list, Data}) ->
     lists:keymember(Value, 2, Data).
 
--spec size(Object::dictionary(_K, _V)) -> integer().
+-spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
 size({ec_assoc_list, Data}) ->
     length(Data).
 
 -spec to_list(dictionary(K, V)) -> [{ec_dictionary:key(K),
                                      ec_dictionary:value(V)}].
 to_list({ec_assoc_list, Data}) ->
-   Data.
+    Data.
 
 -spec from_list([{ec_dictionary:key(K), ec_dictionary:value(V)}]) ->
-    dictionary(K, V).
+                       dictionary(K, V).
 from_list(List) when is_list(List) ->
     {ec_assoc_list, List}.
 
 -spec keys(dictionary(K, _V)) -> [ec_dictionary:key(K)].
 keys({ec_assoc_list, Data}) ->
     lists:map(fun({Key, _Value}) ->
-                     Key
-             end, Data).
+                      Key
+              end, Data).

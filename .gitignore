@@ -1,5 +1,13 @@
-*.beam
+.erlware_commons_plt
+.eunit/*
+deps/*
+doc/*.html
+doc/*.css
+doc/edoc-info
+doc/erlang.png
+ebin/*
 .*
 _build
 erl_crash.dump
 *.pyc
+src/ec_semver_parser.erl
