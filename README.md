@@ -1,6 +1,10 @@
 Erlware Commons
 ===============
 
+Current Status
+--------------
+[![Build Status](https://secure.travis-ci.org/erlware/erlware_commons.png)](http://travis-ci.org/erlware/erlware_commons)
+
 Introduction
 ------------
 
