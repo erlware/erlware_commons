@@ -16,7 +16,7 @@ ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
 .PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps escript
 
-all: compile test dialyzer
+all: compile test doc dialyzer
 
 get-deps:
 	$(REBAR) get-deps
