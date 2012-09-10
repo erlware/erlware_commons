@@ -141,8 +141,8 @@ between(Vsn1, Vsn2, VsnMatch) ->
 %% revisions and "~> 2.6.5" is pessimistic about future minor
 %% revisions.
 %%
-%%  "~> 2.6" matches cookbooks >= 2.6.0 AND < 3.0.0
-%% "~> 2.6.5" matches cookbooks >= 2.6.5 AND < 2.7.0
+%%  "~> 2.6" matches cookbooks >= 2.6.0 AND &lt; 3.0.0
+%% "~> 2.6.5" matches cookbooks >= 2.6.5 AND &lt; 2.7.0
 pes(VsnA, VsnB) ->
     internal_pes(parse(VsnA), parse(VsnB)).
 
