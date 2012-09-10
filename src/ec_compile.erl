@@ -44,7 +44,7 @@ beam_to_erl_source(BeamFName, ErlFName) ->
 
 %% @doc compile an erlang source file into a Core Erlang AST
 %%
-%% @doc Path - The path to the erlang source file
+%% @param Path - The path to the erlang source file
 -spec erl_source_to_core_ast(file:filename()) -> CoreAst::term().
 erl_source_to_core_ast(Path) ->
     {ok, Contents} = file:read_file(Path),
@@ -52,7 +52,7 @@ erl_source_to_core_ast(Path) ->
 
 %% @doc compile an erlang source file into an Erlang AST
 %%
-%% @doc Path - The path to the erlang source file
+%% @param Path - The path to the erlang source file
 -spec erl_source_to_erl_ast(file:filename()) -> ErlangAst::term().
 erl_source_to_erl_ast(Path) ->
     {ok, Contents} = file:read_file(Path),
@@ -61,7 +61,7 @@ erl_source_to_erl_ast(Path) ->
 %% @doc compile an erlang source file into erlang terms that represent
 %% the relevant ASM
 %%
-%% @doc Path - The path to the erlang source file
+%% @param Path - The path to the erlang source file
 -spec erl_source_to_asm(file:filename()) -> ErlangAsm::term().
 erl_source_to_asm(Path) ->
     {ok, Contents} = file:read_file(Path),
@@ -70,7 +70,7 @@ erl_source_to_asm(Path) ->
 %% @doc compile a string representing an erlang expression into an
 %% Erlang AST
 %%
-%% @doc StringExpr - The path to the erlang source file
+%% @param StringExpr - The path to the erlang source file
 -spec erl_string_to_erl_ast(string()) -> ErlangAst::term().
 erl_string_to_erl_ast(StringExpr) ->
     Forms0 =
@@ -93,7 +93,7 @@ erl_string_to_erl_ast(StringExpr) ->
 %% @doc compile a string representing an erlang expression into a
 %% Core Erlang AST
 %%
-%% @doc StringExpr - The path to the erlang source file
+%% @param StringExpr - The path to the erlang source file
 -spec erl_string_to_core_ast(string()) -> CoreAst::term().
 erl_string_to_core_ast(StringExpr) ->
     compile:forms(erl_string_to_erl_ast(StringExpr), [to_core]).
@@ -101,7 +101,7 @@ erl_string_to_core_ast(StringExpr) ->
 %% @doc compile a string representing an erlang expression into a term
 %% that represents the ASM
 %%
-%% @doc StringExpr - The path to the erlang source file
+%% @param StringExpr - The path to the erlang source file
 -spec erl_string_to_asm(string()) -> ErlangAsm::term().
 erl_string_to_asm(StringExpr) ->
     compile:forms(erl_string_to_erl_ast(StringExpr), ['S']).
