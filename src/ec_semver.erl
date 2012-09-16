@@ -8,6 +8,7 @@
 -module(ec_semver).
 
 -export([parse/1,
+         format/1,
          eql/2,
          gt/2,
          gte/2,
@@ -53,6 +54,24 @@ parse(Version) when erlang:is_binary(Version) ->
     ec_semver_parser:parse(Version);
 parse(Version) ->
     Version.
+
+-spec format(semver()) -> iolist().
+format({Maj, {AlphaPart, BuildPart}})
+  when erlang:is_integer(Maj) ->
+    [erlang:integer_to_list(Maj),
+     format_vsn_rest(<<"-">>, AlphaPart),
+     format_vsn_rest(<<"+">>, BuildPart)];
+format({{Maj, Min}, {AlphaPart, BuildPart}}) ->
+    [erlang:integer_to_list(Maj), ".",
+     erlang:integer_to_list(Min),
+     format_vsn_rest(<<"-">>, AlphaPart),
+     format_vsn_rest(<<"+">>, BuildPart)];
+format({{Maj, Min, Patch}, {AlphaPart, BuildPart}}) ->
+    [erlang:integer_to_list(Maj), ".",
+     erlang:integer_to_list(Min), ".",
+     erlang:integer_to_list(Patch),
+     format_vsn_rest(<<"-">>, AlphaPart),
+     format_vsn_rest(<<"+">>, BuildPart)].
 
 %% @doc test for quality between semver versions
 -spec eql(any_version(), any_version()) -> boolean().
@@ -189,6 +208,19 @@ format_alpha_part([<<".">>, AlphaPart]) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
+-spec to_list(integer() | binary() | string()) -> string().
+to_list(Detail) when erlang:is_integer(Detail) ->
+    erlang:integer_to_list(Detail);
+to_list(Detail) ->
+    Detail.
+
+-spec format_vsn_rest(binary() | string(), [integer() | binary()]) -> iolist().
+format_vsn_rest(_TypeMark, []) ->
+    [];
+format_vsn_rest(TypeMark, [Head | Rest]) ->
+    [TypeMark, Head |
+     [[".", to_list(Detail)] || Detail <- Rest]].
+
 %% @doc normalize the semver so they can be compared
 -spec normalize(semver()) -> semver().
 normalize({Vsn, Rest})
@@ -522,5 +554,20 @@ pes_test() ->
     ?assertMatch(true, pes("2.6.9", "2.6.5")),
     ?assertMatch(true, not pes("2.7", "2.6.5")),
     ?assertMatch(true, not pes("2.5", "2.6.5")).
+
+version_format_test() ->
+    ?assertEqual(["1", [], []], format({1, {[],[]}})),
+    ?assertEqual(["1", ".", "2", ".", "34", [], []], format({{1,2,34},{[],[]}})),
+    ?assertEqual(<<"1">>, erlang:iolist_to_binary(format({1, {[],[]}}))),
+    ?assertEqual(<<"1.2">>, erlang:iolist_to_binary(format({{1,2}, {[],[]}}))),
+    ?assertEqual(<<"1.2.2">>, erlang:iolist_to_binary(format({{1,2,2}, {[],[]}}))),
+    ?assertEqual(<<"1.99.2">>, erlang:iolist_to_binary(format({{1,99,2}, {[],[]}}))),
+    ?assertEqual(<<"1.99.2-alpha">>, erlang:iolist_to_binary(format({{1,99,2}, {["alpha"],[]}}))),
+    ?assertEqual(<<"1.99.2-alpha.1">>, erlang:iolist_to_binary(format({{1,99,2}, {["alpha",1], []}}))),
+    ?assertEqual(<<"1.99.2+build.1.a36">>,
+                 erlang:iolist_to_binary(format({{1,99,2}, {[], ["build", 1, "a36"]}}))),
+    ?assertEqual(<<"1.99.2-alpha.1+build.1.a36">>,
+                 erlang:iolist_to_binary(format({{1,99,2}, {["alpha", 1], ["build", 1, "a36"]}}))),
+    ?assertEqual(<<"1">>, erlang:iolist_to_binary(format({1, {[],[]}}))).
 
 -endif.
