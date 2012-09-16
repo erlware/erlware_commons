@@ -245,9 +245,6 @@ internal_pes(VsnA, {{LM, LMI, LP}, _}) ->
 internal_pes(Vsn, LVsn) ->
     gte(Vsn, LVsn).
 
-
-
-
 %%%===================================================================
 %%% Test Functions
 %%%===================================================================
@@ -274,7 +271,6 @@ eql_test() ->
                                "1.0.1+alpha")),
     ?assertMatch(true, not eql("1.0.0+build.1",
                                "1.0.1+build.2")).
-
 
 gt_test() ->
     ?assertMatch(true, gt("1.0.0-alpha.1",
