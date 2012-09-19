@@ -36,12 +36,12 @@
 %% Types
 %%============================================================================
 -type option() :: recursive.
--type void() :: ok.
+
 %%%===================================================================
 %%% API
 %%%===================================================================
 %% @doc copy an entire directory to another location.
--spec copy(file:name(), file:name(), Options::[option()]) -> void().
+-spec copy(file:name(), file:name(), Options::[option()]) -> ok | {error, Reason::term()}.
 copy(From, To, []) ->
     copy(From, To);
 copy(From, To, [recursive] = Options) ->
@@ -230,7 +230,7 @@ tmp() ->
     end.
 
 %% Copy the subfiles of the From directory to the to directory.
--spec copy_subfiles(file:name(), file:name(), [option()]) -> void().
+-spec copy_subfiles(file:name(), file:name(), [option()]) -> {error, Reason::term()} | ok.
 copy_subfiles(From, To, Options) ->
     Fun =
         fun(ChildFrom) ->
