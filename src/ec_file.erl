@@ -11,6 +11,7 @@
          copy/3,
          insecure_mkdtemp/0,
          mkdir_path/1,
+         mkdir_p/1,
          find/2,
          is_symlink/1,
          remove/1,
