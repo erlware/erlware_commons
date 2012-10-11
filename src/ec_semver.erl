@@ -29,12 +29,14 @@
 %%% Public Types
 %%%===================================================================
 
+-type version_element() :: non_neg_integer() | binary().
+
 -type major_minor_patch_minpatch() ::
-        non_neg_integer()
-      | {non_neg_integer(), non_neg_integer()}
-      | {non_neg_integer(), non_neg_integer(), non_neg_integer()}
-      | {non_neg_integer(), non_neg_integer(),
-         non_neg_integer(), non_neg_integer()}.
+        version_element()
+      | {version_element(), version_element()}
+      | {version_element(), version_element(), version_element()}
+      | {version_element(), version_element(),
+         version_element(), version_element()}.
 
 -type alpha_part() :: integer() | binary() | string().
 -type alpha_info() :: {PreRelease::[alpha_part()],
@@ -53,36 +55,57 @@
 %% @doc parse a string or binary into a valid semver representation
 -spec parse(any_version()) -> semver().
 parse(Version) when erlang:is_list(Version) ->
-    ec_semver_parser:parse(Version);
+    case ec_semver_parser:parse(Version) of
+        {fail, _} ->
+            {erlang:iolist_to_binary(Version), {[],[]}};
+        Good ->
+            Good
+    end;
 parse(Version) when erlang:is_binary(Version) ->
-    ec_semver_parser:parse(Version);
+    case ec_semver_parser:parse(Version) of
+        {fail, _} ->
+            {Version, {[],[]}};
+        Good ->
+            Good
+    end;
 parse(Version) ->
     Version.
 
 -spec format(semver()) -> iolist().
 format({Maj, {AlphaPart, BuildPart}})
-  when erlang:is_integer(Maj) ->
-    [erlang:integer_to_list(Maj),
+  when erlang:is_integer(Maj);
+       erlang:is_binary(Maj) ->
+    [format_version_part(Maj),
      format_vsn_rest(<<"-">>, AlphaPart),
      format_vsn_rest(<<"+">>, BuildPart)];
 format({{Maj, Min}, {AlphaPart, BuildPart}}) ->
-    [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min),
+    [format_version_part(Maj), ".",
+     format_version_part(Min),
      format_vsn_rest(<<"-">>, AlphaPart),
      format_vsn_rest(<<"+">>, BuildPart)];
 format({{Maj, Min, Patch}, {AlphaPart, BuildPart}}) ->
-    [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min), ".",
-     erlang:integer_to_list(Patch),
+    [format_version_part(Maj), ".",
+     format_version_part(Min), ".",
+     format_version_part(Patch),
      format_vsn_rest(<<"-">>, AlphaPart),
      format_vsn_rest(<<"+">>, BuildPart)];
 format({{Maj, Min, Patch, MinPatch}, {AlphaPart, BuildPart}}) ->
-    [erlang:integer_to_list(Maj), ".",
-     erlang:integer_to_list(Min), ".",
-     erlang:integer_to_list(Patch), ".",
-     erlang:integer_to_list(MinPatch),
+    [format_version_part(Maj), ".",
+     format_version_part(Min), ".",
+     format_version_part(Patch), ".",
+     format_version_part(MinPatch),
      format_vsn_rest(<<"-">>, AlphaPart),
      format_vsn_rest(<<"+">>, BuildPart)].
+
+-spec format_version_part(integer() | binary()) -> iolist().
+format_version_part(Vsn)
+  when erlang:is_integer(Vsn) ->
+    erlang:integer_to_list(Vsn);
+format_version_part(Vsn)
+  when erlang:is_binary(Vsn) ->
+    Vsn.
+
+
 
 %% @doc test for quality between semver versions
 -spec eql(any_version(), any_version()) -> boolean().
@@ -238,7 +261,8 @@ format_vsn_rest(TypeMark, [Head | Rest]) ->
 %% @doc normalize the semver so they can be compared
 -spec normalize(semver()) -> semver().
 normalize({Vsn, Rest})
-  when erlang:is_integer(Vsn) ->
+  when erlang:is_binary(Vsn);
+       erlang:is_integer(Vsn) ->
     {{Vsn, 0, 0, 0}, Rest};
 normalize({{Maj, Min}, Rest}) ->
     {{Maj, Min, 0, 0}, Rest};
@@ -251,14 +275,23 @@ normalize(Other = {{_, _, _, _}, {_,_}}) ->
 %% the internal implementation of the of the pessimistic run. The
 %% external just ensures that versions are parsed.
 -spec internal_pes(semver(), semver()) -> boolean().
-internal_pes(VsnA, {{LM, LMI}, _}) ->
+internal_pes(VsnA, {{LM, LMI}, _})
+  when erlang:is_integer(LM),
+       erlang:is_integer(LMI) ->
     gte(VsnA, {{LM, LMI, 0}, {[], []}}) andalso
         lt(VsnA, {{LM + 1, 0, 0, 0}, {[], []}});
-internal_pes(VsnA, {{LM, LMI, LP}, _}) ->
+internal_pes(VsnA, {{LM, LMI, LP}, _})
+    when erlang:is_integer(LM),
+         erlang:is_integer(LMI),
+         erlang:is_integer(LP) ->
     gte(VsnA, {{LM, LMI, LP}, {[], []}})
         andalso
         lt(VsnA, {{LM, LMI + 1, 0, 0}, {[], []}});
-internal_pes(VsnA, {{LM, LMI, LP, LMP}, _}) ->
+internal_pes(VsnA, {{LM, LMI, LP, LMP}, _})
+    when erlang:is_integer(LM),
+         erlang:is_integer(LMI),
+         erlang:is_integer(LP),
+         erlang:is_integer(LMP) ->
     gte(VsnA, {{LM, LMI, LP, LMP}, {[], []}})
         andalso
         lt(VsnA, {{LM, LMI, LP + 1, 0}, {[], []}});
@@ -289,6 +322,9 @@ eql_test() ->
                            "1.0.0-alpha.1+build.1")),
     ?assertMatch(true, eql("1.0-alpha.1+build.1",
                            "1.0.0.0-alpha.1+build.1")),
+    ?assertMatch(true, eql("aa", "aa")),
+    ?assertMatch(true, eql("AA.BB", "AA.BB")),
+    ?assertMatch(true, eql("BBB-super", "BBB-super")),
     ?assertMatch(true, not eql("1.0.0",
                                "1.0.1")),
     ?assertMatch(true, not eql("1.0.0-alpha",
@@ -296,7 +332,9 @@ eql_test() ->
     ?assertMatch(true, not eql("1.0.0+build.1",
                                "1.0.1+build.2")),
     ?assertMatch(true, not eql("1.0.0.0+build.1",
-                               "1.0.0.1+build.2")).
+                               "1.0.0.1+build.2")),
+    ?assertMatch(true, not eql("FFF", "BBB")),
+    ?assertMatch(true, not eql("1", "1BBBB")).
 
 gt_test() ->
     ?assertMatch(true, gt("1.0.0-alpha.1",
@@ -324,6 +362,8 @@ gt_test() ->
                           "1.3.7.0+build")),
     ?assertMatch(true, gt("1.3.7+build.11.e0f985a",
                           "1.3.7+build.2.b8f12d7")),
+    ?assertMatch(true, gt("aa.cc",
+                          "aa.bb")),
     ?assertMatch(true, not gt("1.0.0-alpha",
                               "1.0.0-alpha.1")),
     ?assertMatch(true, not gt("1.0.0-alpha",
@@ -350,6 +390,10 @@ gt_test() ->
                               "1.0.0-alpha")),
     ?assertMatch(true, not gt("1",
                               "1.0.0")),
+    ?assertMatch(true, not gt("aa.bb",
+                              "aa.bb")),
+    ?assertMatch(true, not gt("aa.cc",
+                              "aa.dd")),
     ?assertMatch(true, not gt("1.0",
                               "1.0.0")),
     ?assertMatch(true, not gt("1.0.0",
@@ -390,12 +434,15 @@ lt_test() ->
                               "1.0.0")),
     ?assertMatch(true, lt("1",
                           "1.0.0.1")),
+    ?assertMatch(true, lt("AA.DD",
+                          "AA.EE")),
     ?assertMatch(true, not lt("1.0",
                               "1.0.0")),
     ?assertMatch(true, not lt("1.0.0.0",
                               "1")),
     ?assertMatch(true, not lt("1.0+alpha.1",
                               "1.0.0+alpha.1")),
+    ?assertMatch(true, not lt("AA.DD", "AA.CC")),
     ?assertMatch(true, not lt("1.0-alpha.1+build.1",
                               "1.0.0-alpha.1+build.1")),
     ?assertMatch(true, not lt("1.0.0-alpha.1",
@@ -413,7 +460,6 @@ lt_test() ->
                               "1.3.7+build")),
     ?assertMatch(true, not lt("1.3.7+build.11.e0f985a",
                               "1.3.7+build.2.b8f12d7")).
-
 
 gte_test() ->
     ?assertMatch(true, gte("1.0.0-alpha",
@@ -439,13 +485,14 @@ gte_test() ->
 
     ?assertMatch(true, gte("1.0.0-alpha.1+build.1",
                            "1.0.0.0-alpha.1+build.1")),
-
     ?assertMatch(true, gte("1.0.0-alpha.1",
                            "1.0.0-alpha")),
     ?assertMatch(true, gte("1.0.0-beta.2",
                            "1.0.0-alpha.1")),
     ?assertMatch(true, gte("1.0.0-beta.11",
                            "1.0.0-beta.2")),
+    ?assertMatch(true, gte("aa.bb", "aa.bb")),
+    ?assertMatch(true, gte("dd", "aa")),
     ?assertMatch(true, gte("1.0.0-rc.1", "1.0.0-beta.11")),
     ?assertMatch(true, gte("1.0.0-rc.1+build.1", "1.0.0-rc.1")),
     ?assertMatch(true, gte("1.0.0", "1.0.0-rc.1+build.1")),
@@ -457,6 +504,7 @@ gte_test() ->
                            "1.3.7+build.2.b8f12d7")),
     ?assertMatch(true, not gte("1.0.0-alpha",
                                "1.0.0-alpha.1")),
+    ?assertMatch(true, not gte("CC", "DD")),
     ?assertMatch(true, not gte("1.0.0-alpha.1",
                                "1.0.0-beta.2")),
     ?assertMatch(true, not gte("1.0.0-beta.2",
@@ -512,20 +560,23 @@ lte_test() ->
                            "1.0.0+alpha.1")),
     ?assertMatch(true, lte("1.0-alpha.1+build.1",
                            "1.0.0-alpha.1+build.1")),
-    ?assertMatch(true, not lt("1.0.0-alpha.1",
+    ?assertMatch(true, lte("aa","cc")),
+    ?assertMatch(true, lte("cc","cc")),
+    ?assertMatch(true, not lte("1.0.0-alpha.1",
                               "1.0.0-alpha")),
-    ?assertMatch(true, not lt("1.0.0-beta.2",
+    ?assertMatch(true, not lte("cc", "aa")),
+    ?assertMatch(true, not lte("1.0.0-beta.2",
                               "1.0.0-alpha.1")),
-    ?assertMatch(true, not lt("1.0.0-beta.11",
+    ?assertMatch(true, not lte("1.0.0-beta.11",
                               "1.0.0-beta.2")),
-    ?assertMatch(true, not lt("1.0.0-rc.1", "1.0.0-beta.11")),
-    ?assertMatch(true, not lt("1.0.0-rc.1+build.1", "1.0.0-rc.1")),
-    ?assertMatch(true, not lt("1.0.0", "1.0.0-rc.1+build.1")),
-    ?assertMatch(true, not lt("1.0.0+0.3.7", "1.0.0")),
-    ?assertMatch(true, not lt("1.3.7+build", "1.0.0+0.3.7")),
-    ?assertMatch(true, not lt("1.3.7+build.2.b8f12d7",
+    ?assertMatch(true, not lte("1.0.0-rc.1", "1.0.0-beta.11")),
+    ?assertMatch(true, not lte("1.0.0-rc.1+build.1", "1.0.0-rc.1")),
+    ?assertMatch(true, not lte("1.0.0", "1.0.0-rc.1+build.1")),
+    ?assertMatch(true, not lte("1.0.0+0.3.7", "1.0.0")),
+    ?assertMatch(true, not lte("1.3.7+build", "1.0.0+0.3.7")),
+    ?assertMatch(true, not lte("1.3.7+build.2.b8f12d7",
                               "1.3.7+build")),
-    ?assertMatch(true, not lt("1.3.7+build.11.e0f985a",
+    ?assertMatch(true, not lte("1.3.7+build.11.e0f985a",
                               "1.3.7+build.2.b8f12d7")).
 
 between_test() ->
@@ -585,6 +636,9 @@ between_test() ->
     ?assertMatch(true, between("1.0-alpha.1+build.1",
                                "1.0.0-alpha.1+build.1",
                                "1.0.0-alpha.1+build.1")),
+    ?assertMatch(true, between("aaa",
+                               "ddd",
+                               "cc")),
     ?assertMatch(true, not between("1.0.0-alpha.1",
                                    "1.0.0-alpha.22",
                                    "1.0.0")),
@@ -594,13 +648,16 @@ between_test() ->
     ?assertMatch(true, not between("1.0.0-beta.1",
                                    "1.0.0-beta.11",
                                    "1.0.0-alpha")),
-    ?assertMatch(true, not between("1.0.0-beta.11", "1.0.0-rc.1", "1.0.0-rc.22")).
+    ?assertMatch(true, not between("1.0.0-beta.11", "1.0.0-rc.1",
+                                   "1.0.0-rc.22")),
+    ?assertMatch(true, not between("aaa", "ddd", "zzz")).
 
 pes_test() ->
     ?assertMatch(true, pes("2.6.0", "2.6")),
     ?assertMatch(true, pes("2.7", "2.6")),
     ?assertMatch(true, pes("2.8", "2.6")),
     ?assertMatch(true, pes("2.9", "2.6")),
+    ?assertMatch(true, pes("A.B", "A.A")),
     ?assertMatch(true, not pes("3.0.0", "2.6")),
     ?assertMatch(true, not pes("2.5", "2.6")),
     ?assertMatch(true, pes("2.6.5", "2.6.5")),
@@ -611,11 +668,14 @@ pes_test() ->
     ?assertMatch(true, pes("2.6.0.9", "2.6.0.5")),
     ?assertMatch(true, not pes("2.7", "2.6.5")),
     ?assertMatch(true, not pes("2.1.7", "2.1.6.5")),
+    ?assertMatch(true, not pes("A.A", "A.B")),
     ?assertMatch(true, not pes("2.5", "2.6.5")).
 
 version_format_test() ->
     ?assertEqual(["1", [], []], format({1, {[],[]}})),
     ?assertEqual(["1", ".", "2", ".", "34", [], []], format({{1,2,34},{[],[]}})),
+    ?assertEqual(<<"a">>, erlang:iolist_to_binary(format({<<"a">>, {[],[]}}))),
+    ?assertEqual(<<"a.b">>, erlang:iolist_to_binary(format({{<<"a">>,<<"b">>}, {[],[]}}))),
     ?assertEqual(<<"1">>, erlang:iolist_to_binary(format({1, {[],[]}}))),
     ?assertEqual(<<"1.2">>, erlang:iolist_to_binary(format({{1,2}, {[],[]}}))),
     ?assertEqual(<<"1.2.2">>, erlang:iolist_to_binary(format({{1,2,2}, {[],[]}}))),
