@@ -1,7 +1,7 @@
 %% -*- mode: Erlang; fill-column: 75; comment-column: 50; -*-
 {application, erlware_commons,
  [{description, "Additional standard library for Erlang"},
-  {vsn, git},
+  {vsn, "semver"},
   {modules, []},
   {registered, []},
   {applications, [kernel, stdlib]}]}.
