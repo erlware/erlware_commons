@@ -14,7 +14,8 @@ endif
 
 ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
-.PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps escript
+.PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps \
+	rebuild
 
 all: compile test doc dialyzer
 
@@ -62,3 +63,5 @@ clean:
 distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT)
 	rm -rvf $(CURDIR)/deps/*
+
+rebuild: distclean all
