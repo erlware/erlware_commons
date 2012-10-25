@@ -34,11 +34,11 @@ test: compile
 $(ERLWARE_COMMONS_PLT):
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT)
 	@echo
-	- dialyzer --output_plt $(ERLWARE_COMMONS_PLT) --build_plt \
+	- dialyzer --fullpath --output_plt $(ERLWARE_COMMONS_PLT) --build_plt \
 	   --apps erts kernel stdlib eunit -r deps
 
 dialyzer: $(ERLWARE_COMMONS_PLT)
-	dialyzer --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
+	dialyzer --fullpath --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
 
 typer:
 	typer --plt $(ERLWARE_COMMONS_PLT) -r ./src
