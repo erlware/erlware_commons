@@ -7,10 +7,12 @@
 -module(ec_file).
 
 -export([
+         exists/1,
          copy/2,
          copy/3,
          insecure_mkdtemp/0,
          mkdir_path/1,
+         mkdir_p/1,
          find/2,
          is_symlink/1,
          remove/1,
@@ -35,12 +37,21 @@
 %% Types
 %%============================================================================
 -type option() :: recursive.
--type void() :: ok.
+
 %%%===================================================================
 %%% API
 %%%===================================================================
+-spec exists(file:filename()) -> boolean().
+exists(Filename) ->
+    case file:read_file_info(Filename) of
+        {ok, _}         ->
+            true;
+        {error, _Reason} ->
+            false
+    end.
+
 %% @doc copy an entire directory to another location.
--spec copy(file:name(), file:name(), Options::[option()]) -> void().
+-spec copy(file:name(), file:name(), Options::[option()]) -> ok | {error, Reason::term()}.
 copy(From, To, []) ->
     copy(From, To);
 copy(From, To, [recursive] = Options) ->
@@ -229,7 +240,7 @@ tmp() ->
     end.
 
 %% Copy the subfiles of the From directory to the to directory.
--spec copy_subfiles(file:name(), file:name(), [option()]) -> void().
+-spec copy_subfiles(file:name(), file:name(), [option()]) -> {error, Reason::term()} | ok.
 copy_subfiles(From, To, Options) ->
     Fun =
         fun(ChildFrom) ->
@@ -312,6 +323,16 @@ setup_base_and_target() ->
     ok = file:write_file(Name3, DummyContents),
     ok = file:write_file(NoName, DummyContents),
     {BaseDir, SourceDir, {Name1, Name2, Name3, NoName}}.
+
+exists_test() ->
+    BaseDir = insecure_mkdtemp(),
+    SourceDir = filename:join([BaseDir, "source1"]),
+    NoName = filename:join([SourceDir, "noname"]),
+    ok = file:make_dir(SourceDir),
+    Name1 = filename:join([SourceDir, "fileone"]),
+    ok = file:write_file(Name1, <<"Testn">>),
+    ?assertMatch(true, exists(Name1)),
+    ?assertMatch(false, exists(NoName)).
 
 find_test() ->
     %% Create a directory in /tmp for the test. Clean everything afterwards

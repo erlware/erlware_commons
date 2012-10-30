@@ -14,9 +14,10 @@ endif
 
 ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
-.PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps escript
+.PHONY: all compile doc clean test dialyzer typer shell distclean pdf get-deps \
+	rebuild
 
-all: compile test dialyzer
+all: compile dialyzer doc test
 
 get-deps:
 	$(REBAR) get-deps
@@ -34,11 +35,11 @@ test: compile
 $(ERLWARE_COMMONS_PLT):
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT)
 	@echo
-	- dialyzer --output_plt $(ERLWARE_COMMONS_PLT) --build_plt \
+	- dialyzer --fullpath --output_plt $(ERLWARE_COMMONS_PLT) --build_plt \
 	   --apps erts kernel stdlib eunit -r deps
 
 dialyzer: $(ERLWARE_COMMONS_PLT)
-	dialyzer --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
+	dialyzer --fullpath --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
 
 typer:
 	typer --plt $(ERLWARE_COMMONS_PLT) -r ./src
@@ -62,3 +63,5 @@ clean:
 distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT)
 	rm -rvf $(CURDIR)/deps/*
+
+rebuild: distclean all
