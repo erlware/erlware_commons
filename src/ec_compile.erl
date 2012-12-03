@@ -13,9 +13,11 @@
          erl_source_to_core_ast/1,
          erl_source_to_erl_ast/1,
          erl_source_to_asm/1,
+         erl_source_to_erl_syntax/1,
          erl_string_to_core_ast/1,
          erl_string_to_erl_ast/1,
-         erl_string_to_asm/1]).
+         erl_string_to_asm/1,
+         erl_string_to_erl_syntax/1]).
 
 %%%===================================================================
 %%% API
@@ -33,13 +35,13 @@
 beam_to_erl_source(BeamFName, ErlFName) ->
   case beam_lib:chunks(BeamFName, [abstract_code]) of
     {ok, {_, [{abstract_code, {raw_abstract_v1,Forms}}]}} ->
-      Src =
-        erl_prettypr:format(erl_syntax:form_list(tl(Forms))),
-        {ok, Fd} = file:open(ErlFName, [write]),
-        io:fwrite(Fd, "~s~n", [Src]),
-        file:close(Fd);
-    Error ->
-       Error
+          Src =
+              erl_prettypr:format(erl_syntax:form_list(tl(Forms))),
+          {ok, Fd} = file:open(ErlFName, [write]),
+          io:fwrite(Fd, "~s~n", [Src]),
+          file:close(Fd);
+      Error ->
+          Error
   end.
 
 %% @doc compile an erlang source file into a Core Erlang AST
@@ -66,6 +68,15 @@ erl_source_to_erl_ast(Path) ->
 erl_source_to_asm(Path) ->
     {ok, Contents} = file:read_file(Path),
     erl_string_to_asm(binary_to_list(Contents)).
+
+%% @doc compile an erlang source file to a string that displays the
+%% 'erl_syntax1 calls needed to reproduce those terms.
+%%
+%% @param Path - The path to the erlang source file
+-spec erl_source_to_erl_syntax(file:filename()) -> string().
+erl_source_to_erl_syntax(Path) ->
+    {ok, Contents} = file:read_file(Path),
+    erl_string_to_erl_syntax(Contents).
 
 %% @doc compile a string representing an erlang expression into an
 %% Erlang AST
@@ -105,3 +116,16 @@ erl_string_to_core_ast(StringExpr) ->
 -spec erl_string_to_asm(string()) -> ErlangAsm::term().
 erl_string_to_asm(StringExpr) ->
     compile:forms(erl_string_to_erl_ast(StringExpr), ['S']).
+
+%% @doc compile an erlang source file to a string that displays the
+%% 'erl_syntax1 calls needed to reproduce those terms.
+%%
+%% @param StringExpr - The string representing the erlang code.
+-spec erl_string_to_erl_syntax(string() | binary()) -> string().
+erl_string_to_erl_syntax(BinaryExpr)
+  when erlang:is_binary(BinaryExpr) ->
+    erlang:binary_to_list(BinaryExpr);
+erl_string_to_erl_syntax(StringExpr) ->
+    {ok, Tokens, _} = erl_scan:string(StringExpr),
+    {ok, ErlAST} = erl_parse:parse_form(Tokens),
+    io:format(erl_prettypr:format(erl_syntax:meta(ErlAST))).
