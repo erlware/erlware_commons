@@ -39,7 +39,7 @@ $(ERLWARE_COMMONS_PLT):
 	   --apps erts kernel stdlib eunit -r deps
 
 dialyzer: $(ERLWARE_COMMONS_PLT)
-	dialyzer --fullpath --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions --src src
+	dialyzer --fullpath --plt $(ERLWARE_COMMONS_PLT) -Wrace_conditions -r ./ebin
 
 typer:
 	typer --plt $(ERLWARE_COMMONS_PLT) -r ./src
@@ -64,4 +64,4 @@ distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT)
 	rm -rvf $(CURDIR)/deps/*
 
-rebuild: distclean all
+rebuild: distclean get-deps all
