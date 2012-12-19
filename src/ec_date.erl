@@ -88,21 +88,60 @@ do_parse(Date, Now, Opts) ->
                 true -> {D1, T1};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
-        _ -> erlang:throw({?MODULE, {bad_date, Date}})
+        {D1, T1, {Ms}} = {{Y, M, D}, {H, M1, S},  {Ms}}
+        when is_number(Y), is_number(M),
+             is_number(D), is_number(H),
+             is_number(M1), is_number(S),
+	     is_number(Ms) ->
+            case calendar:valid_date(D1) of
+                true -> {D1, T1, {Ms}};
+                false -> erlang:throw({?MODULE, {bad_date, Date}})
+            end;
+        Unknown -> erlang:throw({?MODULE, {bad_date, Date, Unknown }})
     end.
 
 -spec nparse(string()) -> now().
 %% @doc parses the datetime from a string into 'now' format
 nparse(Date) ->
-    DateTime = parse(Date),
-    GSeconds = calendar:datetime_to_gregorian_seconds(DateTime),
-    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
-    {ESeconds div 1000000, ESeconds rem 1000000, 0}.
-
+    case parse(Date) of
+	{DateS, Time, {Ms} } ->
+	    GSeconds = calendar:datetime_to_gregorian_seconds({DateS, Time}),
+	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
+	    {ESeconds div 1000000, ESeconds rem 1000000, Ms};
+	DateTime ->
+	    GSeconds = calendar:datetime_to_gregorian_seconds(DateTime),
+	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
+	    {ESeconds div 1000000, ESeconds rem 1000000, {0}}
+    end.
 
 %%
 %% LOCAL FUNCTIONS
 %%
+
+
+%% Date/Times 22 Aug 2008 6:35.0001 PM
+parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso
+       (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+
+parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour,[]), Min, Sec}, {Ms}};
+parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
+  when ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
+parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms ], _Now, _Opts)
+  when ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
 
 %% Times - 21:45, 13:45:54, 13:15PM etc
 parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
@@ -138,7 +177,8 @@ parse([Month,X,Day,X,Year,Hour | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
         {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 
-%% Time is "6:35 PM"
+
+%% Time is "6:35 PM" ms return
 parse([Year,X,Month,X,Day,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -184,6 +224,9 @@ tokenise([], Acc) ->
 tokenise([N1, N2, N3, N4 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4) ->
     tokenise(Rest, [ ltoi([N1, N2, N3, N4]) | Acc]);
+tokenise([N1, N2, N3 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3]) | Acc]);
 tokenise([N1, N2 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2) ->
     tokenise(Rest, [ ltoi([N1, N2]) | Acc]);
@@ -264,6 +307,8 @@ tokenise("TH"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("ND"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("ST"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("OF"++Rest, Acc) -> tokenise(Rest, Acc);
+tokenise("T"++Rest, Acc) -> tokenise(Rest, Acc);  % 2012-12-12T12:12:12 ISO formatting.
+tokenise([$. | Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
 
 tokenise([Else | Rest], Acc) ->
     tokenise(Rest, [{bad_token, Else} | Acc]).
