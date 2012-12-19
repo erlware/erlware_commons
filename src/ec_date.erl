@@ -42,9 +42,11 @@
 -type hour() :: 0..23.
 -type minute() :: 0..59.
 -type second() :: 0..59.
+-type microsecond() :: 0..1000000.
+
 -type daynum() :: 1..7.
 -type date() :: {year(),month(),day()}.
--type time() :: {hour(),minute(),second()}.
+-type time() :: {hour(),minute(),second()} |{hour(),minute(),second(), microsecond()}.
 -type datetime() :: {date(),time()}.
 -type now() :: {integer(),integer(),integer()}.
 
@@ -69,8 +71,8 @@ format(Format, Date) ->
 parse(Date) ->
     do_parse(Date, calendar:universal_time(),[]).
 
--spec parse(string(),datetime() | now()) -> datetime();
-	   (string(),datetime() | now()) -> now().
+-spec parse(string(),datetime() | now()) -> datetime().
+
 %% @doc parses the datetime from a string
 parse(Date, {_,_,_}=Now) ->
     do_parse(Date, calendar:now_to_datetime(Now), []);
@@ -89,13 +91,13 @@ do_parse(Date, Now, Opts) ->
                 true -> {D1, T1};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
-        {D1, T1, {Ms}} = {{Y, M, D}, {H, M1, S},  {Ms}}
+        {D1, _T1, {Ms}} = {{Y, M, D}, {H, M1, S},  {Ms}}
         when is_number(Y), is_number(M),
              is_number(D), is_number(H),
              is_number(M1), is_number(S),
 	     is_number(Ms) ->
             case calendar:valid_date(D1) of
-                true -> {D1, T1, {Ms}};
+                true -> {D1, {H,M1,S,Ms}};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
         Unknown -> erlang:throw({?MODULE, {bad_date, Date, Unknown }})
@@ -105,14 +107,14 @@ do_parse(Date, Now, Opts) ->
 %% @doc parses the datetime from a string into 'now' format
 nparse(Date) ->
     case parse(Date) of
-	{DateS, Time, {Ms} } ->
-	    GSeconds = calendar:datetime_to_gregorian_seconds({DateS, Time}),
+	{DateS, {H, M, S, Ms} } ->
+	    GSeconds = calendar:datetime_to_gregorian_seconds({DateS, {H, M, S} }),
 	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
 	    {ESeconds div 1000000, ESeconds rem 1000000, Ms};
 	DateTime ->
 	    GSeconds = calendar:datetime_to_gregorian_seconds(DateTime),
 	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
-	    {ESeconds div 1000000, ESeconds rem 1000000, {0}}
+	    {ESeconds div 1000000, ESeconds rem 1000000, 0}
     end.
 
 %%
