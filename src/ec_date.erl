@@ -769,12 +769,12 @@ ms_test_() ->
      ?_assertEqual(format("H:m:s.f \\m \\i\\s \\m\\o\\n\\t\\h",?DATEMS),
                    "17:03:17.123456 m is month"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",?DATEMS),
-                   "2001-03-10T05:16:17.123456"),
+                   "2001-03-10T17:16:17.123456"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T05:16:17.123456")),
                    "2001-03-10T05:16:17.123456"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T05:16:17.123456")),
                    "2001-03-10T05:16:17.123456"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T15:16:17.123456")),
                    "2001-03-10T15:16:17.123456"),
-     ?_assertEqual(Now, nparse(format("Y-m-d\\Th:i:s.f", Now)))
+     ?_assertEqual(Now, nparse(format("Y-m-d\\TH:i:s.f", Now)))
     ].
