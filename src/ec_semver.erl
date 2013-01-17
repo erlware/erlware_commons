@@ -1,4 +1,3 @@
-
 %%%-------------------------------------------------------------------
 %%% @copyright (C) 2011, Erlware LLC
 %%% @doc
@@ -211,14 +210,18 @@ internal_parse_version([MMP, AlphaPart, BuildPart, _]) ->
 %% @doc helper function for the peg grammer to parse the iolist into a major_minor_patch
 -spec parse_major_minor_patch_minpatch(iolist()) -> major_minor_patch_minpatch().
 parse_major_minor_patch_minpatch([MajVsn, [], [], []]) ->
-    MajVsn;
+    strip_maj_version(MajVsn);
 parse_major_minor_patch_minpatch([MajVsn, [<<".">>, MinVsn], [], []]) ->
-    {MajVsn, MinVsn};
-parse_major_minor_patch_minpatch([MajVsn, [<<".">>, MinVsn], [<<".">>, PatchVsn], []]) ->
-    {MajVsn, MinVsn, PatchVsn};
-parse_major_minor_patch_minpatch([MajVsn, [<<".">>, MinVsn],
-                         [<<".">>, PatchVsn], [<<".">>, MinPatch]]) ->
-    {MajVsn, MinVsn, PatchVsn, MinPatch}.
+    {strip_maj_version(MajVsn), MinVsn};
+parse_major_minor_patch_minpatch([MajVsn,
+                                  [<<".">>, MinVsn],
+                                  [<<".">>, PatchVsn], []]) ->
+    {strip_maj_version(MajVsn), MinVsn, PatchVsn};
+parse_major_minor_patch_minpatch([MajVsn,
+                                  [<<".">>, MinVsn],
+                                  [<<".">>, PatchVsn],
+                                  [<<".">>, MinPatch]]) ->
+    {strip_maj_version(MajVsn), MinVsn, PatchVsn, MinPatch}.
 
 %% @doc helper function for the peg grammer to parse the iolist into an alpha part
 -spec parse_alpha_part(iolist()) -> [alpha_part()].
@@ -245,6 +248,14 @@ format_alpha_part([<<".">>, AlphaPart]) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
+-spec strip_maj_version(iolist()) -> version_element().
+strip_maj_version([<<"v">>, MajVsn]) ->
+    MajVsn;
+strip_maj_version([[], MajVsn]) ->
+    MajVsn;
+strip_maj_version(MajVsn) ->
+    MajVsn.
+
 -spec to_list(integer() | binary() | string()) -> string() | binary().
 to_list(Detail) when erlang:is_integer(Detail) ->
     erlang:integer_to_list(Detail);
@@ -308,8 +319,12 @@ internal_pes(Vsn, LVsn) ->
 eql_test() ->
     ?assertMatch(true, eql("1.0.0-alpha",
                            "1.0.0-alpha")),
+    ?assertMatch(true, eql("v1.0.0-alpha",
+                           "1.0.0-alpha")),
     ?assertMatch(true, eql("1",
                            "1.0.0")),
+    ?assertMatch(true, eql("v1",
+                           "v1.0.0")),
     ?assertMatch(true, eql("1.0",
                            "1.0.0")),
     ?assertMatch(true, eql("1.0.0",
@@ -322,6 +337,8 @@ eql_test() ->
                            "1.0.0-alpha.1+build.1")),
     ?assertMatch(true, eql("1.0-alpha.1+build.1",
                            "1.0.0.0-alpha.1+build.1")),
+    ?assertMatch(true, eql("1.0-alpha.1+build.1",
+                           "v1.0.0.0-alpha.1+build.1")),
     ?assertMatch(true, eql("aa", "aa")),
     ?assertMatch(true, eql("AA.BB", "AA.BB")),
     ?assertMatch(true, eql("BBB-super", "BBB-super")),
