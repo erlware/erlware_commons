@@ -1,7 +1,7 @@
 semver <- major_minor_patch_min_patch ("-" alpha_part ("." alpha_part)*)? ("+" alpha_part ("." alpha_part)*)?  !.
        ` ec_semver:internal_parse_version(Node) ` ;
 
-major_minor_patch_min_patch <- version_part ("." version_part)? ("." version_part)? ("." version_part)? ;
+major_minor_patch_min_patch <- ("v"? numeric_part / alpha_part)  ("." version_part)? ("." version_part)? ("." version_part)? ;
 
 version_part <- numeric_part / alpha_part ;
 
