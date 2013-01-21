@@ -42,9 +42,11 @@
 -type hour() :: 0..23.
 -type minute() :: 0..59.
 -type second() :: 0..59.
+-type microsecond() :: 0..1000000.
+
 -type daynum() :: 1..7.
 -type date() :: {year(),month(),day()}.
--type time() :: {hour(),minute(),second()}.
+-type time() :: {hour(),minute(),second()} |{hour(),minute(),second(), microsecond()}.
 -type datetime() :: {date(),time()}.
 -type now() :: {integer(),integer(),integer()}.
 
@@ -59,8 +61,9 @@ format(Format) ->
 
 -spec format(string(),datetime() | now()) -> string().
 %% @doc format Date as Format
-format(Format, {_,_,_}=Now) ->
-    format(Format, calendar:now_to_datetime(Now), []);
+format(Format, {_,_,Ms}=Now) ->
+    {Date,{H,M,S}} = calendar:now_to_datetime(Now),
+    format(Format, {Date, {H,M,S,Ms}}, []);
 format(Format, Date) ->
     format(Format, Date, []).
 
@@ -70,6 +73,7 @@ parse(Date) ->
     do_parse(Date, calendar:universal_time(),[]).
 
 -spec parse(string(),datetime() | now()) -> datetime().
+
 %% @doc parses the datetime from a string
 parse(Date, {_,_,_}=Now) ->
     do_parse(Date, calendar:now_to_datetime(Now), []);
@@ -88,21 +92,60 @@ do_parse(Date, Now, Opts) ->
                 true -> {D1, T1};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
-        _ -> erlang:throw({?MODULE, {bad_date, Date}})
+        {D1, _T1, {Ms}} = {{Y, M, D}, {H, M1, S},  {Ms}}
+        when is_number(Y), is_number(M),
+             is_number(D), is_number(H),
+             is_number(M1), is_number(S),
+	     is_number(Ms) ->
+            case calendar:valid_date(D1) of
+                true -> {D1, {H,M1,S,Ms}};
+                false -> erlang:throw({?MODULE, {bad_date, Date}})
+            end;
+        Unknown -> erlang:throw({?MODULE, {bad_date, Date, Unknown }})
     end.
 
 -spec nparse(string()) -> now().
 %% @doc parses the datetime from a string into 'now' format
 nparse(Date) ->
-    DateTime = parse(Date),
-    GSeconds = calendar:datetime_to_gregorian_seconds(DateTime),
-    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
-    {ESeconds div 1000000, ESeconds rem 1000000, 0}.
-
+    case parse(Date) of
+	{DateS, {H, M, S, Ms} } ->
+	    GSeconds = calendar:datetime_to_gregorian_seconds({DateS, {H, M, S} }),
+	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
+	    {ESeconds div 1000000, ESeconds rem 1000000, Ms};
+	DateTime ->
+	    GSeconds = calendar:datetime_to_gregorian_seconds(DateTime),
+	    ESeconds = GSeconds - ?GREGORIAN_SECONDS_1970,
+	    {ESeconds div 1000000, ESeconds rem 1000000, 0}
+    end.
 
 %%
 %% LOCAL FUNCTIONS
 %%
+
+
+%% Date/Times 22 Aug 2008 6:35.0001 PM
+parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso
+       (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
+
+parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour,[]), Min, Sec}, {Ms}};
+parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
+  when ?is_us_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
+parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms ], _Now, _Opts)
+  when ?is_world_sep(X) ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
 
 %% Times - 21:45, 13:45:54, 13:15PM etc
 parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
@@ -138,7 +181,8 @@ parse([Month,X,Day,X,Year,Hour | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
         {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 
-%% Time is "6:35 PM"
+
+%% Time is "6:35 PM" ms return
 parse([Year,X,Month,X,Day,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -164,7 +208,6 @@ parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
 
-
 parse([Day,Month,Year,Hour | PAM], _Now, _Opts)
   when ?is_meridian(PAM) ->
     {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
@@ -181,9 +224,18 @@ parse(_Tokens, _Now, _Opts) ->
 tokenise([], Acc) ->
     lists:reverse(Acc);
 
+tokenise([N1, N2, N3, N4, N5, N6 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5), ?is_num(N6) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5, N6]) | Acc]);
+tokenise([N1, N2, N3, N4, N5 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5]) | Acc]);
 tokenise([N1, N2, N3, N4 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4) ->
     tokenise(Rest, [ ltoi([N1, N2, N3, N4]) | Acc]);
+tokenise([N1, N2, N3 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3]) | Acc]);
 tokenise([N1, N2 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2) ->
     tokenise(Rest, [ ltoi([N1, N2]) | Acc]);
@@ -264,6 +316,8 @@ tokenise("TH"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("ND"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("ST"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("OF"++Rest, Acc) -> tokenise(Rest, Acc);
+tokenise("T"++Rest, Acc) -> tokenise(Rest, Acc);  % 2012-12-12T12:12:12 ISO formatting.
+tokenise([$. | Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
 
 tokenise([Else | Rest], Acc) ->
     tokenise(Rest, [{bad_token, Else} | Acc]).
@@ -329,13 +383,13 @@ format([$z|T], {Date,_}=Dt, Acc) ->
     format(T, Dt, [itol(days_in_year(Date))|Acc]);
 
 %% Time Formats
-format([$a|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
+format([$a|T], Dt={_,{H,_,_}}, Acc) when H > 12 ->
     format(T, Dt, ["pm"|Acc]);
-format([$a|T], Dt, Acc) ->
+format([$a|T], Dt={_,{_,_,_}}, Acc) ->
     format(T, Dt, ["am"|Acc]);
 format([$A|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
     format(T, Dt, ["PM"|Acc]);
-format([$A|T], Dt, Acc) ->
+format([$A|T], Dt={_,{_,_,_}}, Acc) ->
     format(T, Dt, ["AM"|Acc]);
 format([$g|T], {_,{H,_,_}}=Dt, Acc) when H == 12; H == 0 ->
     format(T, Dt, ["12"|Acc]);
@@ -355,6 +409,38 @@ format([$i|T], {_,{_,M,_}}=Dt, Acc) ->
     format(T, Dt, [pad2(M)|Acc]);
 format([$s|T], {_,{_,_,S}}=Dt, Acc) ->
     format(T, Dt, [pad2(S)|Acc]);
+format([$f|T], {_,{_,_,_}}=Dt, Acc) ->
+    format(T, Dt, [itol(0)|Acc]);
+
+%% Time Formats ms
+format([$a|T], Dt={_,{H,_,_,_}}, Acc) when H > 12 ->
+    format(T, Dt, ["pm"|Acc]);
+format([$a|T], Dt={_,{_,_,_,_}}, Acc) ->
+    format(T, Dt, ["am"|Acc]);
+format([$A|T], {_,{H,_,_,_}}=Dt, Acc) when H > 12 ->
+    format(T, Dt, ["PM"|Acc]);
+format([$A|T], Dt={_,{_,_,_,_}}, Acc) ->
+    format(T, Dt, ["AM"|Acc]);
+format([$g|T], {_,{H,_,_,_}}=Dt, Acc) when H == 12; H == 0 ->
+    format(T, Dt, ["12"|Acc]);
+format([$g|T], {_,{H,_,_,_}}=Dt, Acc) when H > 12 ->
+    format(T, Dt, [itol(H-12)|Acc]);
+format([$g|T], {_,{H,_,_,_}}=Dt, Acc) ->
+    format(T, Dt, [itol(H)|Acc]);
+format([$G|T], {_,{H,_,_,_}}=Dt, Acc) ->
+    format(T, Dt, [itol(H)|Acc]);
+format([$h|T], {_,{H,_,_,_}}=Dt, Acc) when H > 12 ->
+    format(T, Dt, [pad2(H-12)|Acc]);
+format([$h|T], {_,{H,_,_,_}}=Dt, Acc) ->
+    format(T, Dt, [pad2(H)|Acc]);
+format([$H|T], {_,{H,_,_,_}}=Dt, Acc) ->
+    format(T, Dt, [pad2(H)|Acc]);
+format([$i|T], {_,{_,M,_,_}}=Dt, Acc) ->
+    format(T, Dt, [pad2(M)|Acc]);
+format([$s|T], {_,{_,_,S,_}}=Dt, Acc) ->
+    format(T, Dt, [pad2(S)|Acc]);
+format([$f|T], {_,{_,_,_,Ms}}=Dt, Acc) ->
+    format(T, Dt, [itol(Ms)|Acc]);
 
 %% Whole Dates
 format([$c|T], {{Y,M,D},{H,Min,S}}=Dt, Acc) ->
@@ -519,6 +605,7 @@ ltoi(X) ->
 -include_lib("eunit/include/eunit.hrl").
 
 -define(DATE, {{2001,3,10},{17,16,17}}).
+-define(DATEMS, {{2001,3,10},{17,16,17,123456}}).
 -define(ISO, "o \\WW").
 
 basic_format_test_() ->
@@ -673,4 +760,21 @@ iso_test_() ->
      ?_assertEqual("2009 W01",format(?ISO,{{2009,1,1}, {1,1,1}})),
      ?_assertEqual("2009 W53",format(?ISO,{{2009,12,31},{1,1,1}})),
      ?_assertEqual("2009 W53",format(?ISO,{{2010,1,3}, {1,1,1}}))
+    ].
+
+ms_test_() ->
+    Now=now(),
+    [
+     ?_assertEqual({{2012,12,12}, {12,12,12,1234}}, parse("2012-12-12T12:12:12.1234")),
+     ?_assertEqual(format("H:m:s.f \\m \\i\\s \\m\\o\\n\\t\\h",?DATEMS),
+                   "17:03:17.123456 m is month"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s.f",?DATEMS),
+                   "2001-03-10T17:16:17.123456"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T05:16:17.123456")),
+                   "2001-03-10T05:16:17.123456"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T05:16:17.123456")),
+                   "2001-03-10T05:16:17.123456"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T15:16:17.123456")),
+                   "2001-03-10T15:16:17.123456"),
+     ?_assertEqual(Now, nparse(format("Y-m-d\\TH:i:s.f", Now)))
     ].
