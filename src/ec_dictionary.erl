@@ -55,6 +55,7 @@
 -callback keys(any()) -> [key(any())].
 
 -else.
+%% @clear
 
 %% In the case where R14 or lower is being used to compile the system
 %% we need to export a behaviour info
