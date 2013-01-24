@@ -122,6 +122,20 @@ nparse(Date) ->
 %% LOCAL FUNCTIONS
 %%
 
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $Z ], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, { 0}};
+
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $+, Off | _Rest ], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []) - Off, Min, Sec}, {0}};
+
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $-, Off | _Rest ], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []) + Off, Min, Sec}, {0}};
 
 %% Date/Times 22 Aug 2008 6:35.0001 PM
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
@@ -317,7 +331,9 @@ tokenise("ND"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("ST"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("OF"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("T"++Rest, Acc) -> tokenise(Rest, Acc);  % 2012-12-12T12:12:12 ISO formatting.
-tokenise([$. | Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
+tokenise([$Z | Rest], Acc) -> tokenise(Rest, [$Z | Acc]);  % 2012-12-12T12:12:12Zulu
+tokenise([$. |  Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
+tokenise([$+| Rest], Acc) -> tokenise(Rest, [$+ | Acc]);  % 2012-12-12T12:12:12.xxxx+ ISO formatting.
 
 tokenise([Else | Rest], Acc) ->
     tokenise(Rest, [{bad_token, Else} | Acc]).
@@ -777,4 +793,20 @@ ms_test_() ->
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T15:16:17.123456")),
                    "2001-03-10T15:16:17.123456"),
      ?_assertEqual(Now, nparse(format("Y-m-d\\TH:i:s.f", Now)))
+    ].
+
+zulu_test_() ->
+    [
+     ?_assertEqual(format("Y-m-d\\TH:i:sZ",nparse("2001-03-10T15:16:17.123456")),
+                   "2001-03-10T15:16:17Z"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17Z")),
+                   "2001-03-10T15:16:17"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17+04")),
+                   "2001-03-10T11:16:17"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17+04:00")),
+                   "2001-03-10T11:16:17"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17-04")),
+                   "2001-03-10T19:16:17"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17-04:00")),
+                   "2001-03-10T19:16:17")
     ].
