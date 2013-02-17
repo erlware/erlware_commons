@@ -34,10 +34,16 @@
 -define( is_us_sep(X), ( X==$/) ).
 -define( is_world_sep(X), ( X==$-) ).
 
+-define( MONTH_TAG, month ).
+-define( is_year(X), (is_integer(X) andalso X > 31) ).
+-define( is_day(X), (is_integer(X) andalso X =< 31) ).
+-define( is_hinted_month(X), (is_tuple(X) andalso size(X)=:=2 andalso element(1,X)=:=?MONTH_TAG) ).
+-define( is_month(X), ( (is_integer(X) andalso X =< 12) orelse ?is_hinted_month(X) ) ).
+
 -define(GREGORIAN_SECONDS_1970, 62167219200).
 
 -type year() :: non_neg_integer().
--type month() :: 1..12.
+-type month() :: 1..12 | {?MONTH_TAG, 1..12}.
 -type day() :: 1..31.
 -type hour() :: 0..23.
 -type minute() :: 0..59.
@@ -81,7 +87,7 @@ parse(Date, Now) ->
     do_parse(Date, Now, []).
 
 do_parse(Date, Now, Opts) ->
-    case parse(tokenise(string:to_upper(Date), []), Now, Opts) of
+    case filter_hints(parse(tokenise(string:to_upper(Date), []), Now, Opts)) of
         {error, bad_date} ->
             erlang:throw({?MODULE, {bad_date, Date}});
         {D1, T1} = {{Y, M, D}, {H, M1, S}}
@@ -103,6 +109,13 @@ do_parse(Date, Now, Opts) ->
             end;
         Unknown -> erlang:throw({?MODULE, {bad_date, Date, Unknown }})
     end.
+
+filter_hints({{Y, {?MONTH_TAG, M}, D}, {H, M1, S}}) ->
+    filter_hints({{Y, M, D}, {H, M1, S}});
+filter_hints({{Y, {?MONTH_TAG, M}, D}, {H, M1, S}, {Ms}}) ->
+    filter_hints({{Y, M, D}, {H, M1, S}, {Ms}});
+filter_hints(Other) ->
+    Other.
 
 -spec nparse(string()) -> now().
 %% @doc parses the datetime from a string into 'now' format
@@ -141,25 +154,46 @@ parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $-, Off | _Rest ], _Now, 
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
 parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
-  when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
+  when ?is_meridian(PAM) andalso ?is_us_sep(X)
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
 parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
-  when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
+  when ?is_meridian(PAM) andalso ?is_world_sep(X)
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
 
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour,[]), Min, Sec}, {Ms}};
 parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
-  when ?is_us_sep(X) ->
+  when ?is_us_sep(X) andalso ?is_month(Month) ->
     {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
 parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms ], _Now, _Opts)
-  when ?is_world_sep(X) ->
+  when ?is_world_sep(X) andalso ?is_month(Month) ->
     {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
+
+%% Date/Times Dec 1st, 2012 6:25 PM
+parse([Month,Day,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
+	{{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
+parse([Month,Day,Year,Hour,$:,Min | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
+	{{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
+parse([Month,Day,Year,Hour | PAM], _Now, _Opts)
+  when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
+	{{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+
+%% Date/Times Dec 1st, 2012 18:25:15 (no AM/PM)
+parse([Month,Day,Year,Hour,$:,Min,$:,Sec], _Now, _Opts)
+  when ?is_hinted_month(Month) andalso ?is_day(Day) ->
+	{{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
+parse([Month,Day,Year,Hour,$:,Min], _Now, _Opts)
+  when ?is_hinted_month(Month) andalso ?is_day(Day) ->
+	{{Year, Month, Day}, {hour(Hour, []), Min, 0}};
 
 %% Times - 21:45, 13:45:54, 13:15PM etc
 parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
@@ -167,14 +201,14 @@ parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
 parse([Hour,$:,Min | PAM], {Date, _Time}, _Opts) when ?is_meridian(PAM) ->
     {Date, {hour(Hour, PAM), Min, 0}};
 parse([Hour | PAM],{Date,_Time}, _Opts) when ?is_meridian(PAM) ->
-        {Date, {hour(Hour,PAM), 0, 0}};
+    {Date, {hour(Hour,PAM), 0, 0}};
 
 %% Dates 23/april/1963
 parse([Day,Month,Year], {_Date, Time}, _Opts) ->
     {{Year, Month, Day}, Time};
 parse([Year,X,Month,X,Day], {_Date, Time}, _Opts)
   when (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, Time};
 parse([Month,X,Day,X,Year], {_Date, Time}, _Opts) when ?is_us_sep(X) ->
     {{Year, Month, Day}, Time};
@@ -186,7 +220,7 @@ parse([Day,X,Month,X,Year], {_Date, Time}, _Opts) when ?is_world_sep(X) ->
 parse([Year,X,Month,X,Day,Hour | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 parse([Day,X,Month,X,Year,Hour | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
@@ -200,7 +234,7 @@ parse([Month,X,Day,X,Year,Hour | PAM], _Date, _Opts)
 parse([Year,X,Month,X,Day,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
 parse([Day,X,Month,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_world_sep(X) ->
@@ -213,7 +247,7 @@ parse([Month,X,Day,X,Year,Hour,$:,Min | PAM], _Date, _Opts)
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso
        (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+       andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
 parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
@@ -257,32 +291,37 @@ tokenise([N1 | Rest], Acc)
   when ?is_num(N1) ->
     tokenise(Rest, [ ltoi([N1]) | Acc]);
 
-tokenise("JANUARY"++Rest, Acc) -> tokenise(Rest, [1 | Acc]);
-tokenise("JAN"++Rest, Acc) -> tokenise(Rest, [1 | Acc]);
-tokenise("FEBRUARY"++Rest, Acc) -> tokenise(Rest, [2 | Acc]);
-tokenise("FEB"++Rest, Acc) -> tokenise(Rest, [2 | Acc]);
-tokenise("MARCH"++Rest, Acc) -> tokenise(Rest, [3 | Acc]);
-tokenise("MAR"++Rest, Acc) -> tokenise(Rest, [3 | Acc]);
-tokenise("APRIL"++Rest, Acc) -> tokenise(Rest, [4 | Acc]);
-tokenise("APR"++Rest, Acc) -> tokenise(Rest, [4 | Acc]);
-tokenise("MAY"++Rest, Acc) -> tokenise(Rest, [5 | Acc]);
-tokenise("JUNE"++Rest, Acc) -> tokenise(Rest, [6 | Acc]);
-tokenise("JUN"++Rest, Acc) -> tokenise(Rest, [6 | Acc]);
-tokenise("JULY"++Rest, Acc) -> tokenise(Rest, [7 | Acc]);
-tokenise("JUL"++Rest, Acc) -> tokenise(Rest, [7 | Acc]);
-tokenise("AUGUST"++Rest, Acc) -> tokenise(Rest, [8 | Acc]);
-tokenise("AUG"++Rest, Acc) -> tokenise(Rest, [8 | Acc]);
-tokenise("SEPTEMBER"++Rest, Acc) -> tokenise(Rest, [9 | Acc]);
-tokenise("SEPT"++Rest, Acc) -> tokenise(Rest, [9 | Acc]);
-tokenise("SEP"++Rest, Acc) -> tokenise(Rest, [9 | Acc]);
-tokenise("OCTOBER"++Rest, Acc) -> tokenise(Rest, [10 | Acc]);
-tokenise("OCT"++Rest, Acc) -> tokenise(Rest, [10 | Acc]);
-tokenise("NOVEMBER"++Rest, Acc) -> tokenise(Rest, [11 | Acc]);
-tokenise("NOVEM"++Rest, Acc) -> tokenise(Rest, [11 | Acc]);
-tokenise("NOV"++Rest, Acc) -> tokenise(Rest, [11 | Acc]);
-tokenise("DECEMBER"++Rest, Acc) -> tokenise(Rest, [12 | Acc]);
-tokenise("DECEM"++Rest, Acc) -> tokenise(Rest, [12 | Acc]);
-tokenise("DEC"++Rest, Acc) -> tokenise(Rest, [12 | Acc]);
+
+%% Worded Months get tagged with ?MONTH_TAG to let the parser know that these
+%% are unambiguously declared to be months. This was there's no confusion
+%% between, for example: "Aug 12" and "12 Aug"
+%% These hint tags are filtered in filter_hints/1 above.
+tokenise("JANUARY"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,1} | Acc]);
+tokenise("JAN"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,1} | Acc]);
+tokenise("FEBRUARY"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,2} | Acc]);
+tokenise("FEB"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,2} | Acc]);
+tokenise("MARCH"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,3} | Acc]);
+tokenise("MAR"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,3} | Acc]);
+tokenise("APRIL"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,4} | Acc]);
+tokenise("APR"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,4} | Acc]);
+tokenise("MAY"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,5} | Acc]);
+tokenise("JUNE"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,6} | Acc]);
+tokenise("JUN"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,6} | Acc]);
+tokenise("JULY"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,7} | Acc]);
+tokenise("JUL"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,7} | Acc]);
+tokenise("AUGUST"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,8} | Acc]);
+tokenise("AUG"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,8} | Acc]);
+tokenise("SEPTEMBER"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,9} | Acc]);
+tokenise("SEPT"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,9} | Acc]);
+tokenise("SEP"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,9} | Acc]);
+tokenise("OCTOBER"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,10} | Acc]);
+tokenise("OCT"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,10} | Acc]);
+tokenise("NOVEMBER"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,11} | Acc]);
+tokenise("NOVEM"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,11} | Acc]);
+tokenise("NOV"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,11} | Acc]);
+tokenise("DECEMBER"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,12} | Acc]);
+tokenise("DECEM"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,12} | Acc]);
+tokenise("DEC"++Rest, Acc) -> tokenise(Rest, [{?MONTH_TAG,12} | Acc]);
 
 tokenise([$: | Rest], Acc) -> tokenise(Rest, [ $: | Acc]);
 tokenise([$/ | Rest], Acc) -> tokenise(Rest, [ $/ | Acc]);
@@ -505,6 +544,10 @@ to_w(X) -> X.
 suffix(1) -> "st";
 suffix(2) -> "nd";
 suffix(3) -> "rd";
+suffix(21) -> "st";
+suffix(22) -> "nd";
+suffix(23) -> "rd";
+suffix(31) -> "st";
 suffix(_) -> "th".
 
 -spec sdayd(date()) -> string().
@@ -672,6 +715,20 @@ basic_parse_test_() ->
                    parse("22 Aug 2008 6:35 PM", ?DATE)),
      ?_assertEqual({{2008,8,22}, {18,0,0}},
                    parse("22 Aug 2008 6 PM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,0,0}},
+                   parse("Aug 22, 2008 6 PM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,0,0}},
+                   parse("August 22nd, 2008 6:00 PM", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,15,15}},
+                   parse("August 22nd 2008, 6:15:15pm", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,15,15}},
+                   parse("August 22nd, 2008, 6:15:15pm", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {18,15,0}},
+                   parse("Aug 22nd 2008, 18:15", ?DATE)),
+     ?_assertEqual({{2012,12,10}, {0,0,0}},
+                   parse("Dec 10th, 2012, 12:00 AM", ?DATE)),
+     ?_assertEqual({{2012,12,10}, {0,0,0}},
+                   parse("10 Dec 2012 12:00 AM", ?DATE)),
      ?_assertEqual({{2001,3,10}, {11,15,0}},
                    parse("11:15", ?DATE)),
      ?_assertEqual({{2001,3,10}, {1,15,0}},
