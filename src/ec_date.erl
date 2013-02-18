@@ -203,6 +203,21 @@ parse([Hour,$:,Min | PAM], {Date, _Time}, _Opts) when ?is_meridian(PAM) ->
 parse([Hour | PAM],{Date,_Time}, _Opts) when ?is_meridian(PAM) ->
     {Date, {hour(Hour,PAM), 0, 0}};
 
+%% Dates (Any combination with word month "aug 8th, 2008", "8 aug 2008", "2008 aug 21" "2008 5 aug" )
+%% Will work because of the "Hinted month"
+parse([Day,Month,Year], {_Date, Time}, _Opts)
+  when ?is_day(Day) andalso ?is_hinted_month(Month) andalso ?is_year(Year) ->
+    {{Year, Month, Day}, Time};
+parse([Month,Day,Year], {_Date, Time}, _Opts)
+  when ?is_day(Day) andalso ?is_hinted_month(Month) andalso ?is_year(Year) ->
+    {{Year, Month, Day}, Time};
+parse([Year,Day,Month], {_Date, Time}, _Opts)
+  when ?is_day(Day) andalso ?is_hinted_month(Month) andalso ?is_year(Year) ->
+    {{Year, Month, Day}, Time};
+parse([Year,Month,Day], {_Date, Time}, _Opts)
+  when ?is_day(Day) andalso ?is_hinted_month(Month) andalso ?is_year(Year) ->
+    {{Year, Month, Day}, Time};
+
 %% Dates 23/april/1963
 parse([Day,Month,Year], {_Date, Time}, _Opts) ->
     {{Year, Month, Day}, Time};
@@ -670,6 +685,11 @@ ltoi(X) ->
 basic_format_test_() ->
     [
      ?_assertEqual(format("F j, Y, g:i a",?DATE), "March 10, 2001, 5:16 pm"),
+     ?_assertEqual(format("F jS, Y, g:i a",?DATE), "March 10th, 2001, 5:16 pm"),
+     ?_assertEqual(format("F jS",{{2011,3,21},{0,0,0}}), "March 21st"),
+     ?_assertEqual(format("F jS",{{2011,3,22},{0,0,0}}), "March 22nd"),
+     ?_assertEqual(format("F jS",{{2011,3,23},{0,0,0}}), "March 23rd"),
+     ?_assertEqual(format("F jS",{{2011,3,31},{0,0,0}}), "March 31st"),
      ?_assertEqual(format("m.d.y",?DATE), "03.10.01"),
      ?_assertEqual(format("j, n, Y",?DATE), "10, 3, 2001"),
      ?_assertEqual(format("Ymd",?DATE), "20010310"),
@@ -725,6 +745,50 @@ basic_parse_test_() ->
                    parse("August 22nd, 2008, 6:15:15pm", ?DATE)),
      ?_assertEqual({{2008,8,22}, {18,15,0}},
                    parse("Aug 22nd 2008, 18:15", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {17,16,17}},
+                   parse("2nd of August 2008", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {17,16,17}},
+                   parse("August 2nd, 2008", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {17,16,17}},
+                   parse("2nd  August, 2008", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {17,16,17}},
+                   parse("2008 August 2nd", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,0,0}},
+                   parse("2-Aug-2008 6 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("2-Aug-2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,12}},
+                   parse("2-Aug-2008 6:35:12 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,0,0}},
+                   parse("August/2/2008 6 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("August/2/2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("2 August 2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,0,0}},
+                   parse("2 Aug 2008 6AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("2 Aug 2008 6:35AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("2 Aug 2008 6:35 AM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,0,0}},
+                   parse("2 Aug 2008 6", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {6,35,0}},
+                   parse("2 Aug 2008 6:35", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,35,0}},
+                   parse("2 Aug 2008 6:35 PM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,0,0}},
+                   parse("2 Aug 2008 6 PM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,0,0}},
+                   parse("Aug 2, 2008 6 PM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,0,0}},
+                   parse("August 2nd, 2008 6:00 PM", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,15,15}},
+                   parse("August 2nd 2008, 6:15:15pm", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,15,15}},
+                   parse("August 2nd, 2008, 6:15:15pm", ?DATE)),
+     ?_assertEqual({{2008,8,2}, {18,15,0}},
+                   parse("Aug 2nd 2008, 18:15", ?DATE)),
      ?_assertEqual({{2012,12,10}, {0,0,0}},
                    parse("Dec 10th, 2012, 12:00 AM", ?DATE)),
      ?_assertEqual({{2012,12,10}, {0,0,0}},
