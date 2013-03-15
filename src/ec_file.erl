@@ -15,6 +15,8 @@
          mkdir_p/1,
          find/2,
          is_symlink/1,
+         type/1,
+         real_dir_path/1,
          remove/1,
          remove/2,
          md5sum/1,
@@ -115,7 +117,31 @@ is_symlink(Path) ->
         _ ->
             false
     end.
-
+%% @doc returns the type of the file.
+-spec type(file:name()) -> file | symlink | directory.
+type(Path) ->
+    case filelib:is_regular(Path) of
+        true ->
+            file;
+        false ->
+            case is_symlink(Path) of
+                true ->
+                    symlink;
+                false ->
+                    directory
+            end
+    end.
+%% @doc gets the real path of a directory. This is mostly useful for
+%% resolving symlinks. Be aware that this temporarily changes the
+%% current working directory to figure out what the actual path
+%% is. That means that it can be quite slow.
+-spec real_dir_path(file:name()) -> file:name().
+real_dir_path(Path) ->
+    {ok, CurCwd} = file:get_cwd(),
+    ok = file:set_cwd(Path),
+    {ok, RealPath} = file:get_cwd(),
+    ok = file:set_cwd(CurCwd),
+    filename:absname(RealPath).
 
 %% @doc make a unique temorory directory. Similar function to BSD stdlib
 %% function of the same name.
@@ -333,6 +359,21 @@ exists_test() ->
     ok = file:write_file(Name1, <<"Testn">>),
     ?assertMatch(true, exists(Name1)),
     ?assertMatch(false, exists(NoName)).
+
+real_path_test() ->
+    BaseDir = "foo",
+    Dir = filename:absname(filename:join(BaseDir, "source1")),
+    LinkDir = filename:join([BaseDir, "link"]),
+    ok = mkdir_p(Dir),
+    file:make_symlink(Dir, LinkDir),
+    ?assertEqual(Dir, real_dir_path(LinkDir)),
+    ?assertEqual(directory, type(Dir)),
+    ?assertEqual(symlink, type(LinkDir)),
+    TermFile = filename:join(BaseDir, "test_file"),
+    ok = write_term(TermFile, foo),
+    ?assertEqual(file, type(TermFile)),
+    ?assertEqual(true, is_symlink(LinkDir)),
+    ?assertEqual(false, is_symlink(Dir)).
 
 find_test() ->
     %% Create a directory in /tmp for the test. Clean everything afterwards
