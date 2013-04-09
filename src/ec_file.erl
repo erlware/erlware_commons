@@ -241,7 +241,8 @@ find_in_subdirs(FromDir, TargetPattern) ->
                         end
                 end,
                 [],
-                filelib:wildcard(filename:join(FromDir, "*"))).
+                sub_files(FromDir)).
+
 
 
 -spec remove_recursive(file:name(), Options::list()) -> ok | {error, Reason::term()}.
@@ -252,7 +253,7 @@ remove_recursive(Path, Options) ->
         true ->
             lists:foreach(fun(ChildPath) ->
                                   remove_recursive(ChildPath, Options)
-                          end, filelib:wildcard(filename:join(Path, "*"))),
+                          end, sub_files(Path)),
             file:del_dir(Path)
     end.
 
@@ -273,7 +274,7 @@ copy_subfiles(From, To, Options) ->
                 ChildTo = filename:join([To, filename:basename(ChildFrom)]),
                 copy(ChildFrom, ChildTo, Options)
         end,
-    lists:foreach(Fun, filelib:wildcard(filename:join(From, "*"))).
+    lists:foreach(Fun, sub_files(From)).
 
 -spec make_dir_if_dir(file:name()) -> ok | {error, Reason::term()}.
 make_dir_if_dir(File) ->
@@ -299,6 +300,10 @@ hex0(14) -> $e;
 hex0(15) -> $f;
 hex0(I)  -> $0 + I.
 
+
+sub_files(From) ->
+    {ok, SubFiles} = file:list_dir(From),
+    [filename:join(From, SubFile) || SubFile <- SubFiles].
 %%%===================================================================
 %%% Test Functions
 %%%===================================================================
@@ -378,10 +383,11 @@ real_path_test() ->
 find_test() ->
     %% Create a directory in /tmp for the test. Clean everything afterwards
     {BaseDir, _SourceDir, {Name1, Name2, Name3, _NoName}} = setup_base_and_target(),
-    ?assertMatch([Name2,
-                  Name3,
-                  Name1],
-                 find(BaseDir, "file[a-z]+\$")),
+    Result = find(BaseDir, "file[a-z]+\$"),
+    ?assertMatch(3, erlang:length(Result)),
+    ?assert(lists:member(Name1, Result)),
+    ?assert(lists:member(Name2, Result)),
+    ?assert(lists:member(Name3, Result)),
     remove(BaseDir, [recursive]).
 
 -endif.
