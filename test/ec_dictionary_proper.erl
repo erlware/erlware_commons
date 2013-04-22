@@ -5,6 +5,8 @@
 %%   proper:module(ec_dictionary_proper).
 -module(ec_dictionary_proper).
 
+-ifdef(DEV_ONLY).
+
 -export([my_dict/0, dict/1, sym_dict/0, sym_dict/1, gb_tree/0, gb_tree/1, sym_dict2/0]).
 
 -include_lib("proper/include/proper.hrl").
@@ -221,3 +223,4 @@ gb_tree(0) ->
 gb_tree(N) ->
     gb_trees:enter(key(),value(),gb_tree(N-1)).
 
+-endif.

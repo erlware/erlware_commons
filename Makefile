@@ -19,14 +19,19 @@ ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
 all: compile doc test #dialyzer #fail on travis
 
-deps:
+deps: .DEV_MODE
 	$(REBAR) get-deps compile
+
+.DEV_MODE:
+	touch $@
+	cp priv/ec_semver_parser.peg src
 
 get-deps:
 	$(REBAR) get-deps compile
 
 compile: deps
 	$(REBAR) skip_deps=true compile
+
 
 doc: compile
 	- $(REBAR) skip_deps=true doc
@@ -84,5 +89,6 @@ clean:
 distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT).$(ERL_VER)
 	rm -rvf $(CURDIR)/deps
+	rm -rvf .DEV_MODE
 
 rebuild: distclean get-deps all
