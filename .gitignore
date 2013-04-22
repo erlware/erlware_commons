@@ -10,4 +10,5 @@ ebin/*
 _build
 erl_crash.dump
 *.pyc
-src/ec_semver_parser.erl
+
+src/ec_semver_parser.peg
