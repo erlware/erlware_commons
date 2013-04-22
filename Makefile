@@ -19,11 +19,13 @@ ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
 all: compile doc test #dialyzer #fail on travis
 
-get-deps:
-	$(REBAR) get-deps
-	$(REBAR) compile
+deps:
+	$(REBAR) get-deps compile
 
-compile:
+get-deps:
+	$(REBAR) get-deps compile
+
+compile: deps
 	$(REBAR) skip_deps=true compile
 
 doc: compile
@@ -81,6 +83,6 @@ clean:
 
 distclean: clean
 	rm -rf $(ERLWARE_COMMONS_PLT).$(ERL_VER)
-	rm -rvf $(CURDIR)/deps/*
+	rm -rvf $(CURDIR)/deps
 
 rebuild: distclean get-deps all
