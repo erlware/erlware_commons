@@ -60,7 +60,7 @@ $(ERLWARE_COMMONS_PLT).$(ERL_VER): $(ERLWARE_COMMONS_PLT).$(ERL_VER).base
 dialyzer: $(ERLWARE_COMMONS_PLT).$(ERL_VER)
 	dialyzer --fullpath --plt $(ERLWARE_COMMONS_PLT).$(ERL_VER) -Wrace_conditions -r ./ebin
 
-typer: $(ERLWARE_COMMONS_PLT).$(ERL)VER(
+typer: $(ERLWARE_COMMONS_PLT).$(ERL_VER)
 	typer --plt $(ERLWARE_COMMONS_PLT).$(ERL_VER) -r ./src
 
 shell: compile
