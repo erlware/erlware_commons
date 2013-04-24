@@ -15,9 +15,9 @@ endif
 
 ERLWARE_COMMONS_PLT=$(CURDIR)/.erlware_commons_plt
 
-.PHONY: all compile doc clean test shell distclean pdf get-deps rebuild #dialyzer typer #fail on Travis.
+.PHONY: all compile doc clean test shell distclean pdf get-deps rebuild dialyzer typer
 
-all: compile doc test #dialyzer #fail on travis
+all: compile doc test
 
 deps: .DEV_MODE
 	$(REBAR) get-deps compile
@@ -50,13 +50,13 @@ $(ERLWARE_COMMONS_PLT).$(ERL_VER).kernel:$(ERLWARE_COMMONS_PLT).$(ERL_VER).erts
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT).$(ERL_VER).base
 	@echo
 	- dialyzer --fullpath --verbose --output_plt $(ERLWARE_COMMONS_PLT).$(ERL_VER).base --build_plt \
-	   --apps kernel 
+	   --apps kernel
 
 $(ERLWARE_COMMONS_PLT).$(ERL_VER).base:$(ERLWARE_COMMONS_PLT).$(ERL_VER).kernel
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT).$(ERL_VER).base
 	@echo
 	- dialyzer --fullpath --verbose --output_plt $(ERLWARE_COMMONS_PLT).$(ERL_VER).base --build_plt \
-	   --apps stdlib 
+	   --apps stdlib
 
 $(ERLWARE_COMMONS_PLT).$(ERL_VER): $(ERLWARE_COMMONS_PLT).$(ERL_VER).base
 	@echo Building local plt at $(ERLWARE_COMMONS_PLT).$(ERL_VER)
@@ -91,4 +91,4 @@ distclean: clean
 	rm -rvf $(CURDIR)/deps
 	rm -rvf .DEV_MODE
 
-rebuild: distclean get-deps all
+rebuild: distclean all
