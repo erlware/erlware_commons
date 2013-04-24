@@ -91,4 +91,4 @@ distclean: clean
 	rm -rvf $(CURDIR)/deps
 	rm -rvf .DEV_MODE
 
-rebuild: distclean get-deps all
+rebuild: distclean all
