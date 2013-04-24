@@ -453,11 +453,11 @@ format([$z|T], {Date,_}=Dt, Acc) ->
     format(T, Dt, [itol(days_in_year(Date))|Acc]);
 
 %% Time Formats
-format([$a|T], Dt={_,{H,_,_}}, Acc) when H > 12 ->
+format([$a|T], Dt={_,{H,_,_}}, Acc) when H >= 12 ->
     format(T, Dt, ["pm"|Acc]);
 format([$a|T], Dt={_,{_,_,_}}, Acc) ->
     format(T, Dt, ["am"|Acc]);
-format([$A|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
+format([$A|T], {_,{H,_,_}}=Dt, Acc) when H >= 12 ->
     format(T, Dt, ["PM"|Acc]);
 format([$A|T], Dt={_,{_,_,_}}, Acc) ->
     format(T, Dt, ["AM"|Acc]);
@@ -680,6 +680,8 @@ ltoi(X) ->
 
 -define(DATE, {{2001,3,10},{17,16,17}}).
 -define(DATEMS, {{2001,3,10},{17,16,17,123456}}).
+-define(DATE_NOON, {{2001,3,10},{12,0,0}}).
+-define(DATE_MIDNIGHT, {{2001,3,10},{0,0,0}}).
 -define(ISO, "o \\WW").
 
 basic_format_test_() ->
@@ -696,6 +698,10 @@ basic_format_test_() ->
      ?_assertEqual(format("H:i:s",?DATE), "17:16:17"),
      ?_assertEqual(format("z",?DATE), "68"),
      ?_assertEqual(format("D M j G:i:s Y",?DATE), "Sat Mar 10 17:16:17 2001"),
+     ?_assertEqual(format("ga",?DATE_NOON), "12pm"),
+     ?_assertEqual(format("gA",?DATE_NOON), "12PM"),
+     ?_assertEqual(format("ga",?DATE_MIDNIGHT), "12am"),
+     ?_assertEqual(format("gA",?DATE_MIDNIGHT), "12AM"),
 
      ?_assertEqual(format("h-i-s, j-m-y, it is w Day",?DATE),
                    "05-16-17, 10-03-01, 1631 1617 6 Satpm01"),
