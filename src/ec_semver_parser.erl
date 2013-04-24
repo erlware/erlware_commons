@@ -18,19 +18,19 @@ parse(Input) when is_binary(Input) ->
   release_memo(), Result.
 
 'semver'(Input, Index) ->
-  p(Input, Index, 'semver', fun(I,D) -> (p_seq([fun 'major_minor_patch_min_patch'/2, p_optional(p_seq([p_string(<<"-">>), fun 'alpha_part'/2, p_zero_or_more(p_seq([p_string(<<".">>), fun 'alpha_part'/2]))])), p_optional(p_seq([p_string(<<"+">>), fun 'alpha_part'/2, p_zero_or_more(p_seq([p_string(<<".">>), fun 'alpha_part'/2]))])), p_not(p_anything())]))(I,D) end, fun(Node, _Idx) -> ec_semver:internal_parse_version(Node)  end).
+  p(Input, Index, 'semver', fun(I,D) -> (p_seq([fun 'major_minor_patch_min_patch'/2, p_optional(p_seq([p_string(<<"-">>), fun 'alpha_part'/2, p_zero_or_more(p_seq([p_string(<<".">>), fun 'alpha_part'/2]))])), p_optional(p_seq([p_string(<<"+">>), fun 'alpha_part'/2, p_zero_or_more(p_seq([p_string(<<".">>), fun 'alpha_part'/2]))])), p_not(p_anything())]))(I,D) end, fun(Node, _Idx) ->  ec_semver:internal_parse_version(Node)  end).
 
 'major_minor_patch_min_patch'(Input, Index) ->
-  p(Input, Index, 'major_minor_patch_min_patch', fun(I,D) -> (p_seq([p_choose([p_seq([p_optional(p_string(<<"v">>)), fun 'numeric_part'/2]), fun 'alpha_part'/2]), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2])), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2])), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2]))]))(I,D) end, fun(Node, Idx) ->transform('major_minor_patch_min_patch', Node, Idx) end).
+  p(Input, Index, 'major_minor_patch_min_patch', fun(I,D) -> (p_seq([p_choose([p_seq([p_optional(p_string(<<"v">>)), fun 'numeric_part'/2]), fun 'alpha_part'/2]), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2])), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2])), p_optional(p_seq([p_string(<<".">>), fun 'version_part'/2]))]))(I,D) end, fun(Node, Idx) -> transform('major_minor_patch_min_patch', Node, Idx) end).
 
 'version_part'(Input, Index) ->
-  p(Input, Index, 'version_part', fun(I,D) -> (p_choose([fun 'numeric_part'/2, fun 'alpha_part'/2]))(I,D) end, fun(Node, Idx) ->transform('version_part', Node, Idx) end).
+  p(Input, Index, 'version_part', fun(I,D) -> (p_choose([fun 'numeric_part'/2, fun 'alpha_part'/2]))(I,D) end, fun(Node, Idx) -> transform('version_part', Node, Idx) end).
 
 'numeric_part'(Input, Index) ->
-  p(Input, Index, 'numeric_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[0-9]">>)))(I,D) end, fun(Node, _Idx) ->erlang:list_to_integer(erlang:binary_to_list(erlang:iolist_to_binary(Node))) end).
+  p(Input, Index, 'numeric_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[0-9]">>)))(I,D) end, fun(Node, _Idx) -> erlang:list_to_integer(erlang:binary_to_list(erlang:iolist_to_binary(Node))) end).
 
 'alpha_part'(Input, Index) ->
-  p(Input, Index, 'alpha_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[A-Za-z0-9]">>)))(I,D) end, fun(Node, _Idx) ->erlang:iolist_to_binary(Node) end).
+  p(Input, Index, 'alpha_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[A-Za-z0-9]">>)))(I,D) end, fun(Node, _Idx) -> erlang:iolist_to_binary(Node) end).
 
 
 transform(_,Node,_Index) -> Node.
