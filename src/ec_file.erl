@@ -22,8 +22,7 @@
          md5sum/1,
          read/1,
          write/2,
-         write_term/2,
-         consult/1
+         write_term/2
         ]).
 
 -export_type([
@@ -174,16 +173,6 @@ mkdir_path(Path) ->
     mkdir_p(Path).
 
 
-%% @doc consult an erlang term file from the file system.
-%%      Provide user readible exeption on failure.
--spec consult(FilePath::file:name()) -> term().
-consult(FilePath) ->
-    case file:consult(FilePath) of
-        {ok, [Term]} ->
-            Term;
-        Error ->
-            Error
-    end.
 %% @doc read a file from the file system. Provide UEX exeption on failure.
 -spec read(FilePath::file:filename()) -> binary() | {error, Reason::term()}.
 read(FilePath) ->
@@ -327,12 +316,10 @@ file_test() ->
     filelib:ensure_dir(TermFile),
     filelib:ensure_dir(TermFileCopy),
     write_term(TermFile, "term"),
-    ?assertMatch("term", consult(TermFile)),
     ?assertMatch({ok, <<"\"term\". ">>}, read(TermFile)),
     copy(filename:dirname(TermFile),
          filename:dirname(TermFileCopy),
-         [recursive]),
-    ?assertMatch("term", consult(TermFileCopy)).
+         [recursive]).
 
 teardown_test() ->
     Dir = insecure_mkdtemp(),
