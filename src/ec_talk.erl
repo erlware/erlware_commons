@@ -1,4 +1,5 @@
 %% -*- mode: Erlang; fill-column: 79; comment-column: 70; -*-
+%% vi:ts=4 sw=4 et
 %%%---------------------------------------------------------------------------
 %%% Permission is hereby granted, free of charge, to any person
 %%% obtaining a copy of this software and associated documentation

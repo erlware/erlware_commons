@@ -1,4 +1,5 @@
 %%% -*- mode: Erlang; fill-column: 80; comment-column: 75; -*-
+%%% vi:ts=4 sw=4 et
 %%% The MIT License
 %%%
 %%% Copyright (c) 2007 Stephen Marsh
