@@ -1,3 +1,4 @@
+%% vi:ts=4 sw=4 et
 %% @copyright Dale Harvey
 %% @doc Format dates in erlang
 %%
