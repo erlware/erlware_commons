@@ -92,18 +92,18 @@ do_parse(Date, Now, Opts) ->
         {error, bad_date} ->
             erlang:throw({?MODULE, {bad_date, Date}});
         {D1, T1} = {{Y, M, D}, {H, M1, S}}
-        when is_number(Y), is_number(M),
-             is_number(D), is_number(H),
-             is_number(M1), is_number(S) ->
+          when is_number(Y), is_number(M),
+               is_number(D), is_number(H),
+               is_number(M1), is_number(S) ->
             case calendar:valid_date(D1) of
                 true -> {D1, T1};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
             end;
         {D1, _T1, {Ms}} = {{Y, M, D}, {H, M1, S},  {Ms}}
-        when is_number(Y), is_number(M),
-             is_number(D), is_number(H),
-             is_number(M1), is_number(S),
-             is_number(Ms) ->
+          when is_number(Y), is_number(M),
+               is_number(D), is_number(H),
+               is_number(M1), is_number(S),
+               is_number(Ms) ->
             case calendar:valid_date(D1) of
                 true -> {D1, {H,M1,S,Ms}};
                 false -> erlang:throw({?MODULE, {bad_date, Date}})
@@ -138,17 +138,17 @@ nparse(Date) ->
 
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $Z ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+        andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, { 0}};
 
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $+, Off | _Rest ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+        andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, []) - Off, Min, Sec}, {0}};
 
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $-, Off | _Rest ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso Year > 31 ->
+        andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, []) + Off, Min, Sec}, {0}};
 
 %% Date/Times 22 Aug 2008 6:35.0001 PM
@@ -168,7 +168,7 @@ parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
 
 parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
-       andalso ?is_year(Year) ->
+        andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour,[]), Min, Sec}, {Ms}};
 parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
   when ?is_us_sep(X) andalso ?is_month(Month) ->
@@ -180,21 +180,21 @@ parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms ], _Now, _Opts)
 %% Date/Times Dec 1st, 2012 6:25 PM
 parse([Month,Day,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
-	{{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}};
 parse([Month,Day,Year,Hour,$:,Min | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
-	{{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
+    {{Year, Month, Day}, {hour(Hour, PAM), Min, 0}};
 parse([Month,Day,Year,Hour | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
-	{{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+    {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 
 %% Date/Times Dec 1st, 2012 18:25:15 (no AM/PM)
 parse([Month,Day,Year,Hour,$:,Min,$:,Sec], _Now, _Opts)
   when ?is_hinted_month(Month) andalso ?is_day(Day) ->
-	{{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
 parse([Month,Day,Year,Hour,$:,Min], _Now, _Opts)
   when ?is_hinted_month(Month) andalso ?is_day(Day) ->
-	{{Year, Month, Day}, {hour(Hour, []), Min, 0}};
+    {{Year, Month, Day}, {hour(Hour, []), Min, 0}};
 
 %% Times - 21:45, 13:45:54, 13:15PM etc
 parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
@@ -243,7 +243,7 @@ parse([Day,X,Month,X,Year,Hour | PAM], _Date, _Opts)
     {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 parse([Month,X,Day,X,Year,Hour | PAM], _Date, _Opts)
   when ?is_meridian(PAM) andalso ?is_us_sep(X) ->
-        {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
+    {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 
 
 %% Time is "6:35 PM" ms return
@@ -675,7 +675,7 @@ ltoi(X) ->
 %% TEST FUNCTIONS
 %%
 %% c(dh_date,[{d,'TEST'}]).
-%-define(NOTEST, 1).
+%%-define(NOTEST, 1).
 
 -include_lib("eunit/include/eunit.hrl").
 
