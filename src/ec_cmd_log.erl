@@ -227,7 +227,7 @@ colorize_(Color, Bold, Msg) when is_integer(Color), is_integer(Bold)->
 %%% Test Functions
 %%%===================================================================
 
--ifndef(NOTEST).
+-ifdef(DEV_ONLY).
 -include_lib("eunit/include/eunit.hrl").
 
 should_test() ->
