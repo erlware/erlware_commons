@@ -1,6 +1,8 @@
 %%% @copyright Erlware, LLC.
 -module(ec_plists_tests).
 
+-ifdef(DEV_ONLY).
+
 -include_lib("eunit/include/eunit.hrl").
 
 %%%===================================================================
@@ -73,3 +75,5 @@ ftmap_bad_test() ->
                         lists:seq(1, 5)),
     ?assertMatch([{value, 1}, {error,{throw,test_exception}}, {value, 3},
                   {value, 4}, {value, 5}] , Results).
+
+-endif.
