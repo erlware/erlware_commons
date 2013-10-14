@@ -671,13 +671,13 @@ pad2(X) when is_float(X) ->
 ltoi(X) ->
     list_to_integer(X).
 
-%%
-%% TEST FUNCTIONS
-%%
-%% c(dh_date,[{d,'TEST'}]).
-%%-define(NOTEST, 1).
+%%%===================================================================
+%%% Tests
+%%%===================================================================
 
+-ifdef(DEV_ONLY).
 -include_lib("eunit/include/eunit.hrl").
+
 
 -define(DATE, {{2001,3,10},{17,16,17}}).
 -define(DATEMS, {{2001,3,10},{17,16,17,123456}}).
@@ -938,3 +938,4 @@ zulu_test_() ->
      ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17-04:00")),
                    "2001-03-10T19:16:17")
     ].
+-endif.

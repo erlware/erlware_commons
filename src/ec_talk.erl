@@ -43,8 +43,6 @@
               type/0,
               supported/0]).
 
--include_lib("eunit/include/eunit.hrl").
-
 %%============================================================================
 %% Types
 %%============================================================================
@@ -202,6 +200,9 @@ get_string(String) ->
 %%%====================================================================
 %%% tests
 %%%====================================================================
+-ifdef(DEV_ONLY).
+-include_lib("eunit/include/eunit.hrl").
+
 general_test_() ->
     [?_test(42 == get_integer("42")),
      ?_test(500211 == get_integer("500211")),
@@ -216,3 +217,5 @@ general_test_() ->
      ?_test(false == get_boolean("False")),
      ?_test(false == get_boolean("No")),
      ?_test(false == get_boolean("no"))].
+
+-endif.

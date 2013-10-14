@@ -33,7 +33,7 @@
          is_true/1,
          is_false/1]).
 
--ifndef(NOTEST).
+-ifdef(DEV_ONLY).
 -include_lib("proper/include/proper.hrl").
 -endif.
 
@@ -218,10 +218,10 @@ to_atom(X) ->
     to_atom(to_list(X)).
 
 %%%===================================================================
-%%% API
+%%% Tests
 %%%===================================================================
 
--ifndef(NOTEST).
+-ifdef(DEV_ONLY).
 -include_lib("eunit/include/eunit.hrl").
 
 force_proper_test_() ->
