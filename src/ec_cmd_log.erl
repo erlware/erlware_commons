@@ -49,9 +49,8 @@
 
 -define(PREFIX, "===> ").
 
--record(state_t, {mod=?MODULE :: ec_log,
-                  log_level=0 :: int_log_level(),
-                  caller=api :: api | command_line}).
+-record(state_t, {log_level=0 :: int_log_level(),
+                  caller=api :: caller()}).
 
 %%============================================================================
 %% types
@@ -60,7 +59,10 @@
               int_log_level/0,
               atom_log_level/0,
               log_level/0,
+              caller/0,
               log_fun/0]).
+
+-type caller() :: api | command_line.
 
 -type log_level() :: int_log_level() | atom_log_level().
 
@@ -82,8 +84,9 @@
 new(LogLevel) ->
     new(LogLevel, api).
 
+-spec new(log_level(), caller()) -> t().
 new(LogLevel, Caller) when LogLevel >= 0, LogLevel =< 3 ->
-    #state_t{mod=?MODULE, log_level=LogLevel, caller=Caller};
+    #state_t{log_level=LogLevel, caller=Caller};
 new(AtomLogLevel, Caller)
   when AtomLogLevel =:= error;
        AtomLogLevel =:= warn;
@@ -165,7 +168,7 @@ warn(LogState, FormatString, Args) ->
 
 %% @doc Execute the fun passed in if log level is as expected.
 -spec log(t(), int_log_level(), log_fun()) -> ok.
-log(#state_t{mod=?MODULE, log_level=DetailLogLevel}, LogLevel, Fun)
+log(#state_t{log_level=DetailLogLevel}, LogLevel, Fun)
     when DetailLogLevel >= LogLevel ->
     io:format("~s~n", [Fun()]);
 log(_, _, _) ->
@@ -174,7 +177,7 @@ log(_, _, _) ->
 %% @doc when the module log level is less then or equal to the log level for the
 %% call then write the log info out. When its not then ignore the call.
 -spec log(t(), int_log_level(), string(), [any()]) -> ok.
-log(#state_t{mod=?MODULE, log_level=DetailLogLevel}, LogLevel, FormatString, Args)
+log(#state_t{log_level=DetailLogLevel}, LogLevel, FormatString, Args)
   when DetailLogLevel >= LogLevel,
        erlang:is_list(Args) ->
     io:format(FormatString, Args);
@@ -184,7 +187,7 @@ log(_, _, _, _) ->
 %% @doc return a boolean indicating if the system should log for the specified
 %% levelg
 -spec should(t(), int_log_level() | any()) -> boolean().
-should(#state_t{mod=?MODULE, log_level=DetailLogLevel}, LogLevel)
+should(#state_t{log_level=DetailLogLevel}, LogLevel)
   when DetailLogLevel >= LogLevel ->
     true;
 should(_, _) ->
@@ -192,18 +195,18 @@ should(_, _) ->
 
 %% @doc get the current log level as an integer
 -spec log_level(t()) -> int_log_level().
-log_level(#state_t{mod=?MODULE, log_level=DetailLogLevel}) ->
+log_level(#state_t{log_level=DetailLogLevel}) ->
     DetailLogLevel.
 
 %% @doc get the current log level as an atom
 -spec atom_log_level(t()) -> atom_log_level().
-atom_log_level(#state_t{mod=?MODULE, log_level=?EC_ERROR}) ->
+atom_log_level(#state_t{log_level=?EC_ERROR}) ->
     error;
-atom_log_level(#state_t{mod=?MODULE, log_level=?EC_WARN}) ->
+atom_log_level(#state_t{log_level=?EC_WARN}) ->
     warn;
-atom_log_level(#state_t{mod=?MODULE, log_level=?EC_INFO}) ->
+atom_log_level(#state_t{log_level=?EC_INFO}) ->
     info;
-atom_log_level(#state_t{mod=?MODULE, log_level=?EC_DEBUG}) ->
+atom_log_level(#state_t{log_level=?EC_DEBUG}) ->
     debug.
 
 -spec format(t()) -> iolist().

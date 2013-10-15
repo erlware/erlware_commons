@@ -175,7 +175,7 @@ mkdir_path(Path) ->
 
 
 %% @doc read a file from the file system. Provide UEX exeption on failure.
--spec read(FilePath::file:filename()) -> binary() | {error, Reason::term()}.
+-spec read(FilePath::file:filename()) -> {ok, binary()} | {error, Reason::term()}.
 read(FilePath) ->
     %% Now that we are moving away from exceptions again this becomes
     %% a bit redundant but we want to be backwards compatible as much
@@ -373,9 +373,9 @@ find_test() ->
     {BaseDir, _SourceDir, {Name1, Name2, Name3, _NoName}} = setup_base_and_target(),
     Result = find(BaseDir, "file[a-z]+\$"),
     ?assertMatch(3, erlang:length(Result)),
-    ?assert(lists:member(Name1, Result)),
-    ?assert(lists:member(Name2, Result)),
-    ?assert(lists:member(Name3, Result)),
+    ?assertEqual(true, lists:member(Name1, Result)),
+    ?assertEqual(true, lists:member(Name2, Result)),
+    ?assertEqual(true, lists:member(Name3, Result)),
     remove(BaseDir, [recursive]).
 
 -endif.

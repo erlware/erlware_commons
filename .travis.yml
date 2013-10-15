@@ -7,8 +7,7 @@ otp_release:
        - R14B04
        - R14B03
        - R14B02
-script: "make"
+script: "make rebuild"
 branches:
         only:
                 - master
-                - next
