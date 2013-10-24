@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_cmd_log (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_cmd_log</h1>
+<h2 class="modsummary">This provides simple output functions for command line apps.</h2>
+<div class="description">
+<p>This provides simple output functions for command line apps. You should
+   use this to talk to the users if you are wrting code for the system</p></div>
+<div class="section"><h4>DATA TYPES</h4><span id="types"> </span>
+
+<taglist>
+<dt><code>atom_log_level() = error | warn | info | debug</code></dt>
+<item><span id="type-atom_log_level"> </span> </item>
+<dt><code>int_log_level() = 0..3</code></dt>
+<item><span id="type-int_log_level"> </span> </item>
+<dt><code>log_fun() = () -&gt; iolist()</code></dt>
+<item><span id="type-log_fun"> </span> </item>
+<dt><code>log_level() = int_log_level() | atom_log_level()</code></dt>
+<item><span id="type-log_level"> </span> </item>
+<dt><code>t()</code></dt>
+<item><span id="type-t"> </span> </item>
+</taglist></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="new/1">new(LogLevel::log_level()) -&gt; t()</h3>
+
+
+<div class="description"><span id="new-1"> </span>
+
+<p>Create a new 'log level' for the system</p>
+</div></div>
+<div class="function">
+<h3 id="new/2">new(LogLevel, Caller) -&gt; term()
+</h3>
+
+
+<div class="description"><span id="new-2"> </span>
+ </div></div>
+<div class="function">
+<h3 id="debug/1">debug(LogState::t(), Fun::string() | log_fun()) -&gt; ok</h3>
+
+
+<div class="description"><span id="debug-2"> </span>
+
+<p>log at the debug level given the current log state with a string or
+  function that returns a string</p>
+</div></div>
+<div class="function">
+<h3 id="debug/1-1">debug(LogState::t(), FormatString::string(), Args::[any()]) -&gt; ok</h3>
+
+
+<div class="description"><span id="debug-3"> </span>
+
+<p>log at the debug level given the current log state with a format string
+  and argements @see io:format/2</p>
+</div></div>
+<div class="function">
+<h3 id="info/1">info(LogState::t(), Fun::string() | log_fun()) -&gt; ok</h3>
+
+
+<div class="description"><span id="info-2"> </span>
+
+<p>log at the info level given the current log state with a string or
+  function that returns a string</p>
+</div></div>
+<div class="function">
+<h3 id="info/1-1">info(LogState::t(), FormatString::string(), Args::[any()]) -&gt; ok</h3>
+
+
+<div class="description"><span id="info-3"> </span>
+
+<p>log at the info level given the current log state with a format string
+  and argements @see io:format/2</p>
+</div></div>
+<div class="function">
+<h3 id="error/1">error(LogState::t(), Fun::string() | log_fun()) -&gt; ok</h3>
+
+
+<div class="description"><span id="error-2"> </span>
+
+<p>log at the error level given the current log state with a string or
+  format string that returns a function</p>
+</div></div>
+<div class="function">
+<h3 id="error/1-1">error(LogState::t(), FormatString::string(), Args::[any()]) -&gt; ok</h3>
+
+
+<div class="description"><span id="error-3"> </span>
+
+<p>log at the error level given the current log state with a format string
+  and argements @see io:format/2</p>
+</div></div>
+<div class="function">
+<h3 id="warn/1">warn(LogState::t(), Fun::string() | log_fun()) -&gt; ok</h3>
+
+
+<div class="description"><span id="warn-2"> </span>
+
+<p>log at the warn level given the current log state with a string or
+  format string that returns a function</p>
+</div></div>
+<div class="function">
+<h3 id="warn/1-1">warn(LogState::t(), FormatString::string(), Args::[any()]) -&gt; ok</h3>
+
+
+<div class="description"><span id="warn-3"> </span>
+
+<p>log at the warn level given the current log state with a format string
+  and argements @see io:format/2</p>
+</div></div>
+<div class="function">
+<h3 id="log/1">log(State_t::t(), LogLevel::int_log_level(), FormatString::string(), Args::[any()]) -&gt; ok</h3>
+
+
+<div class="description"><span id="log-4"> </span>
+
+<p>when the module log level is less then or equal to the log level for the
+  call then write the log info out. When its not then ignore the call.</p>
+</div></div>
+<div class="function">
+<h3 id="should/1">should(State_t::t(), LogLevel::int_log_level() | any()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="should-2"> </span>
+
+<p>return a boolean indicating if the system should log for the specified
+  levelg</p>
+</div></div>
+<div class="function">
+<h3 id="log_level/1">log_level(State_t::t()) -&gt; int_log_level()</h3>
+
+
+<div class="description"><span id="log_level-1"> </span>
+
+<p>get the current log level as an integer</p>
+</div></div>
+<div class="function">
+<h3 id="atom_log_level/1">atom_log_level(State_t::t()) -&gt; atom_log_level()</h3>
+
+
+<div class="description"><span id="atom_log_level-1"> </span>
+
+<p>get the current log level as an atom</p>
+</div></div>
+<div class="function">
+<h3 id="format/1">format(Log::t()) -&gt; iolist()</h3>
+
+
+<div class="description"><span id="format-1"> </span>
+ </div></div></div>
+
+<authors>
+
+<aname>Eric Merritt</aname>
+<email>ericbmerritt@gmail.com</email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#new/1">new/1</a></li><li><a href="#new/2">new/2</a></li><li><a href="#debug/1">debug/1</a></li><li><a href="#debug/1-1">debug/1-1</a></li><li><a href="#info/1">info/1</a></li><li><a href="#info/1-1">info/1-1</a></li><li><a href="#error/1">error/1</a></li><li><a href="#error/1-1">error/1-1</a></li><li><a href="#warn/1">warn/1</a></li><li><a href="#warn/1-1">warn/1-1</a></li><li><a href="#log/1">log/1</a></li><li><a href="#should/1">should/1</a></li><li><a href="#log_level/1">log_level/1</a></li><li><a href="#atom_log_level/1">atom_log_level/1</a></li><li><a href="#format/1">format/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

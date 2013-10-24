@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_talk (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_talk</h1>
+<h2 class="modsummary">
+    Provides the ability to ask questions of the user and
+    get a response.</h2>
+<div class="description">
+<p>
+    Provides the ability to ask questions of the user and
+    get a response.</p></div>
+<div class="section"><h4>DATA TYPES</h4><span id="types"> </span>
+
+<taglist>
+<dt><code>prompt() = string()</code></dt>
+<item><span id="type-prompt"> </span> </item>
+<dt><code>supported() = boolean() | number() | string()</code></dt>
+<item><span id="type-supported"> </span> </item>
+<dt><code>type() = boolean | number | string</code></dt>
+<item><span id="type-type"> </span> </item>
+</taglist></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="say/1">say(Say::string()) -&gt; ok</h3>
+
+
+<div class="description"><span id="say-1"> </span>
+
+<p>Outputs the line to the screen</p>
+</div></div>
+<div class="function">
+<h3 id="say/1-1">say(Say::string(), Args::[term()] | term()) -&gt; ok</h3>
+
+
+<div class="description"><span id="say-2"> </span>
+ </div></div>
+<div class="function">
+<h3 id="ask/1">ask(Prompt::prompt()) -&gt; string()</h3>
+
+
+<div class="description"><span id="ask-1"> </span>
+
+<p>Asks the user for a response to the specified prompt.</p>
+</div></div>
+<div class="function">
+<h3 id="ask_default/1">ask_default(Prompt::prompt(), Default::string()) -&gt; string()</h3>
+
+
+<div class="description"><span id="ask_default-2"> </span>
+
+<p>Asks the user for a response to the specified prompt.</p>
+</div></div>
+<div class="function">
+<h3 id="ask/1-1">ask(Prompt::prompt(), X2::type()) -&gt; supported()</h3>
+
+
+<div class="description"><span id="ask-2"> </span>
+
+<p>Asks the user to respond to the prompt. Trys to return the
+  value in the format specified by 'Type'.</p>
+</div></div>
+<div class="function">
+<h3 id="ask_default/1-1">ask_default(Prompt::prompt(), X2::type(), Default::supported()) -&gt; supported()</h3>
+
+
+<div class="description"><span id="ask_default-3"> </span>
+
+<p>Asks the user to respond to the prompt. Trys to return the
+  value in the format specified by 'Type'.</p>
+</div></div>
+<div class="function">
+<h3 id="ask/1-2">ask(Prompt::prompt(), Min::number(), Max::number()) -&gt; number()</h3>
+
+
+<div class="description"><span id="ask-3"> </span>
+
+<p>Asks the user to respond to the number prompt with a value
+  between min and max.</p>
+</div></div></div>
+
+<authors>
+
+<aname>Eric Merritt</aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#say/1">say/1</a></li><li><a href="#say/1-1">say/1-1</a></li><li><a href="#ask/1">ask/1</a></li><li><a href="#ask_default/1">ask_default/1</a></li><li><a href="#ask/1-1">ask/1-1</a></li><li><a href="#ask_default/1-1">ask_default/1-1</a></li><li><a href="#ask/1-2">ask/1-2</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

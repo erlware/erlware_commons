@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_cnv (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_cnv</h1>
+<h2 class="modsummary" />
+<div class="description">
+</div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="to_integer/1">to_integer(X::string() | binary() | integer() | float()) -&gt; integer()</h3>
+
+
+<div class="description"><span id="to_integer-1"> </span>
+
+<p>
+  Automatic conversion of a term into integer type.  The conversion
+  will round a float value if nonstrict is specified otherwise badarg</p>
+</div></div>
+<div class="function">
+<h3 id="to_integer/1-1">to_integer(X::string() | binary() | integer() | float(), S::strict | nonstrict) -&gt; integer()</h3>
+
+
+<div class="description"><span id="to_integer-2"> </span>
+ </div></div>
+<div class="function">
+<h3 id="to_float/1">to_float(X::string() | binary() | integer() | float()) -&gt; float()</h3>
+
+
+<div class="description"><span id="to_float-1"> </span>
+
+<p>
+  Automatic conversion of a term into float type. badarg if strict
+  is defined and an integer value is passed.</p>
+</div></div>
+<div class="function">
+<h3 id="to_float/1-1">to_float(X::string() | binary() | integer() | float(), S::strict | nonstrict) -&gt; float()</h3>
+
+
+<div class="description"><span id="to_float-2"> </span>
+ </div></div>
+<div class="function">
+<h3 id="to_number/1">to_number(X::binary() | string() | number()) -&gt; number()</h3>
+
+
+<div class="description"><span id="to_number-1"> </span>
+
+<p>
+  Automatic conversion of a term into number type.</p>
+</div></div>
+<div class="function">
+<h3 id="to_list/1">to_list(X::atom() | list() | binary() | integer() | float()) -&gt; list()</h3>
+
+
+<div class="description"><span id="to_list-1"> </span>
+
+<p>
+  Automatic conversion of a term into Erlang list</p>
+</div></div>
+<div class="function">
+<h3 id="to_binary/1">to_binary(X::atom() | string() | binary() | integer() | float()) -&gt; binary()</h3>
+
+
+<div class="description"><span id="to_binary-1"> </span>
+
+<p>
+  Known limitations:
+    Converting [256 | _], lists with integers &gt; 255</p>
+</div></div>
+<div class="function">
+<h3 id="to_boolean/1">to_boolean(X1::binary() | string() | atom()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="to_boolean-1"> </span>
+ </div></div>
+<div class="function">
+<h3 id="is_true/1">is_true(X1::binary() | string() | atom()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="is_true-1"> </span>
+ </div></div>
+<div class="function">
+<h3 id="is_false/1">is_false(X1::binary() | string() | atom()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="is_false-1"> </span>
+ </div></div>
+<div class="function">
+<h3 id="to_atom/1">to_atom(X::atom() | list() | binary() | integer() | float()) -&gt; atom()</h3>
+
+
+<div class="description"><span id="to_atom-1"> </span>
+
+<p>
+  Automation conversion a term to an existing atom. badarg is
+  returned if the atom doesn't exist.  the safer version, won't let
+  you leak atoms</p>
+</div></div></div>
+
+<authors>
+
+<aname>Eric Merritt</aname>
+<email>ericbmerritt@gmail.com</email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#to_integer/1">to_integer/1</a></li><li><a href="#to_integer/1-1">to_integer/1-1</a></li><li><a href="#to_float/1">to_float/1</a></li><li><a href="#to_float/1-1">to_float/1-1</a></li><li><a href="#to_number/1">to_number/1</a></li><li><a href="#to_list/1">to_list/1</a></li><li><a href="#to_binary/1">to_binary/1</a></li><li><a href="#to_boolean/1">to_boolean/1</a></li><li><a href="#is_true/1">is_true/1</a></li><li><a href="#is_false/1">is_false/1</a></li><li><a href="#to_atom/1">to_atom/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

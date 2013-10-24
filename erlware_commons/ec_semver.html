@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_semver (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_semver</h1>
+<h2 class="modsummary">
+    Helper functions for working with semver versioning strings.</h2>
+<div class="description">
+<p>
+    Helper functions for working with semver versioning strings.
+    See http://semver.org/ for the spec.</p></div>
+<div class="section"><h4>DATA TYPES</h4><span id="types"> </span>
+
+<taglist>
+<dt><code>alpha_info() = {PreRelease::[alpha_part()], BuildVersion::[alpha_part()]}</code></dt>
+<item><span id="type-alpha_info"> </span> </item>
+<dt><code>alpha_part() = integer() | binary() | string()</code></dt>
+<item><span id="type-alpha_part"> </span> </item>
+<dt><code>any_version() = version_string() | semver()</code></dt>
+<item><span id="type-any_version"> </span> </item>
+<dt><code>major_minor_patch_minpatch() = version_element() | {version_element(), version_element()} | {version_element(), version_element(), version_element()} | {version_element(), version_element(), version_element(), version_element()}</code></dt>
+<item><span id="type-major_minor_patch_minpatch"> </span> </item>
+<dt><code>semver() = {major_minor_patch_minpatch(), alpha_info()}</code></dt>
+<item><span id="type-semver"> </span> </item>
+<dt><code>version_element() = non_neg_integer() | binary()</code></dt>
+<item><span id="type-version_element"> </span> </item>
+<dt><code>version_string() = string() | binary()</code></dt>
+<item><span id="type-version_string"> </span> </item>
+</taglist></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="parse/1">parse(Version::any_version()) -&gt; semver()</h3>
+
+
+<div class="description"><span id="parse-1"> </span>
+
+<p>parse a string or binary into a valid semver representation</p>
+</div></div>
+<div class="function">
+<h3 id="format/1">format(X1::semver()) -&gt; iolist()</h3>
+
+
+<div class="description"><span id="format-1"> </span>
+ </div></div>
+<div class="function">
+<h3 id="eql/1">eql(VsnA::any_version(), VsnB::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="eql-2"> </span>
+
+<p>test for quality between semver versions</p>
+</div></div>
+<div class="function">
+<h3 id="gt/1">gt(VsnA::any_version(), VsnB::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="gt-2"> </span>
+
+<p>Test that VsnA is greater than VsnB</p>
+</div></div>
+<div class="function">
+<h3 id="gte/1">gte(VsnA::any_version(), VsnB::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="gte-2"> </span>
+
+<p>Test that VsnA is greater than or equal to VsnB</p>
+</div></div>
+<div class="function">
+<h3 id="lt/1">lt(VsnA::any_version(), VsnB::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="lt-2"> </span>
+
+<p>Test that VsnA is less than VsnB</p>
+</div></div>
+<div class="function">
+<h3 id="lte/1">lte(VsnA::any_version(), VsnB::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="lte-2"> </span>
+
+<p>Test that VsnA is less than or equal to VsnB</p>
+</div></div>
+<div class="function">
+<h3 id="between/1">between(Vsn1::any_version(), Vsn2::any_version(), VsnMatch::any_version()) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="between-3"> </span>
+
+<p>Test that VsnMatch is greater than or equal to Vsn1 and
+  less than or equal to Vsn2</p>
+</div></div>
+<div class="function">
+<h3 id="pes/2">pes(VsnA, VsnB) -&gt; term()
+</h3>
+
+
+<div class="description"><span id="pes-2"> </span>
+
+<p>check that VsnA is Approximately greater than VsnB</p>
+ 
+  <p>Specifying "&gt;= 2.6.5" is an optimistic version constraint. All  
+versions greater than the one specified, including major releases  
+(e.g. 3.0.0) are allowed.</p>
+ 
+  <p>Conversely, specifying "~&gt; 2.6" is pessimistic about future major  
+revisions and "~&gt; 2.6.5" is pessimistic about future minor  
+revisions.</p>
+ 
+   <p>"~&gt; 2.6" matches cookbooks &gt;= 2.6.0 AND &lt; 3.0.0
+  "~&gt; 2.6.5" matches cookbooks &gt;= 2.6.5 AND &lt; 2.7.0</p>
+</div></div>
+<div class="function">
+<h3 id="internal_parse_version/1">internal_parse_version(X1::iolist()) -&gt; semver()</h3>
+
+
+<div class="description"><span id="internal_parse_version-1"> </span>
+
+<p>helper function for the peg grammer to parse the iolist into a semver</p>
+</div></div></div>
+
+<authors>
+<aname> </aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#parse/1">parse/1</a></li><li><a href="#format/1">format/1</a></li><li><a href="#eql/1">eql/1</a></li><li><a href="#gt/1">gt/1</a></li><li><a href="#gte/1">gte/1</a></li><li><a href="#lt/1">lt/1</a></li><li><a href="#lte/1">lte/1</a></li><li><a href="#between/1">between/1</a></li><li><a href="#pes/2">pes/2</a></li><li><a href="#internal_parse_version/1">internal_parse_version/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

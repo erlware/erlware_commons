@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_date (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_date</h1>
+<h2 class="modsummary">Format dates in erlang.</h2>
+<div class="description">
+<p>Format dates in erlang</p>
+ 
+  <p>Licensed under the MIT license</p>
+ 
+  <p>This module formats erlang dates in the form {{Year, Month, Day},  
+{Hour, Minute, Second}} to printable strings, using (almost)  
+equivalent formatting rules as http://uk.php.net/date, US vs  
+European dates are disambiguated in the same way as  
+http://uk.php.net/manual/en/function.strtotime.php That is, Dates  
+in the m/d/y or d-m-y formats are disambiguated by looking at the  
+separator between the various components: if the separator is a  
+slash (/), then the American m/d/y is assumed; whereas if the  
+separator is a dash (-) or a dot (.), then the European d-m-y  
+format is assumed. To avoid potential ambiguity, it's best to use  
+ISO 8601 (YYYY-MM-DD) dates.</p>
+ 
+  <p>erlang has no concept of timezone so the following  
+formats are not implemented: B e I O P T Z  
+formats c and r will also differ slightly</p>
+ 
+  <p>See tests at bottom for examples</p></div>
+<div class="section"><h4>DATA TYPES</h4><span id="types"> </span>
+
+<taglist>
+<dt><code>date() = {year(), month(), day()}</code></dt>
+<item><span id="type-date"> </span> </item>
+<dt><code>datetime() = {date(), time()}</code></dt>
+<item><span id="type-datetime"> </span> </item>
+<dt><code>day() = 1..31</code></dt>
+<item><span id="type-day"> </span> </item>
+<dt><code>hour() = 0..23</code></dt>
+<item><span id="type-hour"> </span> </item>
+<dt><code>microsecond() = 0..1000000</code></dt>
+<item><span id="type-microsecond"> </span> </item>
+<dt><code>minute() = 0..59</code></dt>
+<item><span id="type-minute"> </span> </item>
+<dt><code>month() = 1..12 | {month, 1..12}</code></dt>
+<item><span id="type-month"> </span> </item>
+<dt><code>now() = {integer(), integer(), integer()}</code></dt>
+<item><span id="type-now"> </span> </item>
+<dt><code>second() = 0..59</code></dt>
+<item><span id="type-second"> </span> </item>
+<dt><code>time() = {hour(), minute(), second()} | {hour(), minute(), second(), microsecond()}</code></dt>
+<item><span id="type-time"> </span> </item>
+<dt><code>year() = non_neg_integer()</code></dt>
+<item><span id="type-year"> </span> </item>
+</taglist></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="format/1">format(Format::string()) -&gt; string()</h3>
+
+
+<div class="description"><span id="format-1"> </span>
+
+<p>format current local time as Format</p>
+</div></div>
+<div class="function">
+<h3 id="format/1-1">format(Format::string(), Now::datetime() | now()) -&gt; string()</h3>
+
+
+<div class="description"><span id="format-2"> </span>
+
+<p>format Date as Format</p>
+</div></div>
+<div class="function">
+<h3 id="parse/1">parse(Date::string()) -&gt; datetime()</h3>
+
+
+<div class="description"><span id="parse-1"> </span>
+
+<p>parses the datetime from a string</p>
+</div></div>
+<div class="function">
+<h3 id="parse/1-1">parse(Date::string(), Now::datetime() | now()) -&gt; datetime()</h3>
+
+
+<div class="description"><span id="parse-2"> </span>
+
+<p>parses the datetime from a string</p>
+</div></div>
+<div class="function">
+<h3 id="nparse/1">nparse(Date::string()) -&gt; now()</h3>
+
+
+<div class="description"><span id="nparse-1"> </span>
+
+<p>parses the datetime from a string into 'now' format</p>
+</div></div></div>
+
+<authors>
+<aname> </aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#format/1">format/1</a></li><li><a href="#format/1-1">format/1-1</a></li><li><a href="#parse/1">parse/1</a></li><li><a href="#parse/1-1">parse/1-1</a></li><li><a href="#nparse/1">nparse/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

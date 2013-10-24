@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_file (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_file</h1>
+<h2 class="modsummary">
+    Helper functions for working with files.</h2>
+<div class="description">
+<p>
+    Helper functions for working with files.</p></div>
+<div class="section"><h4>DATA TYPES</h4><span id="types"> </span>
+
+<taglist>
+<dt><code>option() = recursive</code></dt>
+<item><span id="type-option"> </span> </item>
+</taglist></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="exists/1">exists(Filename::filename() (see module file)) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="exists-1"> </span>
+ </div></div>
+<div class="function">
+<h3 id="copy/1">copy(From::name() (see module file), To::name() (see module file), Options::[option()]) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="copy-3"> </span>
+
+<p>copy an entire directory to another location.</p>
+</div></div>
+<div class="function">
+<h3 id="copy/1-1">copy(From::filename() (see module file), To::filename() (see module file)) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="copy-2"> </span>
+
+<p>copy a file including timestamps,ownership and mode etc.</p>
+</div></div>
+<div class="function">
+<h3 id="md5sum/1">md5sum(Value::string() | binary()) -&gt; string()</h3>
+
+
+<div class="description"><span id="md5sum-1"> </span>
+
+<p>return an md5 checksum string or a binary. Same as unix utility of
+       same name.</p>
+</div></div>
+<div class="function">
+<h3 id="remove/1">remove(Path::name() (see module file), Options::[option()]) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="remove-2"> </span>
+
+<p>delete a file. Use the recursive option for directories.
+  </p><pre class="sh_erlang">
+  Example: remove("./tmp_dir", [recursive]).
+  </pre>
+</div></div>
+<div class="function">
+<h3 id="remove/1-1">remove(Path::name() (see module file)) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="remove-1"> </span>
+
+<p>delete a file.</p>
+</div></div>
+<div class="function">
+<h3 id="is_symlink/1">is_symlink(Path::name() (see module file)) -&gt; boolean()</h3>
+
+
+<div class="description"><span id="is_symlink-1"> </span>
+
+<p>indicates witha boolean if the path supplied refers to symlink.</p>
+</div></div>
+<div class="function">
+<h3 id="type/1">type(Path::name() (see module file)) -&gt; file | symlink | directory</h3>
+
+
+<div class="description"><span id="type-1"> </span>
+
+<p>returns the type of the file.</p>
+</div></div>
+<div class="function">
+<h3 id="real_dir_path/1">real_dir_path(Path::name() (see module file)) -&gt; name() (see module file)</h3>
+
+
+<div class="description"><span id="real_dir_path-1"> </span>
+
+<p>gets the real path of a directory. This is mostly useful for
+  resolving symlinks. Be aware that this temporarily changes the
+  current working directory to figure out what the actual path
+  is. That means that it can be quite slow.</p>
+</div></div>
+<div class="function">
+<h3 id="insecure_mkdtemp/0">insecure_mkdtemp() -&gt; TmpDirPath::name() (see module file)</h3>
+
+
+<div class="description"><span id="insecure_mkdtemp-0"> </span>
+
+<p>make a unique temorory directory. Similar function to BSD stdlib
+  function of the same name.</p>
+</div></div>
+<div class="function">
+<h3 id="mkdir_p/1">mkdir_p(Path::name() (see module file)) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="mkdir_p-1"> </span>
+
+<p>Makes a directory including parent dirs if they are missing.</p>
+</div></div>
+<div class="function">
+<h3 id="mkdir_path/1">mkdir_path(Path::name() (see module file)) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="mkdir_path-1"> </span>
+
+<p>Makes a directory including parent dirs if they are missing.</p>
+</div></div>
+<div class="function">
+<h3 id="read/1">read(FilePath::filename() (see module file)) -&gt; binary() | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="read-1"> </span>
+
+<p>read a file from the file system. Provide UEX exeption on failure.</p>
+</div></div>
+<div class="function">
+<h3 id="write/1">write(FileName::filename() (see module file), Contents::string()) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="write-2"> </span>
+
+<p>write a file to the file system. Provide UEX exeption on failure.</p>
+</div></div>
+<div class="function">
+<h3 id="write_term/1">write_term(FileName::filename() (see module file), Term::term()) -&gt; ok | {error, Reason::term()}</h3>
+
+
+<div class="description"><span id="write_term-2"> </span>
+
+<p>write a term out to a file so that it can be consulted later.</p>
+</div></div>
+<div class="function">
+<h3 id="find/1">find(FromDir::name() (see module file), TargetPattern::string()) -&gt; [name() (see module file)]</h3>
+
+
+<div class="description"><span id="find-2"> </span>
+
+<p>Finds files and directories that match the regexp supplied in
+   the TargetPattern regexp.</p>
+</div></div></div>
+
+<authors>
+<aname> </aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#exists/1">exists/1</a></li><li><a href="#copy/1">copy/1</a></li><li><a href="#copy/1-1">copy/1-1</a></li><li><a href="#md5sum/1">md5sum/1</a></li><li><a href="#remove/1">remove/1</a></li><li><a href="#remove/1-1">remove/1-1</a></li><li><a href="#is_symlink/1">is_symlink/1</a></li><li><a href="#type/1">type/1</a></li><li><a href="#real_dir_path/1">real_dir_path/1</a></li><li><a href="#insecure_mkdtemp/0">insecure_mkdtemp/0</a></li><li><a href="#mkdir_p/1">mkdir_p/1</a></li><li><a href="#mkdir_path/1">mkdir_path/1</a></li><li><a href="#read/1">read/1</a></li><li><a href="#write/1">write/1</a></li><li><a href="#write_term/1">write_term/1</a></li><li><a href="#find/1">find/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

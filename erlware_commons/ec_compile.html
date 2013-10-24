@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_compile (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_compile</h1>
+<h2 class="modsummary">
+    These are various utility functions to help with compiling and
+    decompiling erlang source.</h2>
+<div class="description">
+<p>
+    These are various utility functions to help with compiling and
+    decompiling erlang source. They are mostly useful to the
+    language/parse transform implementor.</p></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="beam_to_erl_source/1">beam_to_erl_source(BeamFName::string(), ErlFName::string()) -&gt; ok | term()</h3>
+
+
+<div class="description"><span id="beam_to_erl_source-2"> </span>
+
+<p>decompile a beam file that has been compiled with +debug_info
+  into a erlang source file
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_source_to_core_ast/1">erl_source_to_core_ast(Path::filename() (see module file)) -&gt; CoreAst::term()</h3>
+
+
+<div class="description"><span id="erl_source_to_core_ast-1"> </span>
+
+<p>compile an erlang source file into a Core Erlang AST
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_source_to_erl_ast/1">erl_source_to_erl_ast(Path::filename() (see module file)) -&gt; ErlangAst::term()</h3>
+
+
+<div class="description"><span id="erl_source_to_erl_ast-1"> </span>
+
+<p>compile an erlang source file into an Erlang AST
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_source_to_asm/1">erl_source_to_asm(Path::filename() (see module file)) -&gt; ErlangAsm::term()</h3>
+
+
+<div class="description"><span id="erl_source_to_asm-1"> </span>
+
+<p>compile an erlang source file into erlang terms that represent
+  the relevant ASM
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_source_to_erl_syntax/1">erl_source_to_erl_syntax(Path::filename() (see module file)) -&gt; string()</h3>
+
+
+<div class="description"><span id="erl_source_to_erl_syntax-1"> </span>
+
+<p>compile an erlang source file to a string that displays the
+  'erl_syntax1 calls needed to reproduce those terms.
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_string_to_erl_ast/1">erl_string_to_erl_ast(StringExpr::string()) -&gt; ErlangAst::term()</h3>
+
+
+<div class="description"><span id="erl_string_to_erl_ast-1"> </span>
+
+<p>compile a string representing an erlang expression into an
+  Erlang AST
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_string_to_core_ast/1">erl_string_to_core_ast(StringExpr::string()) -&gt; CoreAst::term()</h3>
+
+
+<div class="description"><span id="erl_string_to_core_ast-1"> </span>
+
+<p>compile a string representing an erlang expression into a
+  Core Erlang AST
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_string_to_asm/1">erl_string_to_asm(StringExpr::string()) -&gt; ErlangAsm::term()</h3>
+
+
+<div class="description"><span id="erl_string_to_asm-1"> </span>
+
+<p>compile a string representing an erlang expression into a term
+  that represents the ASM
+ </p>
+</div></div>
+<div class="function">
+<h3 id="erl_string_to_erl_syntax/1">erl_string_to_erl_syntax(BinaryExpr::string() | binary()) -&gt; string()</h3>
+
+
+<div class="description"><span id="erl_string_to_erl_syntax-1"> </span>
+
+<p>compile an erlang source file to a string that displays the
+  'erl_syntax1 calls needed to reproduce those terms.
+ </p>
+</div></div></div>
+
+<authors>
+
+<aname>Eric Merritt</aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#beam_to_erl_source/1">beam_to_erl_source/1</a></li><li><a href="#erl_source_to_core_ast/1">erl_source_to_core_ast/1</a></li><li><a href="#erl_source_to_erl_ast/1">erl_source_to_erl_ast/1</a></li><li><a href="#erl_source_to_asm/1">erl_source_to_asm/1</a></li><li><a href="#erl_source_to_erl_syntax/1">erl_source_to_erl_syntax/1</a></li><li><a href="#erl_string_to_erl_ast/1">erl_string_to_erl_ast/1</a></li><li><a href="#erl_string_to_core_ast/1">erl_string_to_core_ast/1</a></li><li><a href="#erl_string_to_asm/1">erl_string_to_asm/1</a></li><li><a href="#erl_string_to_erl_syntax/1">erl_string_to_erl_syntax/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>

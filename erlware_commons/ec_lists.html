@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>ec_lists (erlware_commons) -  - erldocs.com (Erlang Documentation)</title>
+    <link rel="search" type="application/opensearchdescription+xml" title="erldocs" href="/search.xml"/>
+    <link type="text/css" rel="stylesheet" href="../erldocs.css"/>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_require', 'inpage_linkid', '//www.google-analytics.com/plugins/ga/inpage_linkid.js']);
+      _gaq.push(['_setAccount', 'UA-44246018-1']);
+      _gaq.push(['_setDomainName', 'erldocs.com']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </head>
+
+  <body>
+    <div id="sidebar" class="inactive">
+      <input type="text" id="search" autocomplete="off" placeholder="press TAB to search"/>
+      <ul id="results"> </ul>
+    </div>
+
+    <div id="content">
+      <div style="margin:0px; padding:10px 20px;">
+        
+
+<h1>ec_lists</h1>
+<h2 class="modsummary">
+    Provides useful functionionality on standard lists that are
+    not provided in the standard library.</h2>
+<div class="description">
+<p>
+    Provides useful functionionality on standard lists that are
+    not provided in the standard library.</p></div>
+<div class="functions"><h4>Functions</h4><hr  />
+<div class="function">
+<h3 id="search/1">search(Fun::function(), T::list()) -&gt; {ok, Result::term(), Element::term()} | not_found</h3>
+
+
+<div class="description"><span id="search-2"> </span>
+
+<p>Search each value in the list with the specified
+  function. When the function returns a value of {ok, term()} the
+  search function stops and returns a tuple of {ok, term(), term()},
+  where the second value is the term returned from the function and
+  the third value is the element passed to the function. The purpose
+  of this is to allow a list to be searched where some internal state
+  is important while the input element is not.</p>
+</div></div>
+<div class="function">
+<h3 id="find/1">find(Fun::function(), Tail::list()) -&gt; {ok, term()} | error</h3>
+
+
+<div class="description"><span id="find-2"> </span>
+
+<p>Find a value in the list with the specified function. If the
+  function returns the atom true, the value is returned as {ok,
+  term()} and processing is aborted, if the function returns false,
+  processing continues until the end of the list. If the end is found
+  and the function never returns true the atom error is returned.</p>
+</div></div>
+<div class="function">
+<h3 id="fetch/1">fetch(Fun::function(), List::list()) -&gt; term()</h3>
+
+
+<div class="description"><span id="fetch-2"> </span>
+
+<p>Fetch a value from the list. If the function returns true the
+  value is returend. If processing reaches the end of the list and
+  the function has never returned true an exception not_found is
+  thrown.</p>
+</div></div></div>
+
+<authors>
+<aname> </aname>
+<email> </email></authors>
+      </div>
+      <div id="funwrapper">
+        <a id="viewfuns">View Functions</a>
+        <ul id="funs"><li><a href="#search/1">search/1</a></li><li><a href="#find/1">find/1</a></li><li><a href="#fetch/1">fetch/1</a></li></ul>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      var CURRENT_ROOT = "../";
+    </script>
+
+    <script type="text/javascript" src="../jquery.js"></script>
+    <script type="text/javascript" src="../erldocs_index.js"></script>
+    <script type="text/javascript" src="../erldocs.js"></script>
+  </body>
+</html>
