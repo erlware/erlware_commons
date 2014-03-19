@@ -12,7 +12,7 @@ ERLFLAGS= -pa $(CURDIR)/.eunit -pa $(CURDIR)/ebin -pa $(CURDIR)/*/ebin
 # Verify that the programs we need to run are installed on this system
 # =============================================================================
 
-REBAR=$(shell which rebar)
+REBAR ?= $(shell which rebar)
 
 ifeq ($(REBAR),)
 $(error "Rebar not available on this system")
