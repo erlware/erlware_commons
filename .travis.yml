@@ -16,3 +16,11 @@ script: "make rebuild"
 branches:
         only:
                 - master
+notifications:
+  email:
+    - core@erlware.org
+  irc:
+    channels:
+      - "irc.freenode.org#erlware"
+    use_notice: true
+    skip_join: true
