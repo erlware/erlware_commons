@@ -70,7 +70,7 @@ strip_leading_v(Vsn) ->
 -spec find_vsn_from_start_of_branch(string()) -> string().
 find_vsn_from_start_of_branch(RefTag) ->
     Count = do_cmd("git rev-list HEAD --count"),
-    erlang:iolist_to_binary("0.0.0+build.", Count, ".ref.", RefTag).
+    erlang:iolist_to_binary(["0.0.0+build.", Count, ".ref.", RefTag]).
 
 do_cmd(Cmd) ->
     trim_whitespace(os:cmd(Cmd)).
