@@ -480,7 +480,7 @@ usort(Fun, List, Malt) ->
     runmany(Fun2, {recursive, Fuse}, List, Malt).
 
 %% @doc Like below, assumes default MapMalt of 1.
--spec mapreduce/2 :: (MapFunc, list()) -> dict() when
+-spec mapreduce/2 :: (MapFunc, list()) -> dict:dict() when
       MapFunc ::  fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()}.
 mapreduce(MapFunc, List) ->
@@ -510,7 +510,7 @@ mapreduce(MapFunc, List, MapMalt) ->
 %%
 %% mapreduce requires OTP R11B, or it may leave monitoring messages in the
 %% message queue.
--spec mapreduce/5 :: (MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict() when
+-spec mapreduce/5 :: (MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict:dict() when
       MapFunc :: fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()},
       ReduceFunc :: fun((OldState::term(), Key::term(), Value::term()) -> NewState::term()).

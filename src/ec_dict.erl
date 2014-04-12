@@ -34,7 +34,7 @@
 %%%===================================================================
 %% This should be opaque, but that kills dialyzer so for now we export it
 %% however you should not rely on the internal representation here
--type dictionary(_K, _V) :: dict().
+-type dictionary(K, V) :: dict:dict(K, V).
 
 %%%===================================================================
 %%% API
