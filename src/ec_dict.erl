@@ -34,7 +34,11 @@
 %%%===================================================================
 %% This should be opaque, but that kills dialyzer so for now we export it
 %% however you should not rely on the internal representation here
+-ifdef(namespaced_types).
+-type dictionary(_K, _V) :: dict:dict().
+-else.
 -type dictionary(_K, _V) :: dict().
+-endif.
 
 %%%===================================================================
 %%% API
