@@ -126,10 +126,13 @@ type(Path) ->
         false ->
             case is_symlink(Path) of
                 true ->
-                    symlink;
-                false ->
-                    directory
+                    symlink;  
+                false -> case filelib:is_dir(Path) of
+                             true -> directory;
+                             false -> undefined
+                         end
             end
+
     end.
 %% @doc gets the real path of a directory. This is mostly useful for
 %% resolving symlinks. Be aware that this temporarily changes the
