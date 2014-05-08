@@ -143,7 +143,7 @@ real_dir_path(Path) ->
     ok = file:set_cwd(CurCwd),
     filename:absname(RealPath).
 
-%% @doc make a unique temorory directory. Similar function to BSD stdlib
+%% @doc make a unique temporary directory. Similar function to BSD stdlib
 %% function of the same name.
 -spec insecure_mkdtemp() -> TmpDirPath::file:name().
 insecure_mkdtemp() ->
