@@ -118,7 +118,7 @@ is_symlink(Path) ->
             false
     end.
 %% @doc returns the type of the file.
--spec type(file:name()) -> file | symlink | directory.
+-spec type(file:name()) -> file | symlink | directory | undefined.
 type(Path) ->
     case filelib:is_regular(Path) of
         true ->
