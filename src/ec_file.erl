@@ -21,6 +21,7 @@
          remove/1,
          remove/2,
          md5sum/1,
+         sha1sum/1,
          read/1,
          write/2,
          write_term/2
@@ -90,6 +91,12 @@ copy(From, To) ->
 -spec md5sum(string() | binary()) -> string().
 md5sum(Value) ->
     hex(binary_to_list(erlang:md5(Value))).
+    
+%% @doc return an sha1sum checksum string or a binary. Same as unix utility of
+%%      same name.
+-spec sha1sum(string() | binary()) -> string().
+sha1sum(Value) ->
+    hex(binary_to_list(crypto:hash(sha, Value))).
 
 %% @doc delete a file. Use the recursive option for directories.
 %% <pre>
@@ -312,6 +319,9 @@ setup_test() ->
 
 md5sum_test() ->
     ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
+    
+sha1sum_test() ->
+    ?assertMatch("b6589fc6ab0dc82cf12099d1c2d40ab994e8410c", sha1sum("0")).
 
 file_test() ->
     Dir = insecure_mkdtemp(),
