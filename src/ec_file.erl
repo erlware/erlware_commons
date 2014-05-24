@@ -94,9 +94,15 @@ md5sum(Value) ->
     
 %% @doc return an sha1sum checksum string or a binary. Same as unix utility of
 %%      same name.
+-ifdef(deprecated_crypto).
 -spec sha1sum(string() | binary()) -> string().
-sha1sum(Value) ->
+sha1sum(Value) ->  
+    hex(binary_to_list(crypto:sha(Value))).
+-else.
+-spec sha1sum(string() | binary()) -> string().
+sha1sum(Value) ->  
     hex(binary_to_list(crypto:hash(sha, Value))).
+-endif.
 
 %% @doc delete a file. Use the recursive option for directories.
 %% <pre>
