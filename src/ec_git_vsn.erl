@@ -3,39 +3,19 @@
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
 %%% @copyright 2011 Erlware, LLC.
 %%% @doc
-%%%  This provides an implementation of the ec_vsn for git. That is
-%%%  it is capable of returning a semver for a git repository
-%%% see ec_vsn
-%%% see ec_semver
+%%% Returns a version string based on the current git ref.
 %%% @end
 %%%-------------------------------------------------------------------
 -module(ec_git_vsn).
 
--behaviour(ec_vsn).
-
-%% API
--export([new/0,
-         vsn/1]).
-
--export_type([t/0]).
-
-%%%===================================================================
-%%% Types
-%%%===================================================================
-%% This should be opaque, but that kills dialyzer so for now we export it
-%% however you should not rely on the internal representation here
--type t() :: {}.
+-export([vsn/1]).
 
 %%%===================================================================
 %%% API
 %%%===================================================================
 
--spec new() -> t().
-new() ->
-    {}.
-
--spec vsn(t()) -> {ok, string()} | {error, Reason::any()}.
-vsn(_Data) ->
+-spec vsn() -> string() | {error, Reason::any()}.
+vsn() ->
     Result = do_cmd("git describe --tags --always"),
     case re:split(Result, "-") of
         [Vsn, Count, RefTag] ->
