@@ -16,6 +16,7 @@
          mkdir_p/1,
          find/2,
          is_symlink/1,
+         is_dir/1,
          type/1,
          real_dir_path/1,
          remove/1,
@@ -58,7 +59,7 @@ exists(Filename) ->
 copy(From, To, []) ->
     copy(From, To);
 copy(From, To, [recursive] = Options) ->
-    case filelib:is_dir(From) of
+    case is_dir(From) of
         false ->
             copy(From, To);
         true ->
@@ -130,6 +131,15 @@ is_symlink(Path) ->
         _ ->
             false
     end.
+
+is_dir(Path) ->
+    case file:read_file_info(Path) of
+        {ok, #file_info{type = directory}} ->
+            true;
+        _ ->
+            false
+    end.
+
 %% @doc returns the type of the file.
 -spec type(file:name()) -> file | symlink | directory | undefined.
 type(Path) ->
@@ -139,11 +149,12 @@ type(Path) ->
         false ->
             case is_symlink(Path) of
                 true ->
-                    symlink;  
-                false -> case filelib:is_dir(Path) of
-                             true -> directory;
-                             false -> undefined
-                         end
+                    symlink;
+                false ->
+                    case is_dir(Path) of
+                        true -> directory;
+                        false -> undefined
+                    end
             end
 
     end.
@@ -218,7 +229,7 @@ write_term(FileName, Term) ->
 find([], _) ->
     [];
 find(FromDir, TargetPattern) ->
-    case filelib:is_dir(FromDir) of
+    case is_dir(FromDir) of
         false ->
             case re:run(FromDir, TargetPattern) of
                 {match, _} -> [FromDir];
@@ -253,7 +264,7 @@ find_in_subdirs(FromDir, TargetPattern) ->
 
 -spec remove_recursive(file:name(), Options::list()) -> ok | {error, Reason::term()}.
 remove_recursive(Path, Options) ->
-    case filelib:is_dir(Path) of
+    case is_dir(Path) of
         false ->
             file:delete(Path);
         true ->
@@ -284,7 +295,7 @@ copy_subfiles(From, To, Options) ->
 
 -spec make_dir_if_dir(file:name()) -> ok | {error, Reason::term()}.
 make_dir_if_dir(File) ->
-    case filelib:is_dir(File) of
+    case is_dir(File) of
         true  -> ok;
         false -> mkdir_path(File)
     end.
