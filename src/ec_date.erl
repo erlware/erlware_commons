@@ -25,6 +25,7 @@
 -author("Dale Harvey <dale@hypernumbers.com>").
 
 -export([format/1, format/2]).
+-export([format_iso8601/1]).
 -export([parse/1, parse/2]).
 -export([nparse/1]).
 
@@ -42,6 +43,8 @@
 -define( is_month(X), ( (is_integer(X) andalso X =< 12) orelse ?is_hinted_month(X) ) ).
 
 -define(GREGORIAN_SECONDS_1970, 62167219200).
+-define(ISO_8601_DATETIME_FORMAT, "Y-m-dTG:i:sZ").
+-define(ISO_8601_DATETIME_WITH_MS_FORMAT, "Y-m-dTG:i:s.fZ").
 
 -type year() :: non_neg_integer().
 -type month() :: 1..12 | {?MONTH_TAG, 1..12}.
@@ -73,6 +76,14 @@ format(Format, {_,_,Ms}=Now) ->
     format(Format, {Date, {H,M,S,Ms}}, []);
 format(Format, Date) ->
     format(Format, Date, []).
+
+-spec format_iso8601(datetime()) -> string().
+%% @doc format date in the ISO8601 format
+%% This always puts 'Z' as time zone, since we have no notion of timezone
+format_iso8601({{_, _, _}, {_, _, _}} = Date) ->
+    format(?ISO_8601_DATETIME_FORMAT, Date);
+format_iso8601({{_, _, _}, {_, _, _, _}} = Date) ->
+    format(?ISO_8601_DATETIME_WITH_MS_FORMAT, Date).
 
 -spec parse(string()) -> datetime().
 %% @doc parses the datetime from a string
@@ -938,4 +949,11 @@ zulu_test_() ->
      ?_assertEqual(format("Y-m-d\\TH:i:s",nparse("2001-03-10T15:16:17-04:00")),
                    "2001-03-10T19:16:17")
     ].
+
+format_iso8601_test_() ->
+    [
+     ?_assertEqual("2001-03-10T17:16:17Z", format_iso8601(?DATE)),
+     ?_assertEqual("2001-03-10T17:16:17.123456Z", format_iso8601(?DATEMS))
+    ].
+
 -endif.
