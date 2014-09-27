@@ -149,7 +149,7 @@ error(LogState, String) ->
 %% and argements @see io:format/2
 -spec error(t(), string(), [any()]) -> ok.
 error(LogState, FormatString, Args) ->
-    log(LogState, ?EC_ERROR, colorize(LogState, ?GREEN, false, FormatString), Args).
+    log(LogState, ?EC_ERROR, colorize(LogState, ?RED, false, FormatString), Args).
 
 %% @doc log at the warn level given the current log state with a string or
 %% format string that returns a function
