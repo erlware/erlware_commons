@@ -26,19 +26,6 @@
          from_list/1,
          keys/1]).
 
--export_type([dictionary/2]).
-
-%%%===================================================================
-%%% Types
-%%%===================================================================
-%% This should be opaque, but that kills dialyzer so for now we export it
-%% however you should not rely on the internal representation here
--type dictionary(K, V) :: {non_neg_integer(), ec_gb_tree_node(K, V)}.
-
--type ec_gb_tree_node(K, V) :: 'nil' | {K, V,
-                                        ec_gb_tree_node(K, V),
-                                        ec_gb_tree_node(K, V)}.
-
 %%%===================================================================
 %%% API
 %%%===================================================================
@@ -49,7 +36,7 @@
 %% same implementation is created and returned.
 %%
 %% @param ModuleName|Object The module name or existing dictionary object.
--spec new() -> dictionary(_K, _V).
+-spec new() -> gb_trees:tree(_K, _V).
 new() ->
     gb_trees:empty().
 
@@ -57,7 +44,7 @@ new() ->
 %%
 %% @param Object The dictory object to check
 %% @param Key The key to check the dictionary for
--spec has_key(ec_dictionary:key(K), Object::dictionary(K, _V)) -> boolean().
+-spec has_key(ec_dictionary:key(K), Object::gb_trees:tree(K, _V)) -> boolean().
 has_key(Key, Data) ->
     case gb_trees:lookup(Key, Data) of
         {value, _Val} ->
@@ -72,7 +59,7 @@ has_key(Key, Data) ->
 %% @param Object The dictionary object to return the value from
 %% @param Key The key requested
 %% when the key does not exist @throws not_found
--spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
+-spec get(ec_dictionary:key(K), Object::gb_trees:tree(K, V)) ->
     ec_dictionary:value(V).
 get(Key, Data) ->
     case gb_trees:lookup(Key, Data) of
@@ -84,7 +71,7 @@ get(Key, Data) ->
 
 -spec get(ec_dictionary:key(K),
           ec_dictionary:value(V),
-          Object::dictionary(K, V)) ->
+          Object::gb_trees:tree(K, V)) ->
     ec_dictionary:value(V).
 get(Key, Default, Data) ->
     case gb_trees:lookup(Key, Data) of
@@ -101,8 +88,8 @@ get(Key, Default, Data) ->
 %% @param Key the key to add
 %% @param Value the value to add
 -spec add(ec_dictionary:key(K), ec_dictionary:value(V),
-          Object::dictionary(K, V)) ->
-    dictionary(K, V).
+          Object::gb_trees:tree(K, V)) ->
+    gb_trees:tree(K, V).
 add(Key, Value, Data) ->
     gb_trees:enter(Key, Value, Data).
 
@@ -111,8 +98,8 @@ add(Key, Value, Data) ->
 %%
 %% @param Object the dictionary object to remove the value from
 %% @param Key the key of the key/value pair to remove
--spec remove(ec_dictionary:key(K), Object::dictionary(K, V)) ->
-    dictionary(K, V).
+-spec remove(ec_dictionary:key(K), Object::gb_trees:tree(K, V)) ->
+    gb_trees:tree(K, V).
 remove(Key, Data) ->
     gb_trees:delete_any(Key, Data).
 
@@ -120,24 +107,24 @@ remove(Key, Data) ->
 %%
 %% @param Object the dictionary object to check
 %% @param Value The value to check if exists
--spec has_value(ec_dictionary:value(V), Object::dictionary(_K, V)) -> boolean().
+-spec has_value(ec_dictionary:value(V), Object::gb_trees:tree(_K, V)) -> boolean().
 has_value(Value, Data) ->
     lists:member(Value, gb_trees:values(Data)).
 
 %% @doc return the current number of key value pairs in the dictionary
 %%
 %% @param Object the object return the size for.
--spec size(Object::dictionary(_K, _V)) -> non_neg_integer().
+-spec size(Object::gb_trees:tree(_K, _V)) -> non_neg_integer().
 size(Data) ->
     gb_trees:size(Data).
 
--spec to_list(dictionary(K, V)) -> [{ec_dictionary:key(K),
-                                     ec_dictionary:value(V)}].
+-spec to_list(gb_trees:tree(K, V)) -> [{ec_dictionary:key(K),
+                                        ec_dictionary:value(V)}].
 to_list(Data) ->
     gb_trees:to_list(Data).
 
 -spec from_list([{ec_dictionary:key(K), ec_dictionary:value(V)}]) ->
-    dictionary(K, V).
+    gb_trees:tree(K, V).
 from_list(List) when is_list(List) ->
     lists:foldl(fun({Key, Value}, Dict) ->
                         gb_trees:enter(Key, Value, Dict)
@@ -145,7 +132,7 @@ from_list(List) when is_list(List) ->
                 gb_trees:empty(),
                 List).
 
--spec keys(dictionary(K,_V)) -> [ec_dictionary:key(K)].
+-spec keys(gb_trees:tree(K,_V)) -> [ec_dictionary:key(K)].
 keys(Data) ->
     gb_trees:keys(Data).
 

@@ -27,7 +27,7 @@ endif
 # dialyzer on R15 and above. However on R14 and below we have the
 # problem that travis times out. The code below lets us not run
 # dialyzer on R14
-OTP_VSN=$(shell erl -noshell -eval 'io:format("~p", [erlang:system_info(otp_release)]), erlang:halt(0).' | perl -lne 'print for /R(\d+).*/g')
+OTP_VSN=$(shell erl -noshell -eval '{match, [Major]} = re:run(erlang:system_info(otp_release), "^R?([0-9]+).*", [{capture, all_but_first, list}]), io:format("~p", [Major]), erlang:halt(0).')
 TRAVIS_SLOW=$(shell expr $(OTP_VSN) \<= 15 )
 
 ifeq ($(TRAVIS_SLOW), 0)
