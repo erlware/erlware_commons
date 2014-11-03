@@ -36,44 +36,61 @@ new() ->
 
 -spec vsn(t()) -> {ok, string()} | {error, Reason::any()}.
 vsn(_Data) ->
-    Result = do_cmd("git describe --tags --always"),
-    case re:split(Result, "-") of
-        [Vsn, Count, RefTag] ->
-            erlang:iolist_to_binary([strip_leading_v(Vsn),
-                                     <<"+build.">>,
-                                     Count,
-                                     <<".ref.">>,
-                                     RefTag]);
-        [VsnOrRefTag] ->
-            case re:run(VsnOrRefTag, "^[0-9a-fA-F]+$") of
-                {match, _} ->
-                    find_vsn_from_start_of_branch(VsnOrRefTag);
-                nomatch ->
-                    strip_leading_v(VsnOrRefTag)
-            end;
-        _ ->
-            {error, {invalid_result, Result}}
-    end.
+    {Vsn, RawRef, RawCount} = collect_default_refcount(),
+    {ok, build_vsn_string(Vsn, RawRef, RawCount)}.
 
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
--spec strip_leading_v(string()) -> string().
-strip_leading_v(Vsn) ->
-    case re:run(Vsn, "v?(.+)", [{capture, [1], binary}]) of
-        {match, [NVsn]} ->
-            NVsn;
+
+collect_default_refcount() ->
+    %% Get the tag timestamp and minimal ref from the system. The
+    %% timestamp is really important from an ordering perspective.
+    RawRef = os:cmd("git log -n 1 --pretty=format:'%h\n' "),
+
+    {Tag, TagVsn} = parse_tags(),
+    RawCount =
+        case Tag of
+            undefined ->
+                os:cmd("git rev-list HEAD | wc -l");
+            _ ->
+                get_patch_count(Tag)
+        end,
+    {TagVsn, RawRef, RawCount}.
+
+build_vsn_string(Vsn, RawRef, RawCount) ->
+    %% Cleanup the tag and the Ref information. Basically leading 'v's and
+    %% whitespace needs to go away.
+    RefTag = case RawRef of
+                 undefined ->
+                     "";
+                 RawRef ->
+                     [".ref", re:replace(RawRef, "\\s", "", [global])]
+             end,
+    Count = erlang:iolist_to_binary(re:replace(RawCount, "\\s", "", [global])),
+
+    %% Create the valid [semver](http://semver.org) version from the tag
+    case Count of
+        <<"0">> ->
+            erlang:binary_to_list(erlang:iolist_to_binary(Vsn));
         _ ->
-            Vsn
+            erlang:binary_to_list(erlang:iolist_to_binary([Vsn, "+build.",
+                                                           Count, RefTag]))
     end.
 
--spec find_vsn_from_start_of_branch(string()) -> string().
-find_vsn_from_start_of_branch(RefTag) ->
-    Count = do_cmd("git rev-list HEAD --count"),
-    erlang:iolist_to_binary(["0.0.0+build.", Count, ".ref.", RefTag]).
+get_patch_count(RawRef) ->
+    Ref = re:replace(RawRef, "\\s", "", [global]),
+    Cmd = io_lib:format("git rev-list ~s..HEAD | wc -l",
+                         [Ref]),
+    os:cmd(Cmd).
 
-do_cmd(Cmd) ->
-    trim_whitespace(os:cmd(Cmd)).
+parse_tags() ->
+    first_valid_tag(os:cmd("git log --oneline --decorate  | fgrep \"tag: \" -1000")).
 
-trim_whitespace(Input) ->
-     re:replace(Input, "\\s+", "", [global]).
+first_valid_tag(Line) ->
+    case re:run(Line, "(\\(|\\s)tag:\\s(v([^,\\)]+))", [{capture, [2, 3], list}]) of
+        {match,[Tag, Vsn]} ->
+            {Tag, Vsn};
+        nomatch ->
+            {undefined, "0.0.0"}
+    end.
