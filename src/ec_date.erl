@@ -28,6 +28,7 @@
 -export([format_iso8601/1]).
 -export([parse/1, parse/2]).
 -export([nparse/1]).
+-export([tokenise/2]).
 
 %% These are used exclusively as guards and so the function like
 %% defines make sense
@@ -41,6 +42,7 @@
 -define( is_day(X), (is_integer(X) andalso X =< 31) ).
 -define( is_hinted_month(X), (is_tuple(X) andalso size(X)=:=2 andalso element(1,X)=:=?MONTH_TAG) ).
 -define( is_month(X), ( (is_integer(X) andalso X =< 12) orelse ?is_hinted_month(X) ) ).
+-define( is_tz_offset(H1,H2,M1,M2), (?is_num(H1) andalso ?is_num(H2) andalso ?is_num(M1) andalso ?is_num(M2)) ).
 
 -define(GREGORIAN_SECONDS_1970, 62167219200).
 -define(ISO_8601_DATETIME_FORMAT, "Y-m-dTG:i:sZ").
@@ -206,6 +208,11 @@ parse([Month,Day,Year,Hour,$:,Min,$:,Sec], _Now, _Opts)
 parse([Month,Day,Year,Hour,$:,Min], _Now, _Opts)
   when ?is_hinted_month(Month) andalso ?is_day(Day) ->
     {{Year, Month, Day}, {hour(Hour, []), Min, 0}};
+
+%% Date/Times Fri Nov 21 14:55:26 +0000 2014 (Twitter format)
+parse([Month, Day, Hour,$:,Min,$:,Sec, Year], _Now, _Opts)
+  when ?is_hinted_month(Month), ?is_day(Day), ?is_year(Year) ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
 
 %% Times - 21:45, 13:45:54, 13:15PM etc
 parse([Hour,$:,Min,$:,Sec | PAM], {Date, _Time}, _O) when ?is_meridian(PAM) ->
@@ -399,6 +406,7 @@ tokenise("OF"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("T"++Rest, Acc) -> tokenise(Rest, Acc);  % 2012-12-12T12:12:12 ISO formatting.
 tokenise([$Z | Rest], Acc) -> tokenise(Rest, [$Z | Acc]);  % 2012-12-12T12:12:12Zulu
 tokenise([$. |  Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
+tokenise([$+, H1,H2,M1,M2| Rest], Acc) when ?is_tz_offset(H1,H2,M1,M2) -> tokenise(Rest, Acc);  % Tue Nov 11 15:03:18 +0000 2014 Twitter format
 tokenise([$+| Rest], Acc) -> tokenise(Rest, [$+ | Acc]);  % 2012-12-12T12:12:12.xxxx+ ISO formatting.
 
 tokenise([Else | Rest], Acc) ->
@@ -888,7 +896,12 @@ parse_with_days_test_() ->
      ?_assertEqual({{2008,8,22}, {6,0,0}},
                    parse("Monday 22 Aug 2008 6a", ?DATE)),
      ?_assertEqual({{2008,8,22}, {18,35,0}},
-                   parse("Mon, 22 Aug 2008 6:35 PM", ?DATE))
+                   parse("Mon, 22 Aug 2008 6:35 PM", ?DATE)),
+     % Twitter style
+     ?_assertEqual({{2008,8,22}, {06,35,04}},
+                   parse("Mon Aug 22 06:35:04 +0000 2008", ?DATE)),
+     ?_assertEqual({{2008,8,22}, {06,35,04}},
+                   parse("Mon Aug 22 06:35:04 +0500 2008", ?DATE))
     ].
 
 parse_with_TZ_test_() ->
