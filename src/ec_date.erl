@@ -530,7 +530,7 @@ format([$i|T], {_,{_,M,_,_}}=Dt, Acc) ->
 format([$s|T], {_,{_,_,S,_}}=Dt, Acc) ->
     format(T, Dt, [pad2(S)|Acc]);
 format([$f|T], {_,{_,_,_,Ms}}=Dt, Acc) ->
-    format(T, Dt, [itol(Ms)|Acc]);
+    format(T, Dt, [pad6(Ms)|Acc]);
 
 %% Whole Dates
 format([$c|T], {{Y,M,D},{H,Min,S}}=Dt, Acc) ->
@@ -686,6 +686,10 @@ pad2(X) when is_integer(X) ->
     io_lib:format("~2.10.0B",[X]);
 pad2(X) when is_float(X) ->
     io_lib:format("~2.10.0B",[trunc(X)]).
+
+-spec pad6(integer()) -> list().
+pad6(X) when is_integer(X) ->
+    io_lib:format("~6.10.0B",[X]).
 
 ltoi(X) ->
     list_to_integer(X).
@@ -933,7 +937,7 @@ iso_test_() ->
 ms_test_() ->
     Now=now(),
     [
-     ?_assertEqual({{2012,12,12}, {12,12,12,1234}}, parse("2012-12-12T12:12:12.1234")),
+     ?_assertEqual({{2012,12,12}, {12,12,12,1234}}, parse("2012-12-12T12:12:12.001234")),
      ?_assertEqual(format("H:m:s.f \\m \\i\\s \\m\\o\\n\\t\\h",?DATEMS),
                    "17:03:17.123456 m is month"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",?DATEMS),
@@ -944,6 +948,8 @@ ms_test_() ->
                    "2001-03-10T05:16:17.123456"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T15:16:17.123456")),
                    "2001-03-10T15:16:17.123456"),
+     ?_assertEqual(format("Y-m-d\\TH:i:s.f",nparse("2001-03-10T15:16:17.000123")),
+                   "2001-03-10T15:16:17.000123"),
      ?_assertEqual(Now, nparse(format("Y-m-d\\TH:i:s.f", Now)))
     ].
 
