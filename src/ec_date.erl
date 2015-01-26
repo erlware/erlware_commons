@@ -680,7 +680,7 @@ iso_week_one(Y) ->
 itol(X) ->
     integer_to_list(X).
 
--spec pad2(integer()) -> list().
+-spec pad2(integer() | float()) -> list().
 %% @doc int padded with 0 to make sure its 2 chars
 pad2(X) when is_integer(X) ->
     io_lib:format("~2.10.0B",[X]);
