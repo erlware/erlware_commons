@@ -938,6 +938,7 @@ ms_test_() ->
     Now=now(),
     [
      ?_assertEqual({{2012,12,12}, {12,12,12,1234}}, parse("2012-12-12T12:12:12.001234")),
+     ?_assertEqual({{2012,12,12}, {12,12,12,123000}}, parse("2012-12-12T12:12:12.123")),
      ?_assertEqual(format("H:m:s.f \\m \\i\\s \\m\\o\\n\\t\\h",?DATEMS),
                    "17:03:17.123456 m is month"),
      ?_assertEqual(format("Y-m-d\\TH:i:s.f",?DATEMS),
