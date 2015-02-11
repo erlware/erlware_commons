@@ -218,13 +218,9 @@ format(Log) ->
 
 -spec colorize(t(), color(), boolean(), string()) -> string().
 colorize(#state_t{caller=command_line}, Color, false, Msg) when is_integer(Color) ->
-    colorize_(Color, 0, Msg);
+    lists:flatten(io_lib:format("\033[~B;~Bm~s~s\033[0m", [0, Color, ?PREFIX, Msg]));
 colorize(_LogState, _Color, _Bold, Msg) ->
     Msg.
-
--spec colorize_(color(), integer(), string()) -> string().
-colorize_(Color, Bold, Msg) when is_integer(Color), is_integer(Bold)->
-    lists:flatten(io_lib:format("\033[~B;~Bm~s~s\033[0m", [Bold, Color, ?PREFIX, Msg])).
 
 %%%===================================================================
 %%% Test Functions
