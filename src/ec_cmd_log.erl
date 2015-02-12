@@ -50,7 +50,8 @@
 -define(PREFIX, "===> ").
 
 -record(state_t, {log_level=0 :: int_log_level(),
-                  caller=api :: caller()}).
+                  caller=api :: caller(),
+                  term_cap=full :: full | dumb }).
 
 %%============================================================================
 %% types
@@ -86,7 +87,7 @@ new(LogLevel) ->
 
 -spec new(log_level(), caller()) -> t().
 new(LogLevel, Caller) when LogLevel >= 0, LogLevel =< 3 ->
-    #state_t{log_level=LogLevel, caller=Caller};
+    #state_t{log_level=LogLevel, caller=Caller, term_cap=query_term_env()};
 new(AtomLogLevel, Caller)
   when AtomLogLevel =:= error;
        AtomLogLevel =:= warn;
@@ -217,14 +218,26 @@ format(Log) ->
      <<")">>].
 
 -spec colorize(t(), color(), boolean(), string()) -> string().
-colorize(#state_t{caller=command_line}, Color, false, Msg) when is_integer(Color) ->
-    colorize_(Color, 0, Msg);
+colorize(#state_t{caller=command_line, term_cap=full}, Color, false, Msg) when is_integer(Color) ->
+    lists:flatten(io_lib:format("\033[~B;~Bm~s~s\033[0m", [0, Color, ?PREFIX, Msg]));
+colorize(#state_t{caller=command_line, term_cap=dumb}, Color, _Bold, Msg) when is_integer(Color) ->
+    lists:flatten(io_lib:format("~s~s", [?PREFIX, Msg]));
 colorize(_LogState, _Color, _Bold, Msg) ->
     Msg.
 
--spec colorize_(color(), integer(), string()) -> string().
-colorize_(Color, Bold, Msg) when is_integer(Color), is_integer(Bold)->
-    lists:flatten(io_lib:format("\033[~B;~Bm~s~s\033[0m", [Bold, Color, ?PREFIX, Msg])).
+%% @doc Query the term enviroment
+%% For reasons of simplicity, we don't parse terminal capabilities yet, although
+%% a later version could do so. Rather, we provide a simple match-list of terminal
+%% capabilities.
+%% @end
+-spec query_term_env() -> full | dumb.
+query_term_env() ->
+    term_capabilities(os:getenv("TERM")).
+
+-spec term_capabilities(string()) -> full | dumb.
+term_capabilities("xterm") -> full;
+term_capabilities("dumb") -> dumb;
+term_capabilities(_) -> full. %% Default to the backwards compatible version.
 
 %%%===================================================================
 %%% Test Functions
