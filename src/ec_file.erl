@@ -92,16 +92,16 @@ copy(From, To) ->
 -spec md5sum(string() | binary()) -> string().
 md5sum(Value) ->
     hex(binary_to_list(erlang:md5(Value))).
-    
+
 %% @doc return an sha1sum checksum string or a binary. Same as unix utility of
 %%      same name.
 -ifdef(deprecated_crypto).
 -spec sha1sum(string() | binary()) -> string().
-sha1sum(Value) ->  
+sha1sum(Value) ->
     hex(binary_to_list(crypto:sha(Value))).
 -else.
 -spec sha1sum(string() | binary()) -> string().
-sha1sum(Value) ->  
+sha1sum(Value) ->
     hex(binary_to_list(crypto:hash(sha, Value))).
 -endif.
 
@@ -174,7 +174,7 @@ real_dir_path(Path) ->
 %% function of the same name.
 -spec insecure_mkdtemp() -> TmpDirPath::file:name().
 insecure_mkdtemp() ->
-    random:seed(now()),
+    random:seed(os:timestamp()),
     UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
     TmpDirPath =
         filename:join([tmp(), lists:flatten([".tmp_dir", UniqueNumber])]),
@@ -336,7 +336,7 @@ setup_test() ->
 
 md5sum_test() ->
     ?assertMatch("cfcd208495d565ef66e7dff9f98764da", md5sum("0")).
-    
+
 sha1sum_test() ->
     ?assertMatch("b6589fc6ab0dc82cf12099d1c2d40ab994e8410c", sha1sum("0")).
 
