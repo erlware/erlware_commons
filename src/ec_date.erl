@@ -931,7 +931,7 @@ iso_test_() ->
     ].
 
 ms_test_() ->
-    Now=now(),
+    Now=os:timestamp(),
     [
      ?_assertEqual({{2012,12,12}, {12,12,12,1234}}, parse("2012-12-12T12:12:12.1234")),
      ?_assertEqual(format("H:m:s.f \\m \\i\\s \\m\\o\\n\\t\\h",?DATEMS),
