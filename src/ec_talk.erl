@@ -83,7 +83,7 @@ ask(Prompt, boolean) ->
 ask(Prompt, number) ->
     ask_convert(Prompt, fun get_integer/1, number,  none);
 ask(Prompt, string) ->
-    ask_convert(Prompt, fun get_integer/1, string, none).
+    ask_convert(Prompt, fun get_string/1, string, none).
 
 %% @doc Asks the user to respond to the prompt. Trys to return the
 %% value in the format specified by 'Type'.
