@@ -83,7 +83,7 @@ the `lists` module in stdlib.
 
 ### [ec_talk](https://github.com/erlware/erlware_commons/blob/master/src/ec_talk.erl)
 
-A set of simple utility functions to falicitate command line
+A set of simple utility functions to facilitate command line
 communication with a user.
 
 Signatures
