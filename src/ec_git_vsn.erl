@@ -24,7 +24,7 @@
 %%%===================================================================
 %% This should be opaque, but that kills dialyzer so for now we export it
 %% however you should not rely on the internal representation here
--type t() :: {}.
+-type t() :: {string()}.
 
 %%%===================================================================
 %%% API
@@ -32,23 +32,23 @@
 
 -spec new() -> t().
 new() ->
-    {}.
+    {"v"}.
 
 -spec vsn(t()) -> {ok, string()} | {error, Reason::any()}.
-vsn(_Data) ->
-    {Vsn, RawRef, RawCount} = collect_default_refcount(),
+vsn(Data) ->
+    {Vsn, RawRef, RawCount} = collect_default_refcount(Data),
     {ok, build_vsn_string(Vsn, RawRef, RawCount)}.
 
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
 
-collect_default_refcount() ->
+collect_default_refcount(Data) ->
     %% Get the tag timestamp and minimal ref from the system. The
     %% timestamp is really important from an ordering perspective.
     RawRef = os:cmd("git log -n 1 --pretty=format:'%h\n' "),
 
-    {Tag, TagVsn} = parse_tags(),
+    {Tag, TagVsn} = parse_tags(Data),
     RawCount =
         case Tag of
             undefined ->
@@ -84,11 +84,14 @@ get_patch_count(RawRef) ->
                          [Ref]),
     os:cmd(Cmd).
 
-parse_tags() ->
-    first_valid_tag(os:cmd("git log --oneline --decorate  | fgrep \"tag: \" -1000")).
+-spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
+parse_tags({Prefix}) ->
+    first_valid_tag(os:cmd("git log --oneline --decorate  | fgrep \"tag: \" -1000"), Prefix).
 
-first_valid_tag(Line) ->
-    case re:run(Line, "(\\(|\\s)tag:\\s(v([^,\\)]+))", [{capture, [2, 3], list}]) of
+-spec first_valid_tag(string(), string()) -> {string()|undefined, ec_semver:version_string()}.
+first_valid_tag(Line, Prefix) ->
+    RE = lists:flatten(io_lib:format("(\\(|\\s)tag:\\s(~s([^,\\)]+))", [Prefix])),
+    case re:run(Line, RE, [{capture, [2, 3], list}]) of
         {match,[Tag, Vsn]} ->
             {Tag, Vsn};
         nomatch ->
