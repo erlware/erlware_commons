@@ -86,7 +86,10 @@ get_patch_count(RawRef) ->
 
 -spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
 parse_tags({Prefix}) ->
-    first_valid_tag(os:cmd("git log --oneline --decorate  | fgrep \"tag: \" -1000"), Prefix).
+    first_valid_tag(os:cmd("git log --oneline --decorate  | grep -F \"tag: \""), Prefix).
+    %% TODO: The following command sould be able to get the version
+    %% number directly, without a re:run. Should be checked for POSIX
+    %% "git log --oneline --decorate | grep -F \"tag: \" --color=never | head -n 1 | sed  \"s/.*tag: " ++ Prefix ++ "\([^,)]*\).*/\1/\"".
 
 -spec first_valid_tag(string(), string()) -> {string()|undefined, ec_semver:version_string()}.
 first_valid_tag(Line, Prefix) ->
