@@ -1,13 +1,11 @@
-%% -*- mode: Erlang; fill-column: 75; comment-column: 50; -*-
-{application, erlware_commons,
- [{description, "Additional standard library for Erlang"},
-  {vsn, "0.15.0"},
-  {modules, []},
-  {registered, []},
-  {applications, [kernel, stdlib]},
-
-  {contributors,["Eric Merritt", "Tristan Sloughter",
-                 "Jordan Wilberding", "Martin Logan"]},
-  {licenses, ["Apache"]},
-  {links, [{"Github","https://github.com/erlware/erlware_commons"}]}
- ]}.
+{application,erlware_commons,
+             [{description,"Additional standard library for Erlang"},
+              {vsn,"0.16.0"},
+              {modules,[]},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {contributors,["Eric Merritt","Tristan Sloughter",
+                             "Jordan Wilberding","Martin Logan"]},
+              {licenses,["Apache"]},
+              {links,[{"Github",
+                       "https://github.com/erlware/erlware_commons"}]}]}.
