@@ -33,10 +33,6 @@
          is_true/1,
          is_false/1]).
 
--ifdef(DEV_ONLY).
--include_lib("proper/include/proper.hrl").
--endif.
-
 %%%===================================================================
 %%% API
 %%%===================================================================
@@ -224,10 +220,6 @@ to_atom(X) ->
 -ifdef(DEV_ONLY).
 -include_lib("eunit/include/eunit.hrl").
 
-force_proper_test_() ->
-    {"Runs PropEr test during EUnit phase",
-     {timeout, 15000, [?_assertEqual([], proper:module(?MODULE))]}}.
-
 to_integer_test() ->
     ?assertError(badarg, to_integer(1.5, strict)).
 
@@ -252,58 +244,4 @@ to_boolean_test()->
     ?assertMatch(false, to_boolean("false")),
     ?assertMatch(false, to_boolean(false)).
 
-%%% PropEr testing
-
-prop_to_integer() ->
-    ?FORALL({F, I}, {float(), integer()},
-            begin
-                Is = [[Fun(N), N] ||
-                         Fun <- [fun to_list/1,
-                                 fun to_binary/1],
-                         N <- [F, I]],
-                lists:all(fun([FN, N]) ->
-                                  erlang:is_integer(to_integer(N)) andalso
-                                      erlang:is_integer(to_integer(FN))
-                          end, Is)
-            end).
-
-prop_to_list() ->
-    ?FORALL({A, L, B, I, F}, {atom(), list(), binary(), integer(), float()},
-            lists:all(fun(X) ->
-                              erlang:is_list(to_list(X))
-                      end, [A, L, B, I, F])).
-
-prop_to_binary() ->
-    ?FORALL({A, L, B, I, F, IO}, {atom(), list(range(0,255)), binary(),
-                                  integer(), float(), iolist()},
-            lists:all(fun(X) ->
-                              erlang:is_binary(to_binary(X))
-                      end, [A, L, B, I, F, IO])).
-
-prop_iolist_t() ->
-    ?FORALL(IO, iolist(), erlang:is_binary(to_binary(IO))).
-
-prop_to_float() ->
-    ?FORALL({F, I}, {float(), integer()},
-            begin
-                Fs = [[Fun(N), N] ||
-                         Fun <- [fun to_list/1, fun to_binary/1],
-                         N <- [F, I]],
-                lists:all(fun([FN, N]) ->
-                                  erlang:is_float(to_float(N)) andalso
-                                      erlang:is_float(to_float(FN))
-                          end, Fs)
-            end).
-
-prop_to_number() ->
-    ?FORALL({F, I}, {float(), integer()},
-            begin
-                Is = [[Fun(N), N] ||
-                         Fun <- [fun to_list/1, fun to_binary/1],
-                         N <- [F, I] ],
-                lists:all(fun([FN, N]) ->
-                                  erlang:is_number(to_number(N)) andalso
-                                      erlang:is_number(to_number(FN))
-                          end, Is)
-            end).
 -endif.
