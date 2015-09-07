@@ -68,7 +68,7 @@ fetch(Fun, List) when is_list(List), is_function(Fun) ->
 %%% Test Functions
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 find1_test() ->

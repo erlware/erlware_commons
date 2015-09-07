@@ -141,7 +141,7 @@ keys(Data) ->
 %%%===================================================================
 
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 %% For me unit testing initially is about covering the obvious case. A

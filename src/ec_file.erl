@@ -325,7 +325,7 @@ sub_files(From) ->
 %%% Test Functions
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 setup_test() ->

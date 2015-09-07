@@ -217,7 +217,7 @@ to_atom(X) ->
 %%% Tests
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 to_integer_test() ->
