@@ -314,7 +314,7 @@ internal_pes(Vsn, LVsn) ->
 %%% Test Functions
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 eql_test() ->

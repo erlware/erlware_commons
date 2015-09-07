@@ -694,7 +694,7 @@ ltoi(X) ->
 %%% Tests
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 

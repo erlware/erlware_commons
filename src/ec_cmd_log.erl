@@ -243,7 +243,7 @@ term_capabilities(_) -> full. %% Default to the backwards compatible version.
 %%% Test Functions
 %%%===================================================================
 
--ifdef(DEV_ONLY).
+-ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 should_test() ->
