@@ -24,7 +24,7 @@
 %%%===================================================================
 %% This should be opaque, but that kills dialyzer so for now we export it
 %% however you should not rely on the internal representation here
--type t() :: {string()}.
+-type t() :: {}.
 
 %%%===================================================================
 %%% API
@@ -32,7 +32,7 @@
 
 -spec new() -> t().
 new() ->
-    {"v"}.
+    {}.
 
 -spec vsn(t()) -> {ok, string()} | {error, Reason::any()}.
 vsn(Data) ->
@@ -85,15 +85,15 @@ get_patch_count(RawRef) ->
     os:cmd(Cmd).
 
 -spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
-parse_tags({Prefix}) ->
-    first_valid_tag(os:cmd("git log --oneline --decorate  | grep -F \"tag: \""), Prefix).
+parse_tags(_) ->
+    first_valid_tag(os:cmd("git log --oneline --decorate  | grep -F \"tag: \"")).
     %% TODO: The following command sould be able to get the version
     %% number directly, without a re:run. Should be checked for POSIX
-    %% "git log --oneline --decorate | grep -F \"tag: \" --color=never | head -n 1 | sed  \"s/.*tag: " ++ Prefix ++ "\([^,)]*\).*/\1/\"".
+    %% "git log --oneline --decorate | grep -F \"tag: \" --color=never | head -n 1 | sed  \"s/.*tag: v?\([^,)]*\).*/\1/\"".
 
--spec first_valid_tag(string(), string()) -> {string()|undefined, ec_semver:version_string()}.
-first_valid_tag(Line, Prefix) ->
-    RE = lists:flatten(io_lib:format("(\\(|\\s)tag:\\s(~s([^,\\)]+))", [Prefix])),
+-spec first_valid_tag(string()) -> {string()|undefined, ec_semver:version_string()}.
+first_valid_tag(Line) ->
+    RE = "(\\(|\\s)tag:\\s(v?([^,\\)]+))",
     case re:run(Line, RE, [{capture, [2, 3], list}]) of
         {match,[Tag, Vsn]} ->
             {Tag, Vsn};
