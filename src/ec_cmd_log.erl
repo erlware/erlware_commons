@@ -24,6 +24,7 @@
 
 -export([new/1,
          new/2,
+         new/3,
          log/4,
          should/2,
          debug/2,
@@ -40,17 +41,18 @@
 
 -include("ec_cmd_log.hrl").
 
--define(RED, 31).
--define(GREEN, 32).
--define(YELLOW, 33).
--define(BLUE, 34).
--define(MAGENTA, 35).
--define(CYAN, 36).
+-define(RED,     $r).
+-define(GREEN,   $g).
+-define(YELLOW,  $y).
+-define(BLUE,    $b).
+-define(MAGENTA, $m).
+-define(CYAN,    $c).
 
 -define(PREFIX, "===> ").
 
 -record(state_t, {log_level=0 :: int_log_level(),
                   caller=api :: caller(),
+                  intensity=low :: low | high,
                   term_cap=full :: full | dumb }).
 
 %%============================================================================
@@ -71,9 +73,11 @@
 
 -type atom_log_level() :: error | warn | info | debug.
 
+-type intensity() :: low | high.
+
 -type log_fun() :: fun(() -> iolist()).
 
--type color() :: 31..36.
+-type color() :: char().
 
 -opaque t() :: #state_t{}.
 
@@ -86,9 +90,17 @@ new(LogLevel) ->
     new(LogLevel, api).
 
 -spec new(log_level(), caller()) -> t().
-new(LogLevel, Caller) when LogLevel >= 0, LogLevel =< 3 ->
-    #state_t{log_level=LogLevel, caller=Caller, term_cap=query_term_env()};
-new(AtomLogLevel, Caller)
+new(LogLevel, Caller) ->
+    new(LogLevel, Caller, high).
+
+
+-spec new(log_level(), caller(), intensity()) -> t().
+new(LogLevel, Caller, Intensity) when (Intensity =:= low orelse
+                                       Intensity =:= high),
+                                      LogLevel >= 0, LogLevel =< 3 ->
+    #state_t{log_level=LogLevel, caller=Caller, term_cap=query_term_env(),
+             intensity=Intensity};
+new(AtomLogLevel, Caller, Intensity)
   when AtomLogLevel =:= error;
        AtomLogLevel =:= warn;
        AtomLogLevel =:= info;
@@ -99,7 +111,8 @@ new(AtomLogLevel, Caller)
                    info -> 2;
                    debug -> 3
                end,
-    new(LogLevel, Caller).
+    new(LogLevel, Caller, Intensity).
+
 
 %% @doc log at the debug level given the current log state with a string or
 %% function that returns a string
@@ -218,10 +231,25 @@ format(Log) ->
      <<")">>].
 
 -spec colorize(t(), color(), boolean(), string()) -> string().
-colorize(#state_t{caller=command_line, term_cap=full}, Color, false, Msg) when is_integer(Color) ->
-    lists:flatten(io_lib:format("\033[~B;~Bm~s~s\033[0m", [0, Color, ?PREFIX, Msg]));
-colorize(#state_t{caller=command_line, term_cap=dumb}, Color, _Bold, Msg) when is_integer(Color) ->
-    lists:flatten(io_lib:format("~s~s", [?PREFIX, Msg]));
+
+-define(VALID_COLOR(C),
+        C =:= $r orelse C =:= $g orelse C =:= $y orelse
+        C =:= $b orelse C =:= $m orelse C =:= $c orelse
+        C =:= $R orelse C =:= $G orelse C =:= $Y orelse
+        C =:= $B orelse C =:= $M orelse C =:= $C).
+
+%% We're sneaky we can substract 32 to get the uppercase character
+colorize(State, Color, true, Msg) when ?VALID_COLOR(Color) ->
+    colorize(State, Color - 32, fase, Msg);
+colorize(#state_t{caller=command_line, term_cap=full, intensity = high},
+         Color, false, Msg) when ?VALID_COLOR(Color) ->
+    lists:flatten(cf:format("~!" ++ [Color] ++"~s~s", [?PREFIX, Msg]));
+colorize(#state_t{caller=command_line, term_cap=full, intensity = low},
+         Color, false, Msg) when ?VALID_COLOR(Color) ->
+    lists:flatten(cf:format("~!" ++ [Color] ++"~s~!!~s", [?PREFIX, Msg]));
+colorize(#state_t{caller=command_line, term_cap=dumb}, Color, _Bold, Msg)
+  when ?VALID_COLOR(Color) ->
+    lists:flatten(cf:format("~s~s", [?PREFIX, Msg]));
 colorize(_LogState, _Color, _Bold, Msg) ->
     Msg.
 
