@@ -8,7 +8,7 @@ otp_release:
        - R16B01
        - R16B
        - R15B02
-script: "./rebar3 update && ./rebar3 compile && ./rebar3 unit"
+script: "./rebar3 update && ./rebar3 compile && ./rebar3 eunit"
 branches:
         only:
                 - master
