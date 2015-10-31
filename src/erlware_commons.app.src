@@ -1,6 +1,6 @@
 {application,erlware_commons,
              [{description,"Additional standard library for Erlang"},
-              {vsn,"0.16.1"},
+              {vsn,"0.17.0"},
               {modules,[]},
               {registered,[]},
               {applications,[kernel,stdlib]},
