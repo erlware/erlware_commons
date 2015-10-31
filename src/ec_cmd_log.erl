@@ -52,8 +52,7 @@
 
 -record(state_t, {log_level=0 :: int_log_level(),
                   caller=api :: caller(),
-                  intensity=low :: low | high,
-                  term_cap=full :: full | dumb }).
+                  intensity=low :: low | high}).
 
 %%============================================================================
 %% types
@@ -98,7 +97,7 @@ new(LogLevel, Caller) ->
 new(LogLevel, Caller, Intensity) when (Intensity =:= low orelse
                                        Intensity =:= high),
                                       LogLevel >= 0, LogLevel =< 3 ->
-    #state_t{log_level=LogLevel, caller=Caller, term_cap=query_term_env(),
+    #state_t{log_level=LogLevel, caller=Caller,
              intensity=Intensity};
 new(AtomLogLevel, Caller, Intensity)
   when AtomLogLevel =:= error;
@@ -238,34 +237,24 @@ format(Log) ->
         C =:= $R orelse C =:= $G orelse C =:= $Y orelse
         C =:= $B orelse C =:= $M orelse C =:= $C).
 
-%% We're sneaky we can substract 32 to get the uppercase character
+
+%% When it is suposed to be bold and we already have a uppercase
+%% (bold color) we don't need to modify the color
+colorize(State, Color, true, Msg)  when ?VALID_COLOR(Color),
+                                        Color >= $A, Color =< $Z ->
+    colorize(State, Color, fase, Msg);
+%% We're sneaky we can substract 32 to get the uppercase character if we want
+%% bold but have a non bold color.
 colorize(State, Color, true, Msg) when ?VALID_COLOR(Color) ->
     colorize(State, Color - 32, fase, Msg);
-colorize(#state_t{caller=command_line, term_cap=full, intensity = high},
+colorize(#state_t{caller=command_line, intensity = high},
          Color, false, Msg) when ?VALID_COLOR(Color) ->
     lists:flatten(cf:format("~!" ++ [Color] ++"~s~s", [?PREFIX, Msg]));
-colorize(#state_t{caller=command_line, term_cap=full, intensity = low},
+colorize(#state_t{caller=command_line, intensity = low},
          Color, false, Msg) when ?VALID_COLOR(Color) ->
     lists:flatten(cf:format("~!" ++ [Color] ++"~s~!!~s", [?PREFIX, Msg]));
-colorize(#state_t{caller=command_line, term_cap=dumb}, Color, _Bold, Msg)
-  when ?VALID_COLOR(Color) ->
-    lists:flatten(cf:format("~s~s", [?PREFIX, Msg]));
 colorize(_LogState, _Color, _Bold, Msg) ->
     Msg.
-
-%% @doc Query the term enviroment
-%% For reasons of simplicity, we don't parse terminal capabilities yet, although
-%% a later version could do so. Rather, we provide a simple match-list of terminal
-%% capabilities.
-%% @end
--spec query_term_env() -> full | dumb.
-query_term_env() ->
-    term_capabilities(os:getenv("TERM")).
-
--spec term_capabilities(string()) -> full | dumb.
-term_capabilities("xterm") -> full;
-term_capabilities("dumb") -> dumb;
-term_capabilities(_) -> full. %% Default to the backwards compatible version.
 
 %%%===================================================================
 %%% Test Functions
