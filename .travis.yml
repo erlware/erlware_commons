@@ -20,3 +20,4 @@ notifications:
       - "irc.freenode.org#erlware"
     use_notice: true
     skip_join: true
+sudo: false
