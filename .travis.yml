@@ -8,7 +8,7 @@ otp_release:
        - R16B01
        - R16B
        - R15B02
-script: "DEBUG=1 ./rebar3 update && ./rebar3 compile && ./rebar3 ct"
+script: "DEBUG=1 ./rebar3 update && DEBUG=1 ./rebar3 compile && DEBUG=1 ./rebar3 ct"
 branches:
         only:
                 - master
