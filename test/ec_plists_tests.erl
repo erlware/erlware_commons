@@ -74,3 +74,11 @@ ftmap_bad_test() ->
     ?assertMatch([{value, 1}, {error,{throw,test_exception}}, {value, 3},
                   {value, 4}, {value, 5}] , Results).
 
+external_down_message_test() ->
+    erlang:spawn_monitor(fun() -> erlang:throw(fail) end),
+    Results = ec_plists:map(fun(_) ->
+                                    ok
+                            end,
+                            lists:seq(1, 5)),
+    ?assertMatch([ok, ok, ok, ok, ok],
+                 Results).
