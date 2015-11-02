@@ -772,8 +772,8 @@ receivefrom(Pid) ->
     receive
         {Pid, R} ->
             R;
-        {'DOWN', _, _, BadPid, Reason} when Reason =/= normal ->
-            erlang:throw({BadPid, Reason});
+        {'DOWN', _, _, Pid, Reason} when Reason =/= normal ->
+            erlang:throw({Pid, Reason});
         {timerrang, _} ->
             erlang:throw({nil, timeout})
     end.
