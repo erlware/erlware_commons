@@ -3,9 +3,9 @@
               {vsn,"0.18.0"},
               {modules,[]},
               {registered,[]},
-              {applications,[kernel,stdlib]},
-              {contributors,["Eric Merritt","Tristan Sloughter",
-                             "Jordan Wilberding","Martin Logan"]},
+              {applications,[kernel,stdlib,cf]},
+              {maintainers,["Eric Merritt","Tristan Sloughter",
+                            "Jordan Wilberding","Martin Logan"]},
               {licenses,["Apache"]},
               {links,[{"Github",
                        "https://github.com/erlware/erlware_commons"}]}]}.
