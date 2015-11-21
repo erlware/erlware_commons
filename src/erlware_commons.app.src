@@ -4,8 +4,8 @@
               {modules,[]},
               {registered,[]},
               {applications,[kernel,stdlib,cf]},
-              {contributors,["Eric Merritt","Tristan Sloughter",
-                             "Jordan Wilberding","Martin Logan"]},
+              {maintainers,["Eric Merritt","Tristan Sloughter",
+                            "Jordan Wilberding","Martin Logan"]},
               {licenses,["Apache"]},
               {links,[{"Github",
                        "https://github.com/erlware/erlware_commons"}]}]}.
