@@ -242,11 +242,11 @@ format(Log) ->
 %% (bold color) we don't need to modify the color
 colorize(State, Color, true, Msg)  when ?VALID_COLOR(Color),
                                         Color >= $A, Color =< $Z ->
-    colorize(State, Color, fase, Msg);
+    colorize(State, Color, false, Msg);
 %% We're sneaky we can substract 32 to get the uppercase character if we want
 %% bold but have a non bold color.
 colorize(State, Color, true, Msg) when ?VALID_COLOR(Color) ->
-    colorize(State, Color - 32, fase, Msg);
+    colorize(State, Color - 32, false, Msg);
 colorize(#state_t{caller=command_line, intensity = high},
          Color, false, Msg) when ?VALID_COLOR(Color) ->
     lists:flatten(cf:format("~!" ++ [Color] ++"~s~s", [?PREFIX, Msg]));
