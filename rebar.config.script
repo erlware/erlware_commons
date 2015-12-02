@@ -1,8 +1,11 @@
-{ok, VSN} = application:get_key(rebar, vsn),
-[VSN1 | _] = string:tokens(VSN, "-"),
-[Maj, Min, Patch] = string:tokens(VSN1, "."),
-IsRebar3 = (list_to_integer(Maj) >= 3),
-
+IsRebar3 = case application:get_key(rebar, vsn) of
+               {ok, VSN} ->
+                   [VSN1 | _] = string:tokens(VSN, "-"),
+                   [Maj, Min, Patch] = string:tokens(VSN1, "."),
+                   (list_to_integer(Maj) >= 3);
+               undefined ->
+                   false
+           end,
 
 Rebar2Deps = [
               {cf, ".*", {git, "https://github.com/project-fifo/cf", {tag, "0.2.0"}}}
