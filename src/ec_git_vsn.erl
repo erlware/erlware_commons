@@ -52,7 +52,7 @@ collect_default_refcount(Data) ->
     RawCount =
         case Tag of
             undefined ->
-                os:cmd("git rev-list HEAD | wc -l");
+                os:cmd("git rev-list --count HEAD");
             _ ->
                 get_patch_count(Tag)
         end,
@@ -80,23 +80,15 @@ build_vsn_string(Vsn, RawRef, RawCount) ->
 
 get_patch_count(RawRef) ->
     Ref = re:replace(RawRef, "\\s", "", [global]),
-    Cmd = io_lib:format("git rev-list ~s..HEAD | wc -l",
+    Cmd = io_lib:format("git rev-list --count ~s..HEAD",
                          [Ref]),
     os:cmd(Cmd).
 
 -spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
-parse_tags(_) ->
-    first_valid_tag(os:cmd("git log --oneline --decorate  | grep -F \"tag: \"")).
-    %% TODO: The following command sould be able to get the version
-    %% number directly, without a re:run. Should be checked for POSIX
-    %% "git log --oneline --decorate | grep -F \"tag: \" --color=never | head -n 1 | sed  \"s/.*tag: v?\([^,)]*\).*/\1/\"".
+parse_tags(Pattern) ->
+    Cmd = io_lib:format("git describe --abbrev=0 --match \"~s*\"", [Pattern]),
+    Tag = os:cmd(Cmd),
+    Vsn = string:substr(Tag, string:len(Pattern) + 1),
+    Vsn1 = string:strip(Vsn, left, $v),
+    {Tag, Vsn1}.
 
--spec first_valid_tag(string()) -> {string()|undefined, ec_semver:version_string()}.
-first_valid_tag(Line) ->
-    RE = "(\\(|\\s)tag:\\s(v?([^,\\)]+))",
-    case re:run(Line, RE, [{capture, [2, 3], list}]) of
-        {match,[Tag, Vsn]} ->
-            {Tag, Vsn};
-        nomatch ->
-            {undefined, "0.0.0"}
-    end.
