@@ -217,13 +217,13 @@
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec all/2 :: (el_fun(), list()) -> boolean().
+-spec all(el_fun(), list()) -> boolean().
 all(Fun, List) ->
     all(Fun, List, 1).
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec all/3 :: (el_fun(), list(), malt()) -> boolean().
+-spec all(el_fun(), list(), malt()) -> boolean().
 all(Fun, List, Malt) ->
     try
         runmany(fun (L) ->
@@ -247,13 +247,13 @@ all(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec any/2 :: (fun(), list()) -> boolean().
+-spec any(fun(), list()) -> boolean().
 any(Fun, List) ->
     any(Fun, List, 1).
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec any/3 :: (fun(), list(), malt()) -> boolean().
+-spec any(fun(), list(), malt()) -> boolean().
 any(Fun, List, Malt) ->
     try
         runmany(fun (L) ->
@@ -276,13 +276,13 @@ any(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec filter/2 :: (fun(), list()) -> list().
+-spec filter(fun(), list()) -> list().
 filter(Fun, List) ->
     filter(Fun, List, 1).
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec filter/3 :: (fun(), list(), malt()) -> list().
+-spec filter(fun(), list(), malt()) -> list().
 filter(Fun, List, Malt) ->
     runmany(fun (L) ->
                     lists:filter(Fun, L)
@@ -297,12 +297,12 @@ filter(Fun, List, Malt) ->
 
 %% @doc Like below, but assumes 1 as the Malt. This function is almost useless,
 %% and is intended only to aid converting code from using lists to plists.
--spec fold/3 :: (fun(), InitAcc::term(), list()) -> term().
+-spec fold(fun(), InitAcc::term(), list()) -> term().
 fold(Fun, InitAcc, List) ->
     fold(Fun, Fun, InitAcc, List, 1).
 
 %% @doc Like below, but uses the Fun as the Fuse by default.
--spec fold/4 :: (fun(), InitAcc::term(), list(), malt()) -> term().
+-spec fold(fun(), InitAcc::term(), list(), malt()) -> term().
 fold(Fun, InitAcc, List, Malt) ->
     fold(Fun, Fun, InitAcc, List, Malt).
 
@@ -323,7 +323,7 @@ fold(Fun, InitAcc, List, Malt) ->
 %%
 %% Malt is the malt for the initial folding of sublists, and for the
 %% possible recursive fuse.
--spec fold/5 :: (fun(), fuse(), InitAcc::term(), list(), malt()) -> term().
+-spec fold(fun(), fuse(), InitAcc::term(), list(), malt()) -> term().
 fold(Fun, Fuse, InitAcc, List, Malt) ->
     Fun2 = fun (L) ->
                    lists:foldl(Fun, InitAcc, L)
@@ -333,14 +333,14 @@ fold(Fun, Fuse, InitAcc, List, Malt) ->
 %% @doc Similiar to foreach in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>
 %% except it makes no guarantee about the order it processes list elements.
--spec foreach/2 :: (fun(), list()) -> ok.
+-spec foreach(fun(), list()) -> ok.
 foreach(Fun, List) ->
     foreach(Fun, List, 1).
 
 %% @doc Similiar to foreach in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>
 %% except it makes no guarantee about the order it processes list elements.
--spec foreach/3 :: (fun(), list(), malt()) -> ok.
+-spec foreach(fun(), list(), malt()) -> ok.
 foreach(Fun, List, Malt) ->
     runmany(fun (L) ->
                     lists:foreach(Fun, L)
@@ -352,13 +352,13 @@ foreach(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec map/2 :: (fun(), list()) -> list().
+-spec map(fun(), list()) -> list().
 map(Fun, List) ->
     map(Fun, List, 1).
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec map/3 :: (fun(), list(), malt()) -> list().
+-spec map(fun(), list(), malt()) -> list().
 map(Fun, List, Malt) ->
     runmany(fun (L) ->
                     lists:map(Fun, L)
@@ -369,7 +369,7 @@ map(Fun, List, Malt) ->
             List, Malt).
 
 %% @doc values are returned as {value, term()}.
--spec ftmap/2 :: (fun(), list()) -> list().
+-spec ftmap(fun(), list()) -> list().
 ftmap(Fun, List) ->
    map(fun(L) ->
                try
@@ -381,7 +381,7 @@ ftmap(Fun, List) ->
        end, List).
 
 %% @doc values are returned as {value, term()}.
--spec ftmap/3 :: (fun(), list(), malt()) -> list().
+-spec ftmap(fun(), list(), malt()) -> list().
 ftmap(Fun, List, Malt) ->
     map(fun(L) ->
                 try
@@ -394,13 +394,13 @@ ftmap(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec partition/2 :: (fun(), list()) -> {list(), list()}.
+-spec partition(fun(), list()) -> {list(), list()}.
 partition(Fun, List) ->
     partition(Fun, List, 1).
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec partition/3 :: (fun(), list(), malt()) -> {list(), list()}.
+-spec partition(fun(), list(), malt()) -> {list(), list()}.
 partition(Fun, List, Malt) ->
     runmany(fun (L) ->
                     lists:partition(Fun, L)
@@ -415,7 +415,7 @@ partition(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec sort/1 :: (list()) -> list().
+-spec sort(list()) -> list().
 sort(List) ->
     sort(fun (A, B) ->
                  A =< B
@@ -424,7 +424,7 @@ sort(List) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec sort/2 :: (fun(), list()) -> list().
+-spec sort(fun(), list()) -> list().
 sort(Fun, List) ->
     sort(Fun, List, ?SORTMALT).
 
@@ -435,7 +435,7 @@ sort(Fun, List) ->
 %% sorted in a seperate process, and each merging of results is done in a
 %% seperate process. Malt defaults to 100, causing the list to be split into
 %% 100-element sublists.
--spec sort/3 :: (fun(), list(), malt()) -> list().
+-spec sort(fun(), list(), malt()) -> list().
 sort(Fun, List, Malt) ->
     Fun2 = fun (L) ->
                    lists:sort(Fun, L)
@@ -447,7 +447,7 @@ sort(Fun, List, Malt) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec usort/1 :: (list()) -> list().
+-spec usort(list()) -> list().
 usort(List) ->
     usort(fun (A, B) ->
                   A =< B
@@ -456,7 +456,7 @@ usort(List) ->
 
 %% @doc Same semantics as in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>.
--spec usort/2 :: (fun(), list()) -> list().
+-spec usort(fun(), list()) -> list().
 usort(Fun, List) ->
     usort(Fun, List, ?SORTMALT).
 
@@ -469,7 +469,7 @@ usort(Fun, List) ->
 %% 100-element sublists.
 %%
 %% usort removes duplicate elments while it sorts.
--spec usort/3 :: (fun(), list(), malt()) -> list().
+-spec usort(fun(), list(), malt()) -> list().
 usort(Fun, List, Malt) ->
     Fun2 = fun (L) ->
                    lists:usort(Fun, L)
@@ -481,11 +481,11 @@ usort(Fun, List, Malt) ->
 
 %% @doc Like below, assumes default MapMalt of 1.
 -ifdef(namespaced_types).
--spec mapreduce/2 :: (MapFunc, list()) -> dict:dict() when
+-spec mapreduce(MapFunc, list()) -> dict:dict() when
       MapFunc ::  fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()}.
 -else.
--spec mapreduce/2 :: (MapFunc, list()) -> dict() when
+-spec mapreduce(MapFunc, list()) -> dict() when
       MapFunc ::  fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()}.
 -endif.
@@ -519,12 +519,12 @@ mapreduce(MapFunc, List, MapMalt) ->
 %% mapreduce requires OTP R11B, or it may leave monitoring messages in the
 %% message queue.
 -ifdef(namespaced_types).
--spec mapreduce/5 :: (MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict:dict() when
+-spec mapreduce(MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict:dict() when
       MapFunc :: fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()},
       ReduceFunc :: fun((OldState::term(), Key::term(), Value::term()) -> NewState::term()).
 -else.
--spec mapreduce/5 :: (MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict() when
+-spec mapreduce(MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict() when
       MapFunc :: fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()},
       ReduceFunc :: fun((OldState::term(), Key::term(), Value::term()) -> NewState::term()).
@@ -587,7 +587,7 @@ add_key(Dict, Key, Value) ->
 
 %% @doc Like below, but assumes a Malt of 1,
 %% meaning each element of the list is processed by a seperate process.
--spec runmany/3 :: (fun(), fuse(), list()) -> term().
+-spec runmany(fun(), fuse(), list()) -> term().
 runmany(Fun, Fuse, List) ->
     runmany(Fun, Fuse, List, 1).
 
@@ -622,7 +622,7 @@ runmany(Fun, Fuse, List) ->
 %% Even if you pass {recursive, FuseFunc}, a recursive fuse is only done if
 %% the malt contains {nodes, NodeList} or {processes, X}. If this is not the
 %% case, a linear fuse is done.
--spec runmany/4 :: (fun(([term()]) -> term()), fuse(), list(), malt()) -> term().
+-spec runmany(fun(([term()]) -> term()), fuse(), list(), malt()) -> term().
 runmany(Fun, Fuse, List, Malt)
   when erlang:is_list(Malt) ->
     runmany(Fun, Fuse, List, local, no_split, Malt);
