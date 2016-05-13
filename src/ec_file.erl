@@ -174,8 +174,7 @@ real_dir_path(Path) ->
 %% function of the same name.
 -spec insecure_mkdtemp() -> TmpDirPath::file:name().
 insecure_mkdtemp() ->
-    random:seed(os:timestamp()),
-    UniqueNumber = erlang:integer_to_list(erlang:trunc(random:uniform() * 1000000000000)),
+    UniqueNumber = erlang:integer_to_list(erlang:trunc(random_uniform() * 1000000000000)),
     TmpDirPath =
         filename:join([tmp(), lists:flatten([".tmp_dir", UniqueNumber])]),
 
@@ -321,6 +320,16 @@ hex0(I)  -> $0 + I.
 sub_files(From) ->
     {ok, SubFiles} = file:list_dir(From),
     [filename:join(From, SubFile) || SubFile <- SubFiles].
+
+-ifdef(rand_module).
+random_uniform() ->
+    rand:uniform().
+-else.
+random_uniform() ->
+    random:seed(os:timestamp()),
+    random:uniform().
+-endif.
+
 %%%===================================================================
 %%% Test Functions
 %%%===================================================================
