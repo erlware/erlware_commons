@@ -54,11 +54,11 @@
 -type hour() :: 0..23.
 -type minute() :: 0..59.
 -type second() :: 0..59.
--type microsecond() :: 0..1000000.
+-type microsecond() :: 0..999999.
 
 -type daynum() :: 1..7.
 -type date() :: {year(),month(),day()}.
--type time() :: {hour(),minute(),second()} |{hour(),minute(),second(), microsecond()}.
+-type time() :: {hour(),minute(),second()} | {hour(),minute(),second(),microsecond()}.
 -type datetime() :: {date(),time()}.
 -type now() :: {integer(),integer(),integer()}.
 
