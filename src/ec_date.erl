@@ -149,10 +149,16 @@ nparse(Date) ->
 %% LOCAL FUNCTIONS
 %%
 
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $., Micros, $Z ], _Now, _Opts)
+  when ?is_world_sep(X)
+       andalso (Micros >= 0 andalso Micros < 1000000)
+       andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Micros}};
+
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $Z ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
         andalso Year > 31 ->
-    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, { 0}};
+    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
 
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $+, Off | _Rest ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -306,6 +312,15 @@ parse(_Tokens, _Now, _Opts) ->
 tokenise([], Acc) ->
     lists:reverse(Acc);
 
+%% ISO 8601 fractions of a second: only 3 or 6 places after comma,
+%% i.e. milli- or microseconds
+tokenise([$., N1, N2, N3, N4, N5, N6 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5), ?is_num(N6) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5, N6]), $. | Acc]);
+tokenise([$., N1, N2, N3 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, $0, $0, $0]), $. | Acc]);
+
 tokenise([N1, N2, N3, N4, N5, N6 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5), ?is_num(N6) ->
     tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5, N6]) | Acc]);
@@ -405,7 +420,6 @@ tokenise("ST"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("OF"++Rest, Acc) -> tokenise(Rest, Acc);
 tokenise("T"++Rest, Acc) -> tokenise(Rest, Acc);  % 2012-12-12T12:12:12 ISO formatting.
 tokenise([$Z | Rest], Acc) -> tokenise(Rest, [$Z | Acc]);  % 2012-12-12T12:12:12Zulu
-tokenise([$. |  Rest], Acc) -> tokenise(Rest, [$. | Acc]);  % 2012-12-12T12:12:12.xxxx ISO formatting.
 tokenise([$+, H1,H2,M1,M2| Rest], Acc) when ?is_tz_offset(H1,H2,M1,M2) -> tokenise(Rest, Acc);  % Tue Nov 11 15:03:18 +0000 2014 Twitter format
 tokenise([$+| Rest], Acc) -> tokenise(Rest, [$+ | Acc]);  % 2012-12-12T12:12:12.xxxx+ ISO formatting.
 
@@ -972,8 +986,32 @@ zulu_test_() ->
 
 format_iso8601_test_() ->
     [
-     ?_assertEqual("2001-03-10T17:16:17Z", format_iso8601(?DATE)),
-     ?_assertEqual("2001-03-10T17:16:17.123456Z", format_iso8601(?DATEMS))
+     ?_assertEqual("2001-03-10T17:16:17Z",
+                   format_iso8601({{2001,3,10},{17,16,17}})),
+     ?_assertEqual("2001-03-10T17:16:17.000000Z",
+                   format_iso8601({{2001,3,10},{17,16,17,0}})),
+     ?_assertEqual("2001-03-10T17:16:17.123456Z",
+                   format_iso8601({{2001,3,10},{17,16,17,123456}})),
+     ?_assertEqual("2001-03-10T17:16:17.000456Z",
+                   format_iso8601({{2001,3,10},{17,16,17,456}})),
+     ?_assertEqual("2001-03-10T17:16:17.123000Z",
+                   format_iso8601({{2001,3,10},{17,16,17,123000}}))
+    ].
+
+parse_iso8601_test_() ->
+    [
+     ?_assertEqual({{2001,3,10},{17,16,17}},
+                   parse("2001-03-10T17:16:17Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,0}},
+                   parse("2001-03-10T17:16:17.000Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,0}},
+                   parse("2001-03-10T17:16:17.000000Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123456}},
+                   parse("2001-03-10T17:16:17.123456Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,456}},
+                   parse("2001-03-10T17:16:17.000456Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123000}},
+                   parse("2001-03-10T17:16:17.123000Z"))
     ].
 
 -endif.
