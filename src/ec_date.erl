@@ -312,14 +312,22 @@ parse(_Tokens, _Now, _Opts) ->
 tokenise([], Acc) ->
     lists:reverse(Acc);
 
-%% ISO 8601 fractions of a second: only 3 or 6 places after comma,
-%% i.e. milli- or microseconds
+%% ISO 8601 fractions of a second
 tokenise([$., N1, N2, N3, N4, N5, N6 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5), ?is_num(N6) ->
     tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5, N6]), $. | Acc]);
-tokenise([$., N1, N2, N3 | Rest], Acc)
-  when ?is_num(N1), ?is_num(N2), ?is_num(N3) ->
-    tokenise(Rest, [ ltoi([N1, N2, N3, $0, $0, $0]), $. | Acc]);
+tokenise([$., N1, N2, N3, N4, N5 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, N4, N5]) * 10, $. | Acc]);
+tokenise([$., N1, N2, N3, N4 | Rest], Acc)
+  when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3, N4]) * 100, $. | Acc]);
+tokenise([$., N1, N2, N3 | Rest], Acc) when ?is_num(N1), ?is_num(N2), ?is_num(N3) ->
+    tokenise(Rest, [ ltoi([N1, N2, N3]) * 1000, $. | Acc]);
+tokenise([$., N1, N2 | Rest], Acc) when ?is_num(N1), ?is_num(N2) ->
+    tokenise(Rest, [ ltoi([N1, N2]) * 10000, $. | Acc]);
+tokenise([$., N1 | Rest], Acc) when ?is_num(N1) ->
+    tokenise(Rest, [ ltoi([N1]) * 100000, $. | Acc]);
 
 tokenise([N1, N2, N3, N4, N5, N6 | Rest], Acc)
   when ?is_num(N1), ?is_num(N2), ?is_num(N3), ?is_num(N4), ?is_num(N5), ?is_num(N6) ->
@@ -990,12 +998,28 @@ format_iso8601_test_() ->
                    format_iso8601({{2001,3,10},{17,16,17}})),
      ?_assertEqual("2001-03-10T17:16:17.000000Z",
                    format_iso8601({{2001,3,10},{17,16,17,0}})),
+     ?_assertEqual("2001-03-10T17:16:17.100000Z",
+                   format_iso8601({{2001,3,10},{17,16,17,100000}})),
+     ?_assertEqual("2001-03-10T17:16:17.120000Z",
+                   format_iso8601({{2001,3,10},{17,16,17,120000}})),
+     ?_assertEqual("2001-03-10T17:16:17.123000Z",
+                   format_iso8601({{2001,3,10},{17,16,17,123000}})),
+     ?_assertEqual("2001-03-10T17:16:17.123400Z",
+                   format_iso8601({{2001,3,10},{17,16,17,123400}})),
+     ?_assertEqual("2001-03-10T17:16:17.123450Z",
+                   format_iso8601({{2001,3,10},{17,16,17,123450}})),
      ?_assertEqual("2001-03-10T17:16:17.123456Z",
                    format_iso8601({{2001,3,10},{17,16,17,123456}})),
+     ?_assertEqual("2001-03-10T17:16:17.023456Z",
+                   format_iso8601({{2001,3,10},{17,16,17,23456}})),
+     ?_assertEqual("2001-03-10T17:16:17.003456Z",
+                   format_iso8601({{2001,3,10},{17,16,17,3456}})),
      ?_assertEqual("2001-03-10T17:16:17.000456Z",
                    format_iso8601({{2001,3,10},{17,16,17,456}})),
-     ?_assertEqual("2001-03-10T17:16:17.123000Z",
-                   format_iso8601({{2001,3,10},{17,16,17,123000}}))
+     ?_assertEqual("2001-03-10T17:16:17.000056Z",
+                   format_iso8601({{2001,3,10},{17,16,17,56}})),
+     ?_assertEqual("2001-03-10T17:16:17.000006Z",
+                   format_iso8601({{2001,3,10},{17,16,17,6}}))
     ].
 
 parse_iso8601_test_() ->
@@ -1006,12 +1030,20 @@ parse_iso8601_test_() ->
                    parse("2001-03-10T17:16:17.000Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,0}},
                    parse("2001-03-10T17:16:17.000000Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,100000}},
+                   parse("2001-03-10T17:16:17.1Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,120000}},
+                   parse("2001-03-10T17:16:17.12Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123000}},
+                   parse("2001-03-10T17:16:17.123Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123400}},
+                   parse("2001-03-10T17:16:17.1234Z")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123450}},
+                   parse("2001-03-10T17:16:17.12345Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,123456}},
                    parse("2001-03-10T17:16:17.123456Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,456}},
                    parse("2001-03-10T17:16:17.000456Z")),
-     ?_assertEqual({{2001,3,10},{17,16,17,123000}},
-                   parse("2001-03-10T17:16:17.123Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,123000}},
                    parse("2001-03-10T17:16:17.123000Z"))
     ].
