@@ -52,7 +52,7 @@
 
 -record(state_t, {log_level=0 :: int_log_level(),
                   caller=api :: caller(),
-                  intensity=low :: low | high}).
+                  intensity=low :: none | low | high}).
 
 %%============================================================================
 %% types
@@ -72,7 +72,7 @@
 
 -type atom_log_level() :: error | warn | info | debug.
 
--type intensity() :: low | high.
+-type intensity() :: none | low | high.
 
 -type log_fun() :: fun(() -> iolist()).
 
@@ -94,7 +94,8 @@ new(LogLevel, Caller) ->
 
 
 -spec new(log_level(), caller(), intensity()) -> t().
-new(LogLevel, Caller, Intensity) when (Intensity =:= low orelse
+new(LogLevel, Caller, Intensity) when (Intensity =:= none orelse
+                                       Intensity =:= low orelse
                                        Intensity =:= high),
                                       LogLevel >= 0, LogLevel =< 3 ->
     #state_t{log_level=LogLevel, caller=Caller,
@@ -237,7 +238,8 @@ format(Log) ->
         C =:= $R orelse C =:= $G orelse C =:= $Y orelse
         C =:= $B orelse C =:= $M orelse C =:= $C).
 
-
+colorize(#state_t{intensity=none}, _, _, Msg) ->
+                Msg;
 %% When it is suposed to be bold and we already have a uppercase
 %% (bold color) we don't need to modify the color
 colorize(State, Color, true, Msg)  when ?VALID_COLOR(Color),
@@ -285,4 +287,14 @@ should_test() ->
     ?assertEqual(?EC_DEBUG, log_level(DebugLogState)),
     ?assertEqual(debug, atom_log_level(DebugLogState)).
 
+
+no_color_test() ->
+    LogState = new(debug, command_line, none),
+    ?assertEqual("test",
+                 colorize(LogState, ?RED, true, "test")).
+
+color_test() ->
+    LogState = new(debug, command_line, high),
+    ?assertEqual("\e[1;31m===> test\e[0m",
+                 colorize(LogState, ?RED, true, "test")).
 -endif.
