@@ -12,7 +12,7 @@
 -define(p_zero_or_more,true).
 
 
--compile(export_all).
+
 -spec file(file:name()) -> any().
 file(Filename) -> case file:read_file(Filename) of {ok,Bin} -> parse(Bin); Err -> Err end.
 
