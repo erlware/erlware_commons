@@ -7,7 +7,7 @@ IsRebar3 = case application:get_key(rebar, vsn) of
            end,
 
 Rebar2Deps = [
-              {cf, ".*", {git, "https://github.com/project-fifo/cf", {tag, "0.2.0"}}}
+              {cf, ".*", {git, "https://github.com/project-fifo/cf", {tag, "0.2.2"}}}
              ],
 
 case IsRebar3 of
