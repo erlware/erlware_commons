@@ -510,7 +510,7 @@ format([$g|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
 format([$g|T], {_,{H,_,_}}=Dt, Acc) ->
     format(T, Dt, [itol(H)|Acc]);
 format([$G|T], {_,{H,_,_}}=Dt, Acc) ->
-    format(T, Dt, [itol(H)|Acc]);
+    format(T, Dt, [pad2(H)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
     format(T, Dt, [pad2(H-12)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) ->
@@ -540,7 +540,7 @@ format([$g|T], {_,{H,_,_,_}}=Dt, Acc) when H > 12 ->
 format([$g|T], {_,{H,_,_,_}}=Dt, Acc) ->
     format(T, Dt, [itol(H)|Acc]);
 format([$G|T], {_,{H,_,_,_}}=Dt, Acc) ->
-    format(T, Dt, [itol(H)|Acc]);
+    format(T, Dt, [pad2(H)|Acc]);
 format([$h|T], {_,{H,_,_,_}}=Dt, Acc) when H > 12 ->
     format(T, Dt, [pad2(H-12)|Acc]);
 format([$h|T], {_,{H,_,_,_}}=Dt, Acc) ->
@@ -1019,7 +1019,33 @@ format_iso8601_test_() ->
      ?_assertEqual("2001-03-10T17:16:17.000056Z",
                    format_iso8601({{2001,3,10},{17,16,17,56}})),
      ?_assertEqual("2001-03-10T17:16:17.000006Z",
-                   format_iso8601({{2001,3,10},{17,16,17,6}}))
+                   format_iso8601({{2001,3,10},{17,16,17,6}})),
+    ?_assertEqual("2001-03-10T07:16:17Z",
+                   format_iso8601({{2001,3,10},{07,16,17}})),
+     ?_assertEqual("2001-03-10T07:16:17.000000Z",
+                   format_iso8601({{2001,3,10},{07,16,17,0}})),
+     ?_assertEqual("2001-03-10T07:16:17.100000Z",
+                   format_iso8601({{2001,3,10},{07,16,17,100000}})),
+     ?_assertEqual("2001-03-10T07:16:17.120000Z",
+                   format_iso8601({{2001,3,10},{07,16,17,120000}})),
+     ?_assertEqual("2001-03-10T07:16:17.123000Z",
+                   format_iso8601({{2001,3,10},{07,16,17,123000}})),
+     ?_assertEqual("2001-03-10T07:16:17.123400Z",
+                   format_iso8601({{2001,3,10},{07,16,17,123400}})),
+     ?_assertEqual("2001-03-10T07:16:17.123450Z",
+                   format_iso8601({{2001,3,10},{07,16,17,123450}})),
+     ?_assertEqual("2001-03-10T07:16:17.123456Z",
+                   format_iso8601({{2001,3,10},{07,16,17,123456}})),
+     ?_assertEqual("2001-03-10T07:16:17.023456Z",
+                   format_iso8601({{2001,3,10},{07,16,17,23456}})),
+     ?_assertEqual("2001-03-10T07:16:17.003456Z",
+                   format_iso8601({{2001,3,10},{07,16,17,3456}})),
+     ?_assertEqual("2001-03-10T07:16:17.000456Z",
+                   format_iso8601({{2001,3,10},{07,16,17,456}})),
+     ?_assertEqual("2001-03-10T07:16:17.000056Z",
+                   format_iso8601({{2001,3,10},{07,16,17,56}})),
+     ?_assertEqual("2001-03-10T07:16:17.000006Z",
+                   format_iso8601({{2001,3,10},{07,16,17,6}}))
     ].
 
 parse_iso8601_test_() ->
