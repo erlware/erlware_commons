@@ -160,10 +160,22 @@ parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $Z ], _Now, _Opts)
         andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
 
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $., Micros, $+, Off | _Rest ], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+        andalso (Micros >= 0 andalso Micros < 1000000)
+        andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []) - Off, Min, Sec}, {Micros}};
+
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $+, Off | _Rest ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
         andalso Year > 31 ->
     {{Year, Month, Day}, {hour(Hour, []) - Off, Min, Sec}, {0}};
+
+parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $., Micros, $-, Off | _Rest ], _Now, _Opts)
+  when  (?is_us_sep(X) orelse ?is_world_sep(X))
+        andalso (Micros >= 0 andalso Micros < 1000000)
+        andalso Year > 31 ->
+    {{Year, Month, Day}, {hour(Hour, []) + Off, Min, Sec}, {Micros}};
 
 parse([Year, X, Month, X, Day, Hour, $:, Min, $:, Sec, $-, Off | _Rest ], _Now, _Opts)
   when  (?is_us_sep(X) orelse ?is_world_sep(X))
@@ -1068,6 +1080,16 @@ parse_iso8601_test_() ->
                    parse("2001-03-10T17:16:17.12345Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,123456}},
                    parse("2001-03-10T17:16:17.123456Z")),
+
+     ?_assertEqual({{2001,3,10},{15,16,17,100000}},
+                   parse("2001-03-10T16:16:17.1+01:00")),
+     ?_assertEqual({{2001,3,10},{15,16,17,123456}},
+                   parse("2001-03-10T16:16:17.123456+01:00")),
+     ?_assertEqual({{2001,3,10},{17,16,17,100000}},
+                   parse("2001-03-10T16:16:17.1-01:00")),
+     ?_assertEqual({{2001,3,10},{17,16,17,123456}},
+                   parse("2001-03-10T16:16:17.123456-01:00")),
+
      ?_assertEqual({{2001,3,10},{17,16,17,456}},
                    parse("2001-03-10T17:16:17.000456Z")),
      ?_assertEqual({{2001,3,10},{17,16,17,123000}},
