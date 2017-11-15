@@ -127,7 +127,7 @@ ask_convert(Prompt, TransFun, Type,  Default) ->
                                                            Default ->
                                                                [" (", io_lib:format("~p", [Default]) , ")"]
                                                        end, "> "])),
-    Data = trim(trim(io:get_line(NewPrompt)), both, $\n),
+    Data = trim(trim(io:get_line(NewPrompt)), both, [$\n]),
     Ret = TransFun(Data),
     case Ret of
         no_data ->
@@ -202,7 +202,7 @@ trim(Str) -> string:trim(Str).
 trim(Str, Dir, Chars) -> string:trim(Str, Dir, Chars).
 -else.
 trim(Str) -> string:strip(Str).
-trim(Str, Dir, Chars) -> string:strip(Str, Dir, Chars).
+trim(Str, Dir, [Chars|_]) -> string:strip(Str, Dir, Chars).
 -endif.
 
 %%%====================================================================
