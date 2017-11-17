@@ -85,16 +85,20 @@ get_patch_count(RawRef) ->
     os:cmd(Cmd).
 
 -spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
+parse_tags({}) ->
+    parse_tags("");
 parse_tags(Pattern) ->
-    Cmd = io_lib:format("git describe --abbrev=0 --match \"~s*\"", [Pattern]),
+    Cmd = io_lib:format("git describe --abbrev=0 --tags --match \"~s*\"", [Pattern]),
     Tag = os:cmd(Cmd),
     Vsn = slice(Tag, len(Pattern) + 1),
-    Vsn1 = trim(Vsn, left, "v"),
+    Vsn1 = trim(trim(Vsn, left, "v"), right, "\n"),
     {Tag, Vsn1}.
 
 -ifdef(unicode_str).
 len(Str) -> string:length(Str).
-trim(Str, Dir, Chars) -> string:trim(Str, Dir, Chars).
+trim(Str, right, Chars) -> string:trim(Str, trailing, Chars);
+trim(Str, left, Chars) -> string:trim(Str, leading, Chars);
+trim(Str, both, Chars) -> string:trim(Str, both, Chars).
 slice(Str, Len) -> string:slice(Str, Len).
 -else.
 len(Str) -> string:len(Str).
