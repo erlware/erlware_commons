@@ -90,7 +90,7 @@ parse_tags({}) ->
 parse_tags(Pattern) ->
     Cmd = io_lib:format("git describe --abbrev=0 --tags --match \"~s*\"", [Pattern]),
     Tag = os:cmd(Cmd),
-    Vsn = slice(Tag, len(Pattern) + 1),
+    Vsn = slice(Tag, len(Pattern)),
     Vsn1 = trim(trim(Vsn, left, "v"), right, "\n"),
     {Tag, Vsn1}.
 
@@ -103,5 +103,5 @@ slice(Str, Len) -> string:slice(Str, Len).
 -else.
 len(Str) -> string:len(Str).
 trim(Str, Dir, [Chars|_]) -> string:strip(Str, Dir, Chars).
-slice(Str, Len) -> string:substr(Str, Len).
+slice(Str, Len) -> string:substr(Str, Len + 1).
 -endif.
