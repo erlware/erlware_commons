@@ -822,20 +822,7 @@ cluster_runmany(Fun, Fuse, [Task|TaskList], [N|Nodes], Running, Results) ->
                            Parent ! {erlang:self(), fuse, FuseFunc(R1, R2)}
                    end
     end,
-    Fun3 = fun () ->
-                   try
-                       Fun2()
-                   catch
-                       exit:siblingdied ->
-                           ok;
-                       exit:Reason ->
-                           Parent ! {erlang:self(), error, Reason};
-                       error:R ->
-                           Parent ! {erlang:self(), error, {R, erlang:get_stacktrace()}};
-                       throw:R ->
-                           Parent ! {erlang:self(), error, {{nocatch, R}, erlang:get_stacktrace()}}
-                   end
-           end,
+    Fun3 = fun() -> runmany_wrap(Fun2, Parent) end,
     Pid = proc_lib:spawn(N, Fun3),
     erlang:monitor(process, Pid),
     cluster_runmany(Fun, Fuse, TaskList, Nodes, [{Pid, N, Task}|Running], Results);
@@ -884,6 +871,36 @@ cluster_runmany(Fun, Fuse, TaskList, Nodes, Running, Results) when length(Runnin
 cluster_runmany(_, _, [_Non|_Empty], []=_Nodes, []=_Running, _) ->
 %% We have data, but no nodes either available or occupied
     erlang:exit(allnodescrashed).
+
+-ifdef(fun_stacktrace).
+runmany_wrap(Fun, Parent) ->
+    try
+        Fun
+    catch
+        exit:siblingdied ->
+            ok;
+        exit:Reason ->
+            Parent ! {erlang:self(), error, Reason};
+        error:R ->
+            Parent ! {erlang:self(), error, {R, erlang:get_stacktrace()}};
+        throw:R ->
+            Parent ! {erlang:self(), error, {{nocatch, R}, erlang:get_stacktrace()}}
+    end.
+-else.
+runmany_wrap(Fun, Parent) ->
+    try
+        Fun
+    catch
+        exit:siblingdied ->
+            ok;
+        exit:Reason ->
+            Parent ! {erlang:self(), error, Reason};
+        error:R:Stacktrace ->
+            Parent ! {erlang:self(), error, {R, Stacktrace}};
+        throw:R:Stacktrace ->
+            Parent ! {erlang:self(), error, {{nocatch, R}, Stacktrace}}
+    end.
+-endif.
 
 delete_running(Pid, [{Pid, Node, List}|Running], Acc) ->
     {Running ++ Acc, Node, List};
