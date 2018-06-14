@@ -277,9 +277,15 @@ remove_recursive(Path, Options) ->
 tmp() ->
     case erlang:system_info(system_architecture) of
         "win32" ->
-            "./tmp";
+            case os:getenv("TEMP") of
+                false -> "./tmp";
+                Val -> Val
+            end;
         _SysArch ->
-            "/tmp"
+            case os:getenv("TMPDIR") of
+                false -> "/tmp";
+                Val -> Val
+            end
     end.
 
 %% Copy the subfiles of the From directory to the to directory.
