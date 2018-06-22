@@ -11,6 +11,7 @@
          exists/1,
          copy/2,
          copy/3,
+         copy_file_info/3,
          insecure_mkdtemp/0,
          mkdir_path/1,
          mkdir_p/1,
@@ -40,7 +41,8 @@
 %%============================================================================
 %% Types
 %%============================================================================
--type option() :: recursive.
+-type file_info() :: mode | time | owner | group.
+-type option() :: recursive | {file_info, [file_info()]}.
 
 %%%===================================================================
 %%% API
@@ -57,35 +59,78 @@ exists(Filename) ->
 %% @doc copy an entire directory to another location.
 -spec copy(file:name(), file:name(), Options::[option()]) -> ok | {error, Reason::term()}.
 copy(From, To, []) ->
-    copy(From, To);
-copy(From, To, [recursive] = Options) ->
-    case is_dir(From) of
-        false ->
-            copy(From, To);
+    copy_(From, To, []);
+copy(From, To, Options) ->
+    case proplists:get_value(recursive,  Options, false) of
         true ->
-            make_dir_if_dir(To),
-            copy_subfiles(From, To, Options)
+            case is_dir(From) of
+                false ->
+                    copy_(From, To, Options);
+                true ->
+                    make_dir_if_dir(To),
+                    copy_subfiles(From, To, Options)
+            end;
+        false ->
+            copy_(From, To, Options)
     end.
 
 %% @doc copy a file including timestamps,ownership and mode etc.
 -spec copy(From::file:filename(), To::file:filename()) -> ok | {error, Reason::term()}.
 copy(From, To) ->
+    copy_(From, To, [{file_info, [mode, time, owner, group]}]).
+
+copy_(From, To, Options) ->
     case file:copy(From, To) of
         {ok, _} ->
-            case file:read_file_info(From) of
-                {ok, FileInfo} ->
-                    case file:write_file_info(To, FileInfo) of
-                        ok ->
-                            ok;
-                        {error, WFError} ->
-                            {error, {write_file_info_failed, WFError}}
-                    end;
-                {error, RFError} ->
-                    {error, {read_file_info_failed, RFError}}
-            end;
+            copy_file_info(To, From, proplists:get_value(file_info, Options, []));
         {error, Error} ->
             {error, {copy_failed, Error}}
     end.
+
+copy_file_info(To, From, FileInfoToKeep) ->
+    case file:read_file_info(From) of
+        {ok, FileInfo} ->
+            case write_file_info(To, FileInfo, FileInfoToKeep) of
+                [] ->
+                    ok;
+                Errors ->
+                    {error, {write_file_info_failed_for, Errors}}
+            end;
+        {error, RFError} ->
+            {error, {read_file_info_failed, RFError}}
+    end.
+
+write_file_info(To, FileInfo, FileInfoToKeep) ->
+    WriteInfoFuns = [{mode, fun try_write_mode/2},
+                     {time, fun try_write_time/2},
+                     {group, fun try_write_group/2},
+                     {owner, fun try_write_owner/2}],
+    lists:foldl(fun(Info, Acc) ->
+                        case proplists:get_value(Info, WriteInfoFuns, undefined) of
+                            undefined ->
+                                Acc;
+                            F ->
+                                case F(To, FileInfo) of
+                                    ok ->
+                                        Acc;
+                                    {error, Reason} ->
+                                        [{Info, Reason} | Acc]
+                                end
+                        end
+                end, [], FileInfoToKeep).
+
+
+try_write_mode(To, #file_info{mode=Mode}) ->
+    file:write_file_info(To, #file_info{mode=Mode}).
+
+try_write_time(To, #file_info{atime=Atime, mtime=Mtime}) ->
+    file:write_file_info(To, #file_info{atime=Atime, mtime=Mtime}).
+
+try_write_owner(To, #file_info{uid=OwnerId}) ->
+    file:write_file_info(To, #file_info{uid=OwnerId}).
+
+try_write_group(To, #file_info{gid=OwnerId}) ->
+    file:write_file_info(To, #file_info{gid=OwnerId}).
 
 %% @doc return an md5 checksum string or a binary. Same as unix utility of
 %%      same name.
