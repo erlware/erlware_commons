@@ -217,7 +217,7 @@ real_dir_path(Path) ->
 
 %% @doc make a unique temporary directory. Similar function to BSD stdlib
 %% function of the same name.
--spec insecure_mkdtemp() -> TmpDirPath::file:name().
+-spec insecure_mkdtemp() -> TmpDirPath::file:name() | {error, term()}.
 insecure_mkdtemp() ->
     UniqueNumber = erlang:integer_to_list(erlang:trunc(random_uniform() * 1000000000000)),
     TmpDirPath =
