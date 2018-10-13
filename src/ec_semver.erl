@@ -287,24 +287,24 @@ normalize(Other = {{_, _, _, _}, {_,_}}) ->
 %% the internal implementation of the of the pessimistic run. The
 %% external just ensures that versions are parsed.
 -spec internal_pes(semver(), semver()) -> boolean().
-internal_pes(VsnA, {{LM, LMI}, _})
+internal_pes(VsnA, {{LM, LMI}, Alpha})
   when erlang:is_integer(LM),
        erlang:is_integer(LMI) ->
-    gte(VsnA, {{LM, LMI, 0}, {[], []}}) andalso
+    gte(VsnA, {{LM, LMI, 0}, Alpha}) andalso
         lt(VsnA, {{LM + 1, 0, 0, 0}, {[], []}});
-internal_pes(VsnA, {{LM, LMI, LP}, _})
+internal_pes(VsnA, {{LM, LMI, LP}, Alpha})
     when erlang:is_integer(LM),
          erlang:is_integer(LMI),
          erlang:is_integer(LP) ->
-    gte(VsnA, {{LM, LMI, LP}, {[], []}})
+    gte(VsnA, {{LM, LMI, LP}, Alpha})
         andalso
         lt(VsnA, {{LM, LMI + 1, 0, 0}, {[], []}});
-internal_pes(VsnA, {{LM, LMI, LP, LMP}, _})
+internal_pes(VsnA, {{LM, LMI, LP, LMP}, Alpha})
     when erlang:is_integer(LM),
          erlang:is_integer(LMI),
          erlang:is_integer(LP),
          erlang:is_integer(LMP) ->
-    gte(VsnA, {{LM, LMI, LP, LMP}, {[], []}})
+    gte(VsnA, {{LM, LMI, LP, LMP}, Alpha})
         andalso
         lt(VsnA, {{LM, LMI, LP + 1, 0}, {[], []}});
 internal_pes(Vsn, LVsn) ->
@@ -671,6 +671,10 @@ between_test() ->
     ?assertMatch(true, not between("aaa", "ddd", "zzz")).
 
 pes_test() ->
+    ?assertMatch(true, pes("1.0.0-rc.0", "1.0.0-rc.0")),
+    ?assertMatch(true, pes("1.0.0-rc.1", "1.0.0-rc.0")),
+    ?assertMatch(true, pes("1.0.0", "1.0.0-rc.0")),
+    ?assertMatch(false, pes("1.0.0-rc.0", "1.0.0-rc.1")),
     ?assertMatch(true, pes("2.6.0", "2.6")),
     ?assertMatch(true, pes("2.7", "2.6")),
     ?assertMatch(true, pes("2.8", "2.6")),
