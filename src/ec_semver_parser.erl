@@ -44,7 +44,7 @@ parse(Input) when is_binary(Input) ->
 
 -spec 'alpha_part'(input(), index()) -> parse_result().
 'alpha_part'(Input, Index) ->
-  p(Input, Index, 'alpha_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[A-Za-z0-9]">>)))(I,D) end, fun(Node, _Idx) ->erlang:iolist_to_binary(Node) end).
+  p(Input, Index, 'alpha_part', fun(I,D) -> (p_one_or_more(p_charclass(<<"[A-Za-z0-9-]">>)))(I,D) end, fun(Node, _Idx) ->erlang:iolist_to_binary(Node) end).
 
 
 transform(_,Node,_Index) -> Node.
