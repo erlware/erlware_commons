@@ -16,7 +16,7 @@ implement a dictionary. Just a few are:
 * [Skip Lists](http://en.wikipedia.org/wiki/Skip_list)
 * Many, many more ....
 
-Each of these approaches has there own performance characteristics,
+Each of these approaches has their own performance characteristics,
 memory footprints etc. For example, a table of size n with open
 addressing has no collisions and holds up to n elements, with a single
 comparison for successful lookup, and a table of size n with chaining
@@ -67,9 +67,9 @@ someone could inadvertantly pass an unexpected function name as
 `ModuleToUse` and you would never get any warnings, just an exception
 at run time.
 
-Fortunately, Erlang is a pretty flexable language so we can use a
+Fortunately, Erlang is a pretty flexible language so we can use a
 similar approach with a few adjustments to give us the best of both
-worlds. Both the flexibiltiy of ignoreing a specific implementation
+worlds. Both the flexibility of ignoring a specific implementation
 and keeping all the nice locality we get by using an explicit module
 name.
 
@@ -90,7 +90,7 @@ reasons, this is a much better approach to the problem. This is what
 Signatures
 ----------
 
-How do we actually do this in Erlang now that Erlang is missing what Java, SML and friends has built in? 
+How do we actually do this in Erlang now that Erlang is missing what Java, SML and friends have built in? 
 
 The first thing we need to do is to define
 a [Behaviour](http://metajack.im/2008/10/29/custom-behaviors-in-erlang/)
@@ -119,7 +119,7 @@ Behaviour for dictionaries. That Behaviour looks like this:
 
 So we have our Behaviour now. Unfortunately, this doesn't give us much
 yet. It will make sure that any dictionaries we write will have all
-the functions they need to have, but it wont help use actually use the
+the functions they need to have, but it won't help us actually use the
 dictionaries in an abstract way in our code. To do that we need to add
 a bit of functionality. We do that by actually implementing our own
 behaviour, starting with `new/1`.
@@ -137,7 +137,7 @@ This code creates a new dictionary for us. Or to be more specific it
 actually creates a new dictionary Signature record, that will be used
 subsequently in other calls. This might look a bit familiar from our
 previous less optimal approach. We have both the module name and the
-data. here in the record. We call the module name named in
+data in the record. We call the module name named in
 `ModuleName` to create the initial data. We then construct the record
 and return that record to the caller and we have a new
 dictionary. What about the other functions, the ones that don't create
@@ -197,7 +197,7 @@ implementation in
 Using Signatures
 ----------------
 
-Its a good idea to work through an example so we have a bit better
+It's a good idea to work through an example so we have a bit better
 idea of how to use these Signatures. If you are like me, you probably
 have some questions about what kind of performance burden this places
 on the code. At the very least we have an additional function call
@@ -206,7 +206,7 @@ lets write a little timing test, so we can get a good idea of how much
 this is all costing us.
 
 In general, there are two kinds of concrete implementations for
-Signatures. The first is a native implementations, the second is a
+Signatures. The first is a native implementation, the second is a
 wrapper.
 
 ### Native Signature Implementations
@@ -223,16 +223,16 @@ implements the ec_dictionary module directly.
 
 A Signature Wrapper is a module that wraps another module. Its
 purpose is to help a preexisting module implement the Behaviour
-defined by a Signature. A good example if this in our current example
+defined by a Signature. A good example of this in our current example
 is the
 [erlware_commons/ec_dict](https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dict.erl)
 module. It implements the ec_dictionary Behaviour, but all the
 functionality is provided by the
 [stdlib/dict](http://www.erlang.org/doc/man/dict.html) module
-itself. Lets take a look at one example to see how this is done.
+itself. Let's take a look at one example to see how this is done.
 
 We will take a look at one of the functions we have already seen. The
-`get` function an ec_dictionary `get` doesn't have quite the same
+`get` function in ec_dictionary doesn't have quite the same
 semantics as any of the functions in the dict module. So a bit of
 translation needs to be done. We do that in the ec_dict module `get` function.
 
@@ -258,11 +258,11 @@ the mix and that adds a bit of additional overhead.
 
 ### Creating the Timing Module
 
-We are going to creating timings for both Native Signature
+We are going to be creating timings for both Native Signature
 Implementations and Signature Wrappers.
 
-Lets get started by looking at some helper functions. We want
-dictionaries to have a bit of data in them. So to that end we are will
+Let's get started by looking at some helper functions. We want
+dictionaries to have a bit of data in them. So to that end we will
 create a couple of functions that create dictionaries for each type we
 want to test. The first we want to time is the Signature Wrapper, so
 `dict` vs `ec_dict` called as a Signature.
@@ -299,7 +299,7 @@ Signatures. Otherwise, this does the exact same thing as the dict
 
 We are going to use two function calls in our timing. One that updates
 data and one that returns data, just to get good coverage. For our
-dictionaries that we are going to use the `size` function as well as
+dictionaries we are going to use the `size` function as well as
 the `add` function.
 
     :::erlang
@@ -315,8 +315,8 @@ the `add` function.
 
 The `test_avg` function runs the provided function the number of times
 specified in the second argument and collects timing information. We
-are going to run these one million times to get a good average (its
-fast so it doesn't take long). You can see that in the anonymous
+are going to run these one million times to get a good average (it's
+fast so it doesn't take long). You can see in the anonymous
 function that we directly call `dict:size/1` and `dict:store/3` to perform
 the test. However, because we are in the wonderful world of Signatures
 we don't have to hard code the calls for the Signature
@@ -426,14 +426,14 @@ results.
 So no difference it time. Well the reality is that there is a
 difference in timing, there must be, but we don't have enough
 resolution in the timing system to be able to figure out what that
-difference is. Essentially that means its really, really small - or small
+difference is. Essentially that means it's really, really small - or small
 enough not to worry about at the very least.
 
 Conclusion
 ----------
 
 Signatures are a viable, useful approach to the problem of interfaces
-in Erlang. The have little or no over head depending on the type of
+in Erlang. They have little or no overhead depending on the type of
 implementation, and greatly increase the flexibility of the a library
 while retaining testability and locality.
 
@@ -456,7 +456,7 @@ Signature Wrapper
 
 ### Code Referenced
 
-* [ec_dictionary Implementation] (https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dictionary.erl)
-* [ec_dict Signature Wrapper] (https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dict.erl)
-* [ec_rbdict Native Signature Implementation] (https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_rbdict.erl)
-* [ec_timing Signature Use Example and Timing Collector] (https://github.com/ericbmerritt/erlware_commons/blob/types/examples/ec_timing.erl)
+* [ec_dictionary Implementation](https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dictionary.erl)
+* [ec_dict Signature Wrapper](https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dict.erl)
+* [ec_rbdict Native Signature Implementation](https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_rbdict.erl)
+* [ec_timing Signature Use Example and Timing Collector](https://github.com/ericbmerritt/erlware_commons/blob/types/examples/ec_timing.erl)
