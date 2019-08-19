@@ -76,7 +76,7 @@ runmany, which is as a generalization of parallel list operations.
 A complete parser for the [semver](http://semver.org/)
 standard. Including a complete set of conforming comparison functions.
 
-### [ec_lists](https://github.com/ericbmerritt/erlware_commons/blob/master/src/ec_lists.erl)
+### [ec_lists](https://github.com/erlware/erlware_commons/blob/master/src/ec_lists.erl)
 
 A set of additional list manipulation functions designed to supliment
 the `lists` module in stdlib.
@@ -110,19 +110,19 @@ This provides an implementation of the ec_dictionary signature using
 erlang's dicts as a base. The function documentation for ec_dictionary
 applies here as well.
 
-### [ec_gb_trees](https://github.com/ericbmerritt/erlware_commons/blob/master/src/ec_gb_trees.erl)
+### [ec_gb_trees](https://github.com/erlware/erlware_commons/blob/master/src/ec_gb_trees.erl)
 
 This provides an implementation of the ec_dictionary signature using
 erlang's gb_trees as a base. The function documentation for
 ec_dictionary applies here as well.
 
-### [ec_orddict](https://github.com/ericbmerritt/erlware_commons/blob/master/src/ec_orddict.erl)
+### [ec_orddict](https://github.com/erlware/erlware_commons/blob/master/src/ec_orddict.erl)
 
 This provides an implementation of the ec_dictionary signature using
 erlang's orddict as a base. The function documentation for
 ec_dictionary applies here as well.
 
-### [ec_rbdict](https://github.com/ericbmerritt/erlware_commons/blob/master/src/ec_rbdict.erl)
+### [ec_rbdict](https://github.com/erlware/erlware_commons/blob/master/src/ec_rbdict.erl)
 
 This provides an implementation of the ec_dictionary signature using
 Robert Virding's rbdict module as a base. The function documentation
