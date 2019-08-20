@@ -485,7 +485,7 @@ usort(Fun, List, Malt) ->
       MapFunc ::  fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()}.
 -else.
--spec mapreduce(MapFunc, list()) -> dict() when
+-spec mapreduce(MapFunc, list()) -> dict:dict() when
       MapFunc ::  fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()}.
 -endif.
@@ -524,7 +524,7 @@ mapreduce(MapFunc, List, MapMalt) ->
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()},
       ReduceFunc :: fun((OldState::term(), Key::term(), Value::term()) -> NewState::term()).
 -else.
--spec mapreduce(MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict() when
+-spec mapreduce(MapFunc, list(), InitState::term(), ReduceFunc, malt()) -> dict:dict() when
       MapFunc :: fun((term()) -> DeepListOfKeyValuePairs),
       DeepListOfKeyValuePairs :: [DeepListOfKeyValuePairs] | {Key::term(), Value::term()},
       ReduceFunc :: fun((OldState::term(), Key::term(), Value::term()) -> NewState::term()).

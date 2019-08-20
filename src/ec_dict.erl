@@ -37,7 +37,7 @@
 -ifdef(namespaced_types).
 -type dictionary(_K, _V) :: dict:dict().
 -else.
--type dictionary(_K, _V) :: dict().
+-type dictionary(_K, _V) :: dict:dict().
 -endif.
 
 %%%===================================================================
