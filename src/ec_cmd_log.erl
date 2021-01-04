@@ -22,6 +22,9 @@
 %%% use this to talk to the users if you are wrting code for the system
 -module(ec_cmd_log).
 
+%% Avoid clashing with `error/3` BIF added in Erlang/OTP 24
+-compile({no_auto_import,[error/3]}).
+
 -export([new/1,
          new/2,
          new/3,
