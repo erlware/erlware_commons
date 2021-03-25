@@ -97,8 +97,7 @@ parse_tags(Pattern) ->
 -ifdef(unicode_str).
 len(Str) -> string:length(Str).
 trim(Str, right, Chars) -> string:trim(Str, trailing, Chars);
-trim(Str, left, Chars) -> string:trim(Str, leading, Chars);
-trim(Str, both, Chars) -> string:trim(Str, both, Chars).
+trim(Str, left, Chars) -> string:trim(Str, leading, Chars).
 slice(Str, Len) -> string:slice(Str, Len).
 -else.
 len(Str) -> string:len(Str).
