@@ -34,7 +34,7 @@
 new() ->
     {}.
 
--spec vsn(t()) -> {ok, string()} | {error, Reason::any()}.
+-spec vsn(t()|string()) -> {ok, string()} | {error, Reason::any()}.
 vsn(Data) ->
     {Vsn, RawRef, RawCount} = collect_default_refcount(Data),
     {ok, build_vsn_string(Vsn, RawRef, RawCount)}.
@@ -61,12 +61,7 @@ collect_default_refcount(Data) ->
 build_vsn_string(Vsn, RawRef, RawCount) ->
     %% Cleanup the tag and the Ref information. Basically leading 'v's and
     %% whitespace needs to go away.
-    RefTag = case RawRef of
-                 undefined ->
-                     "";
-                 RawRef ->
-                     [".ref", re:replace(RawRef, "\\s", "", [global])]
-             end,
+    RefTag = [".ref", re:replace(RawRef, "\\s", "", [global])],
     Count = erlang:iolist_to_binary(re:replace(RawCount, "\\s", "", [global])),
 
     %% Create the valid [semver](http://semver.org) version from the tag
@@ -82,17 +77,27 @@ get_patch_count(RawRef) ->
     Ref = re:replace(RawRef, "\\s", "", [global]),
     Cmd = io_lib:format("git rev-list --count ~s..HEAD",
                          [Ref]),
-    os:cmd(Cmd).
+    case os:cmd(Cmd) of
+        "fatal: " ++ _ ->
+            0;
+        Count ->
+            Count
+    end.
 
--spec parse_tags(t()) -> {string()|undefined, ec_semver:version_string()}.
+-spec parse_tags(t()|string()) -> {string()|undefined, ec_semver:version_string()}.
 parse_tags({}) ->
     parse_tags("");
 parse_tags(Pattern) ->
     Cmd = io_lib:format("git describe --abbrev=0 --tags --match \"~s*\"", [Pattern]),
     Tag = os:cmd(Cmd),
-    Vsn = slice(Tag, len(Pattern)),
-    Vsn1 = trim(trim(Vsn, left, "v"), right, "\n"),
-    {Tag, Vsn1}.
+    case Tag of
+        "fatal: " ++ _ ->
+            {undefined, ""};
+        _ ->
+            Vsn = slice(Tag, len(Pattern)),
+            Vsn1 = trim(trim(Vsn, left, "v"), right, "\n"),
+            {Tag, Vsn1}
+    end.
 
 -ifdef(unicode_str).
 len(Str) -> string:length(Str).
@@ -103,4 +108,17 @@ slice(Str, Len) -> string:slice(Str, Len).
 len(Str) -> string:len(Str).
 trim(Str, Dir, [Chars|_]) -> string:strip(Str, Dir, Chars).
 slice(Str, Len) -> string:substr(Str, Len + 1).
+-endif.
+
+-ifdef(TEST).
+-include_lib("eunit/include/eunit.hrl").
+
+parse_tags_test() ->
+    ?assertEqual({undefined, ""}, parse_tags("a.b.c")).
+
+get_patch_count_test() ->
+    ?assertEqual(0, get_patch_count("a.b.c")).
+
+collect_default_refcount_test() ->
+    ?assertMatch({"", _, _}, collect_default_refcount("a.b.c")).
 -endif.
