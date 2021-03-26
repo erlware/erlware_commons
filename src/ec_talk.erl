@@ -199,8 +199,6 @@ get_string(String) ->
 
 -ifdef(unicode_str).
 trim(Str) -> string:trim(Str).
-trim(Str, right, Chars) -> string:trim(Str, trailing, Chars);
-trim(Str, left, Chars) -> string:trim(Str, leading, Chars);
 trim(Str, both, Chars) -> string:trim(Str, both, Chars).
 -else.
 trim(Str) -> string:strip(Str).

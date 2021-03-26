@@ -12,5 +12,7 @@ _build
 erl_crash.dump
 *.pyc
 *~
+TEST-*.xml
+/foo
 
 src/ec_semver_parser.peg
