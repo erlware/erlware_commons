@@ -6,6 +6,6 @@
               {applications,[kernel,stdlib,cf]},
               {maintainers,["Eric Merritt","Tristan Sloughter",
                             "Jordan Wilberding","Martin Logan"]},
-              {licenses,["Apache"]},
+              {licenses,["Apache", "MIT"]},
               {links,[{"Github",
                        "https://github.com/erlware/erlware_commons"}]}]}.

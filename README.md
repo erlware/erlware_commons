@@ -25,6 +25,18 @@ Goals for the project
 * Well Documented
 * Well Tested
 
+Licenses
+--------
+
+This project contains elements licensed with Apache License, Version 2.0,
+as well as elements licensed with The MIT License.
+
+You'll find license-related information in the header of specific files,
+where warranted.
+
+In cases where no such information is present refer to
+[COPYING](COPYING).
+
 Currently Available Modules/Systems
 ------------------------------------
 
