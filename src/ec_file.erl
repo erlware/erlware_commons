@@ -80,7 +80,14 @@ copy(From, To) ->
     copy_(From, To, [{file_info, [mode, time, owner, group]}]).
 
 copy_(From, To, Options) ->
-    case file:copy(From, To) of
+    Linked
+        = case file:read_link(From) of
+            {ok, Linked0} -> Linked0;
+            {error, _} -> undefined
+          end,
+    case Linked =/= undefined orelse file:copy(From, To) of
+        true ->
+            file:make_symlink(Linked, To);
         {ok, _} ->
             copy_file_info(To, From, proplists:get_value(file_info, Options, []));
         {error, Error} ->
