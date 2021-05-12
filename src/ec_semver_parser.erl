@@ -48,7 +48,6 @@ parse(Input) when is_binary(Input) ->
 
 
 transform(_,Node,_Index) -> Node.
--file("peg_includes.hrl", 1).
 -type index() :: {{line, pos_integer()}, {column, pos_integer()}}.
 -type input() :: binary().
 -type parse_failure() :: {fail, term()}.
