@@ -522,7 +522,7 @@ format([$g|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
 format([$g|T], {_,{H,_,_}}=Dt, Acc) ->
     format(T, Dt, [itol(H)|Acc]);
 format([$G|T], {_,{H,_,_}}=Dt, Acc) ->
-    format(T, Dt, [pad2(H)|Acc]);
+    format(T, Dt, [itol(H)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
     format(T, Dt, [pad2(H-12)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) ->
