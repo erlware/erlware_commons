@@ -762,6 +762,8 @@ basic_format_test_() ->
      ?_assertEqual(format("H:i:s",?DATE), "17:16:17"),
      ?_assertEqual(format("z",?DATE), "68"),
      ?_assertEqual(format("D M j G:i:s Y",?DATE), "Sat Mar 10 17:16:17 2001"),
+     ?_assertEqual(format("D M j G:i:s Y", {{2001,3,10},{5,16,17}}), "Sat Mar 10 5:16:17 2001"),
+     ?_assertEqual(format("D M j H:i:s Y", {{2001,3,10},{5,16,17}}), "Sat Mar 10 05:16:17 2001"),
      ?_assertEqual(format("ga",?DATE_NOON), "12pm"),
      ?_assertEqual(format("gA",?DATE_NOON), "12PM"),
      ?_assertEqual(format("ga",?DATE_MIDNIGHT), "12am"),
