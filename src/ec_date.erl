@@ -45,8 +45,8 @@
 -define( is_tz_offset(H1,H2,M1,M2), (?is_num(H1) andalso ?is_num(H2) andalso ?is_num(M1) andalso ?is_num(M2)) ).
 
 -define(GREGORIAN_SECONDS_1970, 62167219200).
--define(ISO_8601_DATETIME_FORMAT, "Y-m-dTG:i:sZ").
--define(ISO_8601_DATETIME_WITH_MS_FORMAT, "Y-m-dTG:i:s.fZ").
+-define(ISO_8601_DATETIME_FORMAT, "Y-m-dTH:i:sZ").
+-define(ISO_8601_DATETIME_WITH_MS_FORMAT, "Y-m-dTH:i:s.fZ").
 
 -type year() :: non_neg_integer().
 -type month() :: 1..12 | {?MONTH_TAG, 1..12}.
