@@ -45,8 +45,8 @@
 -define( is_tz_offset(H1,H2,M1,M2), (?is_num(H1) andalso ?is_num(H2) andalso ?is_num(M1) andalso ?is_num(M2)) ).
 
 -define(GREGORIAN_SECONDS_1970, 62167219200).
--define(ISO_8601_DATETIME_FORMAT, "Y-m-dTG:i:sZ").
--define(ISO_8601_DATETIME_WITH_MS_FORMAT, "Y-m-dTG:i:s.fZ").
+-define(ISO_8601_DATETIME_FORMAT, "Y-m-dTH:i:sZ").
+-define(ISO_8601_DATETIME_WITH_MS_FORMAT, "Y-m-dTH:i:s.fZ").
 
 -type year() :: non_neg_integer().
 -type month() :: 1..12 | {?MONTH_TAG, 1..12}.
@@ -522,7 +522,7 @@ format([$g|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
 format([$g|T], {_,{H,_,_}}=Dt, Acc) ->
     format(T, Dt, [itol(H)|Acc]);
 format([$G|T], {_,{H,_,_}}=Dt, Acc) ->
-    format(T, Dt, [pad2(H)|Acc]);
+    format(T, Dt, [itol(H)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) when H > 12 ->
     format(T, Dt, [pad2(H-12)|Acc]);
 format([$h|T], {_,{H,_,_}}=Dt, Acc) ->
@@ -762,6 +762,8 @@ basic_format_test_() ->
      ?_assertEqual(format("H:i:s",?DATE), "17:16:17"),
      ?_assertEqual(format("z",?DATE), "68"),
      ?_assertEqual(format("D M j G:i:s Y",?DATE), "Sat Mar 10 17:16:17 2001"),
+     ?_assertEqual(format("D M j G:i:s Y", {{2001,3,10},{5,16,17}}), "Sat Mar 10 5:16:17 2001"),
+     ?_assertEqual(format("D M j H:i:s Y", {{2001,3,10},{5,16,17}}), "Sat Mar 10 05:16:17 2001"),
      ?_assertEqual(format("ga",?DATE_NOON), "12pm"),
      ?_assertEqual(format("gA",?DATE_NOON), "12PM"),
      ?_assertEqual(format("ga",?DATE_MIDNIGHT), "12am"),
