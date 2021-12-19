@@ -30,7 +30,7 @@
 %%% most list operations parallel. It can operate on each element in
 %%% parallel, for IO-bound operations, on sublists in parallel, for
 %%% taking advantage of multi-core machines with CPU-bound operations,
-%%% and across erlang nodes, for parallizing inside a cluster. It
+%%% and across erlang nodes, for parallelizing inside a cluster. It
 %%% handles errors and node failures. It can be configured, tuned, and
 %%% tweaked to get optimal performance while minimizing overhead.
 %%%
@@ -38,7 +38,7 @@
 %%% lists, returning exactly the same result, and having both a form
 %%% with an identical syntax that operates on each element in parallel
 %%% and a form which takes an optional "malt", a specification for how
-%%% to parallize the operation.
+%%% to parallelize the operation.
 %%%
 %%% fold is the one exception, parallel fold is different from linear
 %%% fold.  This module also include a simple mapreduce implementation,
@@ -169,7 +169,7 @@
 %%% processes. If one of them does a non-normal exit, plists receives
 %%% the 'DOWN' message believing it to be from one of its own
 %%% processes. The error propagation system goes into effect, which
-%%% results in the error occuring in the calling process.
+%%% results in the error occurring in the calling process.
 %%%
 -module(ec_plists).
 
@@ -330,14 +330,14 @@ fold(Fun, Fuse, InitAcc, List, Malt) ->
            end,
     runmany(Fun2, Fuse, List, Malt).
 
-%% @doc Similiar to foreach in module
+%% @doc Similar to foreach in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>
 %% except it makes no guarantee about the order it processes list elements.
 -spec foreach(fun(), list()) -> ok.
 foreach(Fun, List) ->
     foreach(Fun, List, 1).
 
-%% @doc Similiar to foreach in module
+%% @doc Similar to foreach in module
 %% <a href="http://www.erlang.org/doc/man/lists.html">lists</a>
 %% except it makes no guarantee about the order it processes list elements.
 -spec foreach(fun(), list(), malt()) -> ok.
@@ -432,8 +432,8 @@ sort(Fun, List) ->
 %%
 %% sort splits the list into sublists and sorts them, and it merges the
 %% sorted lists together. These are done in parallel. Each sublist is
-%% sorted in a seperate process, and each merging of results is done in a
-%% seperate process. Malt defaults to 100, causing the list to be split into
+%% sorted in a separate process, and each merging of results is done in a
+%% separate process. Malt defaults to 100, causing the list to be split into
 %% 100-element sublists.
 -spec sort(fun(), list(), malt()) -> list().
 sort(Fun, List, Malt) ->
@@ -464,11 +464,11 @@ usort(Fun, List) ->
 %%
 %% usort splits the list into sublists and sorts them, and it merges the
 %% sorted lists together. These are done in parallel. Each sublist is
-%% sorted in a seperate process, and each merging of results is done in a
-%% seperate process. Malt defaults to 100, causing the list to be split into
+%% sorted in a separate process, and each merging of results is done in a
+%% separate process. Malt defaults to 100, causing the list to be split into
 %% 100-element sublists.
 %%
-%% usort removes duplicate elments while it sorts.
+%% usort removes duplicate elements while it sorts.
 -spec usort(fun(), list(), malt()) -> list().
 usort(Fun, List, Malt) ->
     Fun2 = fun (L) ->
@@ -514,7 +514,7 @@ mapreduce(MapFunc, List, MapMalt) ->
 %% reducer's final state.
 %%
 %% MapMalt is the malt for the mapping operation, with a default value of 1,
-%% meaning each element of the list is mapped by a seperate process.
+%% meaning each element of the list is mapped by a separate process.
 %%
 %% mapreduce requires OTP R11B, or it may leave monitoring messages in the
 %% message queue.
@@ -586,7 +586,7 @@ add_key(Dict, Key, Value) ->
     end.
 
 %% @doc Like below, but assumes a Malt of 1,
-%% meaning each element of the list is processed by a seperate process.
+%% meaning each element of the list is processed by a separate process.
 -spec runmany(fun(), fuse(), list()) -> term().
 runmany(Fun, Fuse, List) ->
     runmany(Fun, Fuse, List, 1).
@@ -615,7 +615,7 @@ runmany(Fun, Fuse, List) ->
 %% continues fusing pairs of results until it is down to one.
 %%
 %% Recursive fuse is down in parallel with processing the sublists, and a
-%% process is spawned to fuse each pair of results. It is a parallized
+%% process is spawned to fuse each pair of results. It is a parallelized
 %% algorithm. Linear fuse is done after all results of processing sublists
 %% have been collected, and can only run in a single process.
 %%
@@ -691,7 +691,7 @@ runmany(Fun, {recursive, Fuse}, List, local, Split, []) ->
     %% or {nodes, NodeList}. Degenerates recursive fuse into linear fuse.
     runmany(Fun, Fuse, List, local, Split, []);
 runmany(Fun, Fuse, List, Nodes, no_split, []) ->
-    %% by default, operate on each element seperately
+    %% by default, operate on each element separately
     runmany(Fun, Fuse, List, Nodes, 1, []);
 runmany(Fun, Fuse, List, local, Split, []) ->
     List2 = splitmany(List, Split),
