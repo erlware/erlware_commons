@@ -2,7 +2,7 @@ Signatures
 ==========
 
 It often occurs in coding that we need a library, a set of
-functionaly. Often there are several algorithms that could provide
+functionally. Often there are several algorithms that could provide
 this functionality. However, the code that uses it, either doesn't
 care about the individual algorithm or wishes to delegate choosing
 that algorithm to some higher level. Lets take the concrete example of
@@ -26,7 +26,7 @@ characteristics are about as good as that of randomly-built binary
 search trees - namely (O log n). So the choice of which to select
 depends very much on memory available, insert/read characteristics,
 etc. So delegating the choice to a single point in your code is a very
-good idea. Unfortunately, in Erlang thats ot so easy to do at the moment.
+good idea. Unfortunately, in Erlang that's so easy to do at the moment.
 
 Other languages, have built in support for this
 functionality. [Java](http://en.wikipedia.org/wiki/Java_(programming_language))
@@ -63,7 +63,7 @@ mistakes that you might have made. Tools like
 [Dialyzer](http://www.erlang.org/doc/man/dialyzer.html) have just as
 hard a time figuring out the what `ModuleToUse` is pointing to as you
 do. So they can't give you warnings about potential problems. In fact
-someone could inadvertantly pass an unexpected function name as
+someone could inadvertently pass an unexpected function name as
 `ModuleToUse` and you would never get any warnings, just an exception
 at run time.
 
@@ -361,7 +361,7 @@ what it looked like.
     2>
 
 So for the direct dict call, we average about 3 mics per call, while
-for the Signature Wrapper we average around 4. Thats a 25% cost for
+for the Signature Wrapper we average around 4. That's a 25% cost for
 Signature Wrappers in this example, for a very small number of
 calls. Depending on what you are doing that is going to be greater or
 lesser. In any case, we can see that there is some cost associated
