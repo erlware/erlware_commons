@@ -208,14 +208,6 @@ parse([Month,Day,Year,Hour | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
     {{Year, Month, Day}, {hour(Hour, PAM), 0, 0}};
 
-%% Date/Times Dec 1st, 2012 18:25:15 (no AM/PM)
-parse([Month,Day,Year,Hour,$:,Min,$:,Sec], _Now, _Opts)
-  when ?is_hinted_month(Month) andalso ?is_day(Day) ->
-    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}};
-parse([Month,Day,Year,Hour,$:,Min], _Now, _Opts)
-  when ?is_hinted_month(Month) andalso ?is_day(Day) ->
-    {{Year, Month, Day}, {hour(Hour, []), Min, 0}};
-
 %% Date/Times Fri Nov 21 14:55:26 +0000 2014 (Twitter format)
 parse([Month, Day, Hour,$:,Min,$:,Sec, Year], _Now, _Opts)
   when ?is_hinted_month(Month), ?is_day(Day), ?is_year(Year) ->
