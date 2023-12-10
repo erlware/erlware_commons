@@ -875,7 +875,7 @@ cluster_runmany(_, _, [_Non|_Empty], []=_Nodes, []=_Running, _) ->
 -ifdef(fun_stacktrace).
 runmany_wrap(Fun, Parent) ->
     try
-        Fun
+        Fun()
     catch
         exit:siblingdied ->
             ok;
@@ -889,7 +889,7 @@ runmany_wrap(Fun, Parent) ->
 -else.
 runmany_wrap(Fun, Parent) ->
     try
-        Fun
+        Fun()
     catch
         exit:siblingdied ->
             ok;
