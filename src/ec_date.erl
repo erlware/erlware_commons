@@ -197,17 +197,6 @@ parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms | PAM], _Now, _Opts)
        andalso ?is_year(Year) ->
     {{Year, Month, Day}, {hour(Hour, PAM), Min, Sec}, {Ms}};
 
-parse([Year,X,Month,X,Day,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
-  when  (?is_us_sep(X) orelse ?is_world_sep(X))
-        andalso ?is_year(Year) ->
-    {{Year, Month, Day}, {hour(Hour,[]), Min, Sec}, {Ms}};
-parse([Month,X,Day,X,Year,Hour,$:,Min,$:,Sec,$., Ms], _Now, _Opts)
-  when ?is_us_sep(X) andalso ?is_month(Month) ->
-    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
-parse([Day,X,Month,X,Year,Hour,$:,Min,$:,Sec,$., Ms ], _Now, _Opts)
-  when ?is_world_sep(X) andalso ?is_month(Month) ->
-    {{Year, Month, Day}, {hour(Hour, []), Min, Sec}, {Ms}};
-
 %% Date/Times Dec 1st, 2012 6:25 PM
 parse([Month,Day,Year,Hour,$:,Min,$:,Sec | PAM], _Now, _Opts)
   when ?is_meridian(PAM) andalso ?is_hinted_month(Month) andalso ?is_day(Day) ->
