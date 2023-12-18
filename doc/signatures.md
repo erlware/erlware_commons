@@ -2,10 +2,10 @@ Signatures
 ==========
 
 It often occurs in coding that we need a library, a set of
-functionally. Often there are several algorithms that could provide
-this functionality. However, the code that uses it, either doesn't
+functionalities. Often there are several algorithms that could provide
+each of these functionalities. However, the code that uses it, either doesn't
 care about the individual algorithm or wishes to delegate choosing
-that algorithm to some higher level. Lets take the concrete example of
+that algorithm to some higher level. Let's take the concrete example of
 dictionaries. A dictionary provides the ability to access a value via
 a key (other things as well but primarily this). There are may ways to
 implement a dictionary. Just a few are:
@@ -234,15 +234,15 @@ purpose is to help a preexisting module implement the Behaviour
 defined by a Signature. A good example of this in our current example
 is the
 [erlware_commons/ec_dict](https://github.com/ericbmerritt/erlware_commons/blob/types/src/ec_dict.erl)
-module. It implements the ec_dictionary Behaviour, but all the
+module. It implements the `ec_dictionary` Behaviour, but all the
 functionality is provided by the
 [stdlib/dict](http://www.erlang.org/doc/man/dict.html) module
 itself. Let's take a look at one example to see how this is done.
 
 We will take a look at one of the functions we have already seen. The
-`get` function in ec_dictionary doesn't have quite the same
-semantics as any of the functions in the dict module. So a bit of
-translation needs to be done. We do that in the ec_dict module `get` function.
+`get` function in `ec_dictionary` doesn't have quite the same
+semantics as any of the functions in the `dict` module. So a bit of
+translation needs to be done. We do that in the `ec_dict:get/2` function.
 
     ```erlang
     -spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
@@ -256,8 +256,8 @@ translation needs to be done. We do that in the ec_dict module `get` function.
         end.
 	```
 
-So the ec_dict module's purpose for existence is to help the
-preexisting dict module implement the Behaviour defined by the
+So the `ec_dict` module's purpose for existence is to help the
+preexisting `dict` module implement the Behaviour defined by the
 Signature.
 
 
@@ -285,7 +285,7 @@ want to test. The first we want to time is the Signature Wrapper, so
 	```
 
 The only thing we do here is create a sequence of numbers 1 to 100,
-and then add each of those to the dict as an entry. We aren't too
+and then add each of those to the `dict` as an entry. We aren't too
 worried about replicating real data in the dictionary. We care about
 timing the function call overhead of Signatures, not the performance
 of the dictionaries themselves.
@@ -305,8 +305,8 @@ dictionary `ec_dict`.
 Here we actually create everything using the Signature. So we don't
 need one function for each type. We can have one function that can
 create anything that implements the Signature. That is the magic of
-Signatures. Otherwise, this does the exact same thing as the dict
-`create_dict/1`.
+Signatures. Otherwise, this does the exact same thing as the dictionary
+given by `create_dict/0`.
 
 We are going to use two function calls in our timing. One that updates
 data and one that returns data, just to get good coverage. For our
@@ -347,7 +347,7 @@ implementations. Lets take a look at the `time_dict_type` function.
 
 As you can see we take the type as an argument (we need it for `dict`
 creation) and call our create function. Then we run the same timings
-that we did for ec dict. In this case though, the type of dictionary
+that we did for `ec_dict`. In this case though, the type of dictionary
 is never specified, we only ever call ec_dictionary, so this test will
 work for anything that implements that Signature.
 
@@ -374,7 +374,7 @@ what it looked like.
     2>
 	```
 
-So for the direct dict call, we average about 3 mics per call, while
+So for the direct `dict` call, we average about 3 mics per call, while
 for the Signature Wrapper we average around 4. That's a 25% cost for
 Signature Wrappers in this example, for a very small number of
 calls. Depending on what you are doing that is going to be greater or
@@ -400,7 +400,7 @@ is replaced by `ec_rbdict`.
 
 The timing function itself looks very similar as well. Again notice
 that we have to hard code the concrete name for the concrete
-implementation, but we don't for the ec_dictionary test.
+implementation, but we don't for the `ec_dictionary` test.
 
     ```erlang
     time_direct_vs_signature_rbdict() ->
