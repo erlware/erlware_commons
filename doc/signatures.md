@@ -41,7 +41,7 @@ it is going to be called on.
 
 ```erlang
 add(ModuleToUse, Key, Value, DictData) ->
-	ModuleToUse:add(Key, Value, DictData).
+    ModuleToUse:add(Key, Value, DictData).
 ```
 
 This works, and you can vary how you want to pass the data. For
@@ -51,7 +51,7 @@ bit cleaner.
 
 ```erlang
 add(Key, Value, {ModuleToUse, DictData}) ->
-	ModuleToUse:add(Key, Value, DictData).
+    ModuleToUse:add(Key, Value, DictData).
 ```
 
 Either way, there are a few problems with this approach. One of the
@@ -80,7 +80,7 @@ So what we actually want to do is something mole like this:
 
 ```erlang
 add(Key, Value, DictData) ->
-	dictionary:add(Key, Value, DictData).
+    dictionary:add(Key, Value, DictData).
 ```
 
 Doing this we retain the locality. We can easily look up the
@@ -107,18 +107,18 @@ Behaviour for dictionaries. That Behaviour looks like this:
 -export([behaviour_info/1]).
 
 behaviour_info(callbacks) ->
-	[{new, 0},
-	{has_key, 2},
-	{get, 2},
-	{add, 3},
-	{remove, 2},
-	{has_value, 2},
-	{size, 1},
-	{to_list, 1},
-	{from_list, 1},
-	{keys, 1}];
+    [{new, 0},
+    {has_key, 2},
+    {get, 2},
+    {add, 3},
+    {remove, 2},
+    {has_value, 2},
+    {size, 1},
+    {to_list, 1},
+    {from_list, 1},
+    {keys, 1}];
 behaviour_info(_) ->
-	undefined.
+    undefined.
 ```
 
 
@@ -136,7 +136,7 @@ behaviour, starting with `new/1`.
 %% @param ModuleName The module name.
 -spec new(module()) -> dictionary(_K, _V).
 new(ModuleName) when is_atom(ModuleName) ->
-	#dict_t{callback = ModuleName, data = ModuleName:new()}.
+    #dict_t{callback = ModuleName, data = ModuleName:new()}.
 ```
 
 This code creates a new dictionary for us. Or to be more specific it
@@ -163,7 +163,7 @@ adding a value.
 %% @param Value the value to add
 -spec add(key(K), value(V), dictionary(K, V)) -> dictionary(K, V).
 add(Key, Value, #dict_t{callback = Mod, data = Data} = Dict) ->
-	Dict#dict_t{data = Mod:add(Key, Value, Data)}.
+    Dict#dict_t{data = Mod:add(Key, Value, Data)}.
 ```
 
 There are two key things here. 
@@ -189,7 +189,7 @@ of the dictionary Signature.
 %% @throws not_found when the key does not exist
 -spec get(key(K), dictionary(K, V)) -> value(V).
 get(Key, #dict_t{callback = Mod, data = Data}) ->
-	Mod:get(Key, Data).
+    Mod:get(Key, Data).
 ```
 
 In this case, you can see a very similar approach to deconstructing
@@ -246,14 +246,14 @@ translation needs to be done. We do that in the `ec_dict:get/2` function.
 
 ```erlang
 -spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
-	ec_dictionary:value(V).
+    ec_dictionary:value(V).
 get(Key, Data) ->
-	case dict:find(Key, Data) of
-		{ok, Value} ->
-			Value;
-	     error ->
-			 throw(not_found)
-	end.
+    case dict:find(Key, Data) of
+        {ok, Value} ->
+            Value;
+        error ->
+            throw(not_found)
+    end.
 ```
 
 So the `ec_dict` module's purpose for existence is to help the
@@ -278,10 +278,10 @@ want to test. The first we want to time is the Signature Wrapper, so
 
 ```erlang
 create_dict() ->
-	lists:foldl(fun(El, Dict) ->
-		dict:store(El, El, Dict)
-		end, dict:new(),
-		lists:seq(1,100)).
+    lists:foldl(fun(El, Dict) ->
+        dict:store(El, El, Dict)
+        end, dict:new(),
+        lists:seq(1,100)).
 ```
 
 The only thing we do here is create a sequence of numbers 1 to 100,
@@ -295,11 +295,11 @@ dictionary `ec_dict`.
 
 ```erlang
 create_dictionary(Type) ->
-	lists:foldl(fun(El, Dict) ->
-		ec_dictionary:add(El, El, Dict)
-		end,
-		ec_dictionary:new(Type),
-		lists:seq(1,100)).
+    lists:foldl(fun(El, Dict) ->
+        ec_dictionary:add(El, El, Dict)
+        end,
+        ec_dictionary:new(Type),
+        lists:seq(1,100)).
 ```
 
 Here we actually create everything using the Signature. So we don't
@@ -315,14 +315,14 @@ the `add` function.
 
 ```erlang
 time_direct_vs_signature_dict() ->
-	io:format("Timing dict~n"),
-	Dict = create_dict(),
-	test_avg(fun() ->
-	             dict:size(dict:store(some_key, some_value, Dict))
-	         end,
-	         1000000),
-	io:format("Timing ec_dict implementation of ec_dictionary~n"),
-	time_dict_type(ec_dict).
+    io:format("Timing dict~n"),
+    Dict = create_dict(),
+    test_avg(fun() ->
+        dict:size(dict:store(some_key, some_value, Dict))
+        end,
+        1000000),
+    io:format("Timing ec_dict implementation of ec_dictionary~n"),
+    time_dict_type(ec_dict).
 ```
 
 The `test_avg` function runs the provided function the number of times
@@ -337,12 +337,12 @@ implementations. Lets take a look at the `time_dict_type` function.
 
 ```erlang
 time_dict_type(Type) ->
-	io:format("Testing ~p~n", [Type]),
-	Dict = create_dictionary(Type),
-	test_avg(fun() ->
-		ec_dictionary:size(ec_dictionary:add(some_key, some_value, Dict))
-		end,
-	1000000).
+    io:format("Testing ~p~n", [Type]),
+    Dict = create_dictionary(Type),
+    test_avg(fun() ->
+        ec_dictionary:size(ec_dictionary:add(some_key, some_value, Dict))
+        end,
+        1000000).
 ```
 
 As you can see we take the type as an argument (we need it for `dict`
@@ -389,10 +389,10 @@ to create a creation helper just like we did for dict.
 
 ```erlang
 create_rbdict() ->
-	lists:foldl(fun(El, Dict) ->
-		ec_rbdict:add(El, El, Dict)
-		end, ec_rbdict:new(),
-		lists:seq(1,100)).
+    lists:foldl(fun(El, Dict) ->
+        ec_rbdict:add(El, El, Dict)
+        end, ec_rbdict:new(),
+        lists:seq(1,100)).
 ```
 
 This is exactly the same as `create_dict` with the exception that dict
@@ -404,14 +404,14 @@ implementation, but we don't for the `ec_dictionary` test.
 
 ```erlang
 time_direct_vs_signature_rbdict() ->
-	io:format("Timing rbdict~n"),
-	Dict = create_rbdict(),
-	test_avg(fun() ->
-		ec_rbdict:size(ec_rbdict:add(some_key, some_value, Dict))
-		end,
-		1000000),
-	io:format("Timing ec_dict implementation of ec_dictionary~n"),
-	time_dict_type(ec_rbdict).
+    io:format("Timing rbdict~n"),
+    Dict = create_rbdict(),
+    test_avg(fun() ->
+        ec_rbdict:size(ec_rbdict:add(some_key, some_value, Dict))
+        end,
+        1000000),
+    io:format("Timing ec_dict implementation of ec_dictionary~n"),
+    time_dict_type(ec_rbdict).
 ```
 
 And there we have our test. What do the results look like?
