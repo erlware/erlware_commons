@@ -39,17 +39,20 @@ directly. There are a few ways you can approximate it. One way is to
 pass the Module name to the calling functions along with the data that
 it is going to be called on.
 
-    :::erlang
-    add(ModuleToUse, Key, Value, DictData) ->
-        ModuleToUse:add(Key, Value, DictData).
+	```erlang
+	add(ModuleToUse, Key, Value, DictData) ->
+		ModuleToUse:add(Key, Value, DictData).
+	```
 
 This works, and you can vary how you want to pass the data. For
 example, you could easily use a tuple to contain the data. That is,
 you could pass in `{ModuleToUse, DictData}` and that would make it a
 bit cleaner. 
-    :::erlang
+
+	```erlang
     add(Key, Value, {ModuleToUse, DictData}) ->
-        ModuleToUse:add(Key, Value, DictData).        
+        ModuleToUse:add(Key, Value, DictData).
+	```
 
 Either way, there are a few problems with this approach. One of the
 biggest is that you lose code locality, by looking at this bit of code
@@ -75,9 +78,10 @@ name.
 
 So what we actually want to do is something mole like this:
 
-    :::erlang
+    ```erlang
     add(Key, Value, DictData) ->
         dictionary:add(Key, Value, DictData).
+	```
 
 Doing this we retain the locality. We can easily look up the
 `dictionary` Module. We immediately have a good idea what a
@@ -97,7 +101,7 @@ a [Behaviour](http://metajack.im/2008/10/29/custom-behaviors-in-erlang/)
 for our functionality. To continue our example we will define a
 Behaviour for dictionaries. That Behaviour looks like this:
 
-    :::erlang
+    ```erlang
     -module(ec_dictionary).
 
     -export([behaviour_info/1]).
@@ -115,6 +119,7 @@ Behaviour for dictionaries. That Behaviour looks like this:
          {keys, 1}];
     behaviour_info(_) ->
         undefined.
+	```
 
 
 So we have our Behaviour now. Unfortunately, this doesn't give us much
@@ -124,7 +129,7 @@ dictionaries in an abstract way in our code. To do that we need to add
 a bit of functionality. We do that by actually implementing our own
 behaviour, starting with `new/1`.
 
-    :::erlang
+    ```erlang
     %% @doc create a new dictionary object from the specified module. The
     %% module should implement the dictionary behaviour.
     %%
@@ -132,6 +137,7 @@ behaviour, starting with `new/1`.
     -spec new(module()) -> dictionary(_K, _V).
     new(ModuleName) when is_atom(ModuleName) ->
         #dict_t{callback = ModuleName, data = ModuleName:new()}.
+	```
 
 This code creates a new dictionary for us. Or to be more specific it
 actually creates a new dictionary Signature record, that will be used
@@ -148,7 +154,7 @@ dictionary and another that just retrieves data.
 The first we will look at is the one that updates the dictionary by
 adding a value.
 
-    :::erlang
+    ```erlang
     %% @doc add a new value to the existing dictionary. Return a new
     %% dictionary containing the value.
     %%
@@ -158,6 +164,7 @@ adding a value.
     -spec add(key(K), value(V), dictionary(K, V)) -> dictionary(K, V).
     add(Key, Value, #dict_t{callback = Mod, data = Data} = Dict) ->
         Dict#dict_t{data = Mod:add(Key, Value, Data)}.
+	```
 
 There are two key things here. 
 
@@ -173,7 +180,7 @@ implementation to do the work itself.
 Now lets do a data retrieval function. In this case, the `get` function
 of the dictionary Signature.
 
-    :::erlang
+    ```erlang
     %% @doc given a key return that key from the dictionary. If the key is
     %% not found throw a 'not_found' exception.
     %%
@@ -183,6 +190,7 @@ of the dictionary Signature.
     -spec get(key(K), dictionary(K, V)) -> value(V).
     get(Key, #dict_t{callback = Mod, data = Data}) ->
         Mod:get(Key, Data).
+	```
 
 In this case, you can see a very similar approach to deconstructing
 the dict record. We still need to pull out the callback module and the
@@ -236,7 +244,7 @@ We will take a look at one of the functions we have already seen. The
 semantics as any of the functions in the dict module. So a bit of
 translation needs to be done. We do that in the ec_dict module `get` function.
 
-    :::erlang
+    ```erlang
     -spec get(ec_dictionary:key(K), Object::dictionary(K, V)) ->
                ec_dictionary:value(V).
     get(Key, Data) ->
@@ -246,6 +254,7 @@ translation needs to be done. We do that in the ec_dict module `get` function.
 	     error ->
 	        throw(not_found)
         end.
+	```
 
 So the ec_dict module's purpose for existence is to help the
 preexisting dict module implement the Behaviour defined by the
@@ -267,12 +276,13 @@ create a couple of functions that create dictionaries for each type we
 want to test. The first we want to time is the Signature Wrapper, so
 `dict` vs `ec_dict` called as a Signature.
 
-    :::erlang
+    ```erlang
     create_dict() ->
     lists:foldl(fun(El, Dict) ->
 			dict:store(El, El, Dict)
 		end, dict:new(),
 		lists:seq(1,100)).
+	```
 
 The only thing we do here is create a sequence of numbers 1 to 100,
 and then add each of those to the dict as an entry. We aren't too
@@ -283,13 +293,14 @@ of the dictionaries themselves.
 We need to create a similar function for our Signature based
 dictionary `ec_dict`.
 
-    :::erlang
+    ```erlang
     create_dictionary(Type) ->
     lists:foldl(fun(El, Dict) ->
 			ec_dictionary:add(El, El, Dict)
 		end,
 		ec_dictionary:new(Type),
 		lists:seq(1,100)).
+	```
 
 Here we actually create everything using the Signature. So we don't
 need one function for each type. We can have one function that can
@@ -302,7 +313,7 @@ data and one that returns data, just to get good coverage. For our
 dictionaries we are going to use the `size` function as well as
 the `add` function.
 
-    :::erlang
+    ```erlang
     time_direct_vs_signature_dict() ->
         io:format("Timing dict~n"),
         Dict = create_dict(),
@@ -312,6 +323,7 @@ the `add` function.
 	         1000000),
         io:format("Timing ec_dict implementation of ec_dictionary~n"),
         time_dict_type(ec_dict).
+	```
 
 The `test_avg` function runs the provided function the number of times
 specified in the second argument and collects timing information. We
@@ -323,7 +335,7 @@ we don't have to hard code the calls for the Signature
 implementations. Lets take a look at the `time_dict_type` function.
 
 
-    :::erlang
+    ```erlang
     time_dict_type(Type) ->
         io:format("Testing ~p~n", [Type]),
         Dict = create_dictionary(Type),
@@ -331,6 +343,7 @@ implementations. Lets take a look at the `time_dict_type` function.
 		     ec_dictionary:size(ec_dictionary:add(some_key, some_value, Dict))
 	         end,
 	         1000000).
+	```
 
 As you can see we take the type as an argument (we need it for `dict`
 creation) and call our create function. Then we run the same timings
@@ -343,7 +356,7 @@ work for anything that implements that Signature.
 So we have our tests, what was the result. Well on my laptop this is
 what it looked like.
 
-    :::sh
+    ```sh
     Erlang R14B01 (erts-5.8.2) [source] [64-bit] [smp:4:4] [rq:4] [async-threads:0] [hipe] [kernel-poll:false]
 
     Eshell V5.8.2  (abort with ^G)
@@ -359,6 +372,7 @@ what it looked like.
     Median: 3 mics
     Average: 4 mics
     2>
+	```
 
 So for the direct dict call, we average about 3 mics per call, while
 for the Signature Wrapper we average around 4. That's a 25% cost for
@@ -373,12 +387,13 @@ Signature, but it is not a Signature Wrapper. It is a native
 implementation of the Signature. To use `ec_rbdict` directly we have
 to create a creation helper just like we did for dict.
 
-    :::erlang
+    ```erlang
     create_rbdict() ->
     lists:foldl(fun(El, Dict) ->
 			ec_rbdict:add(El, El, Dict)
 		end, ec_rbdict:new(),
 		lists:seq(1,100)).
+	```
 
 This is exactly the same as `create_dict` with the exception that dict
 is replaced by `ec_rbdict`.
@@ -387,7 +402,7 @@ The timing function itself looks very similar as well. Again notice
 that we have to hard code the concrete name for the concrete
 implementation, but we don't for the ec_dictionary test.
 
-    :::erlang
+    ```erlang
     time_direct_vs_signature_rbdict() ->
         io:format("Timing rbdict~n"),
         Dict = create_rbdict(),
@@ -397,6 +412,7 @@ implementation, but we don't for the ec_dictionary test.
 	         1000000),
        io:format("Timing ec_dict implementation of ec_dictionary~n"),
        time_dict_type(ec_rbdict).
+   ```
 
 And there we have our test. What do the results look like?
 
@@ -406,7 +422,7 @@ The main thing we are timing here is the additional cost of the
 dictionary Signature itself. Keep that in mind as we look at the
 results.
 
-    :::sh
+    ```sh
     Erlang R14B01 (erts-5.8.2) [source] [64-bit] [smp:4:4] [rq:4] [async-threads:0] [hipe] [kernel-poll:false]
 
     Eshell V5.8.2  (abort with ^G)
@@ -422,6 +438,7 @@ results.
     Median: 7 mics
     Average: 7 mics
     2>
+	```
 
 So no difference it time. Well the reality is that there is a
 difference in timing, there must be, but we don't have enough
