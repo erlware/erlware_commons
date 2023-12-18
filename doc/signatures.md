@@ -23,7 +23,7 @@ comparison for successful lookup, and a table of size $n$ with chaining
 and $k$ keys has the minimum $\max(0, k-n)$ collisions and $\mathcal{O}(1 + k/n)$
 comparisons for lookup. While for skip lists the performance
 characteristics are about as good as that of randomly-built binary
-search trees - namely ($\mathcal{O}(\log n)$). So the choice of which to select
+search trees - namely $\mathcal{O}(\log n)$. So the choice of which to select
 depends very much on memory available, insert/read characteristics,
 etc. So delegating the choice to a single point in your code is a very
 good idea. Unfortunately, in Erlang that's so easy to do at the moment.
