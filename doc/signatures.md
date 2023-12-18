@@ -19,7 +19,7 @@ implement a dictionary. Just a few are:
 Each of these approaches has their own performance characteristics,
 memory footprints, etc. For example, a table of size $n$ with open
 addressing has no collisions and holds up to $n$ elements, with a single
-comparison for successful lookup, and a table of size $n$_ with chaining
+comparison for successful lookup, and a table of size $n$ with chaining
 and $k$ keys has the minimum $\max(0, k-n)$ collisions and $\mathcal{O}(1 + k/n)$
 comparisons for lookup. While for skip lists the performance
 characteristics are about as good as that of randomly-built binary
