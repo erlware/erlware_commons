@@ -143,22 +143,22 @@ try_write_group(To, #file_info{gid=OwnerId}) ->
 %%      named after the UNIX utility.
 -spec md5sum(string() | binary()) -> string().
 md5sum(Value) ->
-    turn_digest_into_hex(erlang:md5(Value)).
+    bin_to_hex(erlang:md5(Value)).
 
 %% @doc return the SHA-1 digest of a string or a binary,
 %%      named after the UNIX utility.
 -ifdef(deprecated_crypto).
 -spec sha1sum(string() | binary()) -> string().
 sha1sum(Value) ->
-    turn_digest_into_hex(crypto:sha(Value)).
+    bin_to_hex(crypto:sha(Value)).
 -else.
 -spec sha1sum(string() | binary()) -> string().
 sha1sum(Value) ->
-    turn_digest_into_hex(crypto:hash(sha, Value)).
+    bin_to_hex(crypto:hash(sha, Value)).
 -endif.
 
-turn_digest_into_hex(Digest) ->
-    hex(binary_to_list(Digest)).
+bin_to_hex(Bin) ->
+    hex(binary_to_list(Bin)).
 
 %% @doc delete a file. Use the recursive option for directories.
 %% <pre>
