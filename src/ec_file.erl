@@ -139,23 +139,26 @@ try_write_owner(To, #file_info{uid=OwnerId}) ->
 try_write_group(To, #file_info{gid=OwnerId}) ->
     file:write_file_info(To, #file_info{gid=OwnerId}).
 
-%% @doc return an md5 checksum string or a binary. Same as unix utility of
-%%      same name.
+%% @doc return the MD5 digest of a string or a binary,
+%%      named after the UNIX utility.
 -spec md5sum(string() | binary()) -> string().
 md5sum(Value) ->
-    hex(binary_to_list(erlang:md5(Value))).
+    bin_to_hex(erlang:md5(Value)).
 
-%% @doc return an sha1sum checksum string or a binary. Same as unix utility of
-%%      same name.
+%% @doc return the SHA-1 digest of a string or a binary,
+%%      named after the UNIX utility.
 -ifdef(deprecated_crypto).
 -spec sha1sum(string() | binary()) -> string().
 sha1sum(Value) ->
-    hex(binary_to_list(crypto:sha(Value))).
+    bin_to_hex(crypto:sha(Value)).
 -else.
 -spec sha1sum(string() | binary()) -> string().
 sha1sum(Value) ->
-    hex(binary_to_list(crypto:hash(sha, Value))).
+    bin_to_hex(crypto:hash(sha, Value)).
 -endif.
+
+bin_to_hex(Bin) ->
+    hex(binary_to_list(Bin)).
 
 %% @doc delete a file. Use the recursive option for directories.
 %% <pre>
