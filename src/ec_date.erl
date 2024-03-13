@@ -101,7 +101,7 @@ parse(Date, Now) ->
     do_parse(Date, Now, []).
 
 do_parse(Date, Now, Opts) ->
-    case filter_hints(parse(tokenise(uppercase(Date), []), Now, Opts)) of
+    case filter_hints(parse(tokenise(string:uppercase(Date), []), Now, Opts)) of
         {error, bad_date} ->
             erlang:throw({?MODULE, {bad_date, Date}});
         {D1, T1} = {{Y, M, D}, {H, M1, S}}
@@ -708,12 +708,6 @@ pad6(X) when is_integer(X) ->
 
 ltoi(X) ->
     list_to_integer(X).
-
--ifdef(unicode_str).
-uppercase(Str) -> string:uppercase(Str).
--else.
-uppercase(Str) -> string:to_upper(Str).
--endif.
 
 %%%===================================================================
 %%% Tests
