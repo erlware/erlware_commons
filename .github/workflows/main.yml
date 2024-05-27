@@ -1,4 +1,4 @@
-name: EUnit
+name: Integration tests
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    name: Test on OTP ${{ matrix.otp_version }} and ${{ matrix.os }}
+    name: OTP ${{ matrix.otp_version }} on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     container:
       image: erlang:${{matrix.otp_version}}
@@ -25,7 +25,7 @@ jobs:
 
     - name: Compile
       run: rebar3 compile
-    - name: Dialyze
+    - name: Dialyzer
       run: rebar3 as test dialyzer
-    - name: EUnit tests
+    - name: EUnit
       run: TERM=xterm rebar3 eunit
