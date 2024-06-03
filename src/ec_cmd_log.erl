@@ -40,6 +40,7 @@
          warn/3,
          log_level/1,
          atom_log_level/1,
+         colorize/4,
          format/1]).
 
 -include("ec_cmd_log.hrl").
@@ -55,7 +56,7 @@
 
 -record(state_t, {log_level=0 :: int_log_level(),
                   caller=api :: caller(),
-                  intensity=low :: none | low | high}).
+                  intensity=low :: intensity()}).
 
 %%============================================================================
 %% types
