@@ -40,6 +40,7 @@
          warn/3,
          log_level/1,
          atom_log_level/1,
+         colorize/4,
          format/1]).
 
 -include("ec_cmd_log.hrl").
