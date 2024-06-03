@@ -56,7 +56,7 @@
 
 -record(state_t, {log_level=0 :: int_log_level(),
                   caller=api :: caller(),
-                  intensity=low :: none | low | high}).
+                  intensity=low :: intensity()}).
 
 %%============================================================================
 %% types
