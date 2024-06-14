@@ -205,9 +205,9 @@ get_string(String) ->
 
 general_test_() ->
     [?_test(42 == get_integer("42")),
-     ?_test(500211 == get_integer("500211")),
-     ?_test(1234567890 == get_integer("1234567890")),
-     ?_test(12345678901234567890 == get_integer("12345678901234567890")),
+     ?_test(500_211 == get_integer("500211")),
+     ?_test(1_234_567_890 == get_integer("1234567890")),
+     ?_test(12_345_678_901_234_567_890 == get_integer("12345678901234567890")),
      ?_test(true == get_boolean("true")),
      ?_test(false == get_boolean("false")),
      ?_test(true == get_boolean("Ok")),
