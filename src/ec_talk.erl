@@ -26,7 +26,7 @@
 %%%  Provides the ability to ask questions of the user and
 %%%  get a response.
 %%% @end
-%%% @copyright Erlware 2006-2011
+%%% @copyright Erlware 2006-2024
 %%%---------------------------------------------------------------------------
 -module(ec_talk).
 

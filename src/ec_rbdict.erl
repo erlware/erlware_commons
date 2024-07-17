@@ -1,5 +1,5 @@
 %%% vi:ts=4 sw=4 et
-%%% Copyright (c) 2008 Robert Virding. All rights reserved.
+%%% Copyright (c) 2024 Robert Virding. All rights reserved.
 %%%
 %%% Redistribution and use in source and binary forms, with or without
 %%% modification, are permitted provided that the following conditions
@@ -24,7 +24,7 @@
 %%% ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 %%% POSSIBILITY OF SUCH DAMAGE.
 %%%-------------------------------------------------------------------
-%%% @copyright 2008 Robert Verding
+%%% @copyright 2024 Robert Verding
 %%%
 %%% @doc
 %%%

@@ -1,6 +1,6 @@
 %%%-------------------------------------------------------------------
 %%% @author Eric Merritt <>
-%%% @copyright (C) 2011, Erlware, LLC.
+%%% @copyright (C) 2024, Erlware, LLC.
 %%% @doc
 %%%  These are various utility functions to help with compiling and
 %%%  decompiling erlang source. They are mostly useful to the

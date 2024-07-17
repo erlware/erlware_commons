@@ -1,6 +1,6 @@
 %%% vi:ts=4 sw=4 et
 %%%-------------------------------------------------------------------
-%%% @copyright (C) 2011, Erlware LLC
+%%% @copyright (C) 2024, Erlware LLC
 %%% @doc
 %%%  Helper functions for working with files.
 %%% @end

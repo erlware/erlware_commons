@@ -1,7 +1,7 @@
 %%% vi:ts=4 sw=4 et
 %%%-------------------------------------------------------------------
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
-%%% @copyright 2014 Erlware, LLC.
+%%% @copyright 2024 Erlware, LLC.
 %%% @doc
 %%%  Provides a signature to manage returning semver formatted versions
 %%%  from various version control repositories.

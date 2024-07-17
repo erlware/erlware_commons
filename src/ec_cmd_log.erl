@@ -1,5 +1,5 @@
 %% -*- erlang-indent-level: 4; indent-tabs-mode: nil; fill-column: 80 -*-
-%%% Copyright 2012 Erlware, LLC. All Rights Reserved.
+%%% Copyright 2024 Erlware, LLC. All Rights Reserved.
 %%%
 %%% This file is provided to you under the Apache License,
 %%% Version 2.0 (the "License"); you may not use this file
@@ -16,7 +16,7 @@
 %%% under the License.
 %%%---------------------------------------------------------------------------
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
-%%% @copyright (C) 2012 Erlware, LLC.
+%%% @copyright (C) 2024 Erlware, LLC.
 %%%
 %%% @doc This provides simple output functions for command line apps. You should
 %%% use this to talk to the users if you are writing code for the system

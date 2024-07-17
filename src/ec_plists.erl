@@ -2,7 +2,7 @@
 %%% vi:ts=4 sw=4 et
 %%% The MIT License
 %%%
-%%% Copyright (c) 2007 Stephen Marsh
+%%% Copyright (c) 2024 Stephen Marsh
 %%%
 %%% Permission is hereby granted, free of charge, to any person obtaining a copy
 %%% of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
 %%% THE SOFTWARE.
 %%%---------------------------------------------------------------------------
 %%% @author Stephen Marsh
-%%% @copyright 2007 Stephen Marsh freeyourmind ++ [$@|gmail.com]
+%%% @copyright 2024 Stephen Marsh freeyourmind ++ [$@|gmail.com]
 %%% @doc
 %%% plists is a drop-in replacement for module <a
 %%% href="http://www.erlang.org/doc/man/lists.html">lists</a>, making

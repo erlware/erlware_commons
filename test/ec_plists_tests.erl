@@ -1,4 +1,4 @@
-%%% @copyright Erlware, LLC.
+%%% @copyright 2024 Erlware, LLC.
 -module(ec_plists_tests).
 
 -include_lib("eunit/include/eunit.hrl").

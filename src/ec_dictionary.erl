@@ -1,7 +1,7 @@
 %%% vi:ts=4 sw=4 et
 %%%-------------------------------------------------------------------
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
-%%% @copyright 2011 Erlware, LLC.
+%%% @copyright 2024 Erlware, LLC.
 %%% @doc
 %%%  A module that supports association of keys to values. A map cannot
 %%%  contain duplicate keys; each key can map to at most one value.

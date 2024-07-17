@@ -1,7 +1,7 @@
 %%% vi:ts=4 sw=4 et
 %%%-------------------------------------------------------------------
 %%% @author Eric Merritt <ericbmerritt@gmail.com>
-%%% @copyright 2011 Erlware, LLC.
+%%% @copyright 2024 Erlware, LLC.
 %%% @doc
 %%%  This provides an implementation of the ec_dictionary type using
 %%%  erlang dicts as a base. The function documentation for
