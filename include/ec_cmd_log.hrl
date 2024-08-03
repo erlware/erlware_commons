@@ -22,3 +22,10 @@
 -define(EC_WARN, 1).
 -define(EC_INFO, 2).
 -define(EC_DEBUG, 3).
+
+-define(RED,     $r).
+-define(GREEN,   $g).
+-define(YELLOW,  $y).
+-define(BLUE,    $b).
+-define(MAGENTA, $m).
+-define(CYAN,    $c).

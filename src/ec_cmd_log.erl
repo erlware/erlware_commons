@@ -45,13 +45,6 @@
 
 -include("ec_cmd_log.hrl").
 
--define(RED,     $r).
--define(GREEN,   $g).
--define(YELLOW,  $y).
--define(BLUE,    $b).
--define(MAGENTA, $m).
--define(CYAN,    $c).
-
 -define(PREFIX, "===> ").
 
 -record(state_t, {log_level=0 :: int_log_level(),
@@ -261,44 +254,3 @@ colorize(#state_t{caller=command_line, intensity = low},
     lists:flatten(cf:format("~!" ++ [Color] ++"~ts~!!~ts", [?PREFIX, Msg]));
 colorize(_LogState, _Color, _Bold, Msg) ->
     Msg.
-
-%%%===================================================================
-%%% Test Functions
-%%%===================================================================
-
--ifdef(TEST).
--include_lib("eunit/include/eunit.hrl").
-
-should_test() ->
-    ErrorLogState = new(error),
-    ?assertMatch(true, should(ErrorLogState, ?EC_ERROR)),
-    ?assertMatch(true, not should(ErrorLogState, ?EC_INFO)),
-    ?assertMatch(true, not should(ErrorLogState, ?EC_DEBUG)),
-    ?assertEqual(?EC_ERROR, log_level(ErrorLogState)),
-    ?assertEqual(error, atom_log_level(ErrorLogState)),
-
-    InfoLogState = new(info),
-    ?assertMatch(true, should(InfoLogState, ?EC_ERROR)),
-    ?assertMatch(true, should(InfoLogState, ?EC_INFO)),
-    ?assertMatch(true, not should(InfoLogState, ?EC_DEBUG)),
-    ?assertEqual(?EC_INFO, log_level(InfoLogState)),
-    ?assertEqual(info, atom_log_level(InfoLogState)),
-
-    DebugLogState = new(debug),
-    ?assertMatch(true, should(DebugLogState, ?EC_ERROR)),
-    ?assertMatch(true, should(DebugLogState, ?EC_INFO)),
-    ?assertMatch(true, should(DebugLogState, ?EC_DEBUG)),
-    ?assertEqual(?EC_DEBUG, log_level(DebugLogState)),
-    ?assertEqual(debug, atom_log_level(DebugLogState)).
-
-
-no_color_test() ->
-    LogState = new(debug, command_line, none),
-    ?assertEqual("test",
-                 colorize(LogState, ?RED, true, "test")).
-
-color_test() ->
-    LogState = new(debug, command_line, high),
-    ?assertEqual("\e[1;31m===> test\e[0m",
-                 colorize(LogState, ?RED, true, "test")).
--endif.
