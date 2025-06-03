@@ -1,0 +1,28 @@
+name: OTP bump
+
+on:
+  push:
+    branches:
+      - '*'
+
+jobs:
+  otp-bump:
+    name: Bump OTP versions
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+      with:
+        submodules: true
+
+    - name: Pull OTP versions from Debian
+      run: curl --silent https://packages.debian.org/search?keywords=erlang | sed -ne '/Package erlang</,/<\/ul>/{/br/p}' | tee otp.versions
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        delete-branch: true
+        commit-message: 'Tchu tchu, tchu tchu, thchu tchu tchu'
+        branch: 'create-pull-request/otp-bump'
+        title: 'Topesi yo raison'
+        body: |
+          Sebele !
