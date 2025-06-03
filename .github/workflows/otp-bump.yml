@@ -15,8 +15,14 @@ jobs:
       with:
         submodules: true
 
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+    - name: Setup dependencies
+      run: pip install beautifulsoup4 requests
     - name: Pull OTP versions from Debian
-      run: curl --silent https://packages.debian.org/search?keywords=erlang | sed -ne '/Package erlang</,/<\/ul>/{/br/p}' | tee otp.versions
+      run: python3 otp-bump.py
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
       with:
