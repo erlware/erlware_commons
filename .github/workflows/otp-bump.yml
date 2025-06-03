@@ -1,0 +1,38 @@
+name: OTP bump
+
+on:
+  #push:
+  #  branches:
+  #    - "*"
+  schedule:
+    - cron: "0 0 1 */2 *" # Every two months
+
+jobs:
+  otp-bump:
+    name: Bump OTP versions
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@11bd719 # v4
+      with:
+        submodules: true
+
+    - name: Set up Python
+      uses: actions/setup-python@a26af69 # v5
+      with:
+        python-version: 3.12
+    - name: Setup dependencies
+      run: pip install requests beautifulsoup4
+    - name: Pull OTP versions from Debian
+      run: python3 bump-otp-matrix.py
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@271a8d0 # v7.0.8
+      with:
+        token: ${{ secrets.OTP_BUMP }}
+        delete-branch: true
+        commit-message: 'Bump OTP'
+        branch: 'create-pull-request/otp-bump'
+        title: 'OTP bump'
+        body: |
+          ### OTP bump
+          Aligned versions with [Debian](https://packages.debian.org/search?keywords=erlang).
