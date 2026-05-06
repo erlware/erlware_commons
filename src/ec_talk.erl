@@ -182,7 +182,7 @@ get_boolean(_) ->
 get_integer([]) ->
     no_data;
 get_integer(String) ->
-    try list_to_integer(String))
+    try list_to_integer(String)
     catch _:_ -> no_clue
     end.
 
